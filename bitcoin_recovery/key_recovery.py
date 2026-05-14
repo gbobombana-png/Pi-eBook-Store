@@ -26,6 +26,12 @@ import argparse
 import requests
 from typing import Optional, Tuple, List
 
+try:
+    from Crypto.Hash import RIPEMD160 as _RIPEMD160
+    _USE_PYCRYPTO = True
+except ImportError:
+    _USE_PYCRYPTO = False
+
 
 # ─── Paramètres secp256k1 ─────────────────────────────────────────────────────
 
@@ -105,8 +111,13 @@ def sha256d(data: bytes) -> bytes:
 
 
 def hash160(data: bytes) -> bytes:
+    sha = hashlib.sha256(data).digest()
+    if _USE_PYCRYPTO:
+        h = _RIPEMD160.new()
+        h.update(sha)
+        return h.digest()
     h = hashlib.new('ripemd160', usedforsecurity=False)
-    h.update(hashlib.sha256(data).digest())
+    h.update(sha)
     return h.digest()
 
 
