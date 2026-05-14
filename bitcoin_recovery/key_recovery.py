@@ -105,7 +105,7 @@ def sha256d(data: bytes) -> bytes:
 
 
 def hash160(data: bytes) -> bytes:
-    h = hashlib.new('ripemd160')
+    h = hashlib.new('ripemd160', usedforsecurity=False)
     h.update(hashlib.sha256(data).digest())
     return h.digest()
 
