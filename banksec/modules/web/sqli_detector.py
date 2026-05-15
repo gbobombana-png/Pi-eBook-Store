@@ -10,18 +10,30 @@ SSL_CTX.check_hostname = False
 SSL_CTX.verify_mode = ssl.CERT_NONE
 
 ERROR_SIGNATURES = [
+    # MySQL (testphp.vulnweb.com)
     "you have an error in your sql syntax",
-    "warning: mysql", "mysql_fetch", "mysql_num_rows",
-    "mysql_result", "supplied argument is not a valid mysql",
-    "ora-", "oracle error", "oracle.*driver", "warning.*oci_",
+    "warning: mysql",
+    "mysql_fetch", "mysql_num_rows", "mysql_result",
+    "supplied argument is not a valid mysql",
+    "mysql error", "mysql_query", "mysql_connect",
+    "com.mysql.jdbc", "mysqlsyntaxerrorexception",
+    "valid mysql result", "check the manual that corresponds",
+    # Oracle
+    "ora-", "oracle error", "warning.*oci_",
+    # MSSQL
     "microsoft sql", "mssql_", "unclosed quotation mark",
     "incorrect syntax near", "sqlsrv_", "[sql server]",
-    "pg_query", "pg_exec", "warning.*pg_", "valid postgresql",
+    # PostgreSQL
+    "pg_query", "pg_exec", "warning.*pg_", "postgresql",
+    # SQLite
     "sqlite3.operationalerror", "sqlite_", "sqlite error",
-    "jdbc", "odbc driver", "db2 sql", "sqlstate",
+    # Génériques
+    "jdbc", "odbc", "db2 sql", "sqlstate",
     "syntax error", "unterminated string", "operationalerror",
     "division by zero", "column count doesn", "unknown column",
     "table.*doesn.*exist", "sql command not properly ended",
+    "error in your sql", "sql syntax",
+    "invalid query", "db error", "database error",
 ]
 
 # Payloads organisés par technique
@@ -57,21 +69,22 @@ PAYLOADS_BLIND = [
 
 # Chemins spécifiques à testphp.vulnweb.com + endpoints bancaires génériques
 VULN_PATHS = [
-    # testphp.vulnweb.com spécifique
-    ("/artists.php", ["artist"]),
+    # testphp.vulnweb.com — vulnérabilités connues
     ("/listproducts.php", ["cat"]),
-    ("/showimage.php", ["file", "size"]),
-    ("/userinfo.php", ["uname", "pass"]),
-    ("/search.php", ["test"]),
-    ("/guestbook.php", ["name", "comment"]),
+    ("/artists.php",      ["artist"]),
+    ("/showimage.php",    ["file", "size"]),
+    ("/userinfo.php",     ["uname", "pass"]),
+    ("/search.php",       ["test"]),
+    ("/product.php",      ["pic"]),
+    ("/hpp/params.php",   ["pp"]),
     # Endpoints bancaires génériques
-    ("/login", ["user", "pass", "username", "password"]),
-    ("/search", ["q", "query", "search"]),
-    ("/account", ["id", "ref", "user"]),
+    ("/login",       ["user", "pass", "username", "password"]),
+    ("/search",      ["q", "query", "search"]),
+    ("/account",     ["id", "ref", "user"]),
     ("/transaction", ["id", "account", "ref"]),
-    ("/card", ["id", "number"]),
-    ("/profile", ["id", "user"]),
-    ("/", ["id", "cat", "page", "product"]),
+    ("/card",        ["id", "number"]),
+    ("/profile",     ["id", "user"]),
+    ("/",            ["id", "cat", "page", "product"]),
 ]
 
 
@@ -105,11 +118,13 @@ class SQLiDetector:
         return None
 
     def _test_error_based(self, base_url, param):
-        baseline_body, _ = _fetch_baseline(base_url, param)
+        baseline_body, baseline_status = _fetch_baseline(base_url, param)
 
         for payload in PAYLOADS_ERROR:
             url = f"{base_url}?{param}={urllib.parse.quote(payload)}"
             body, status = _fetch(url)
+
+            # 1. Erreur DB explicite
             sig = self._has_error(body)
             if sig:
                 return {
@@ -117,6 +132,16 @@ class SQLiDetector:
                     "title": f"SQL Injection (error-based): {urllib.parse.urlparse(base_url).path}?{param}",
                     "detail": f"Payload: {payload} | Erreur DB: '{sig}' | URL: {url[:150]}"
                 }
+
+            # 2. Rupture de contenu — payload brise la requête SQL
+            if baseline_body and body is not None:
+                ratio = len(body) / max(len(baseline_body), 1)
+                if ratio < 0.3 and len(baseline_body) > 200 and payload == "'":
+                    return {
+                        "severity": "HIGH",
+                        "title": f"SQL Injection probable (rupture contenu): {urllib.parse.urlparse(base_url).path}?{param}",
+                        "detail": f"Réponse réduite à {ratio:.0%} avec payload ' — requête SQL probablement brisée"
+                    }
         return None
 
     def _test_time_based(self, base_url, param):
