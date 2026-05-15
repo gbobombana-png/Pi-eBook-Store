@@ -9,13 +9,14 @@ from modules.web.api_scanner import APIScanner
 from modules.crypto.cipher_audit import CipherAuditor
 from modules.atm.xfs_analyzer import XFSAnalyzer
 from modules.atm.pin_security import PINSecurityAuditor
+from modules.recon.fingerprinting import Fingerprinter
 
 SCAN_MODES = {
-    "full":    ["ports", "ssl", "protocols", "sqli", "xss", "auth", "api", "cipher", "atm", "pin"],
-    "network": ["ports", "ssl", "protocols", "cipher"],
-    "web":     ["sqli", "xss", "auth", "api"],
-    "atm":     ["ports", "protocols", "atm", "pin"],
-    "quick":   ["ports", "ssl", "auth"],
+    "full":    ["recon", "ports", "ssl", "protocols", "sqli", "xss", "auth", "api", "cipher", "atm", "pin"],
+    "network": ["recon", "ports", "ssl", "protocols", "cipher"],
+    "web":     ["recon", "sqli", "xss", "auth", "api"],
+    "atm":     ["recon", "ports", "protocols", "atm", "pin"],
+    "quick":   ["recon", "ports", "ssl", "auth"],
 }
 
 
@@ -45,10 +46,14 @@ class Scanner:
         self.logger.info(f"Scan mode: {mode.upper()} | Modules: {', '.join(modules)}")
 
         open_ports = []
-
-        # Determine scheme from target
         scheme = "https"
         web_port = ssl_port
+
+        # 0. Fingerprinting & recon
+        if "recon" in modules:
+            fp = Fingerprinter(self.logger)
+            findings = fp.run(host, scheme=scheme, port=ssl_port)
+            all_findings.extend(findings)
 
         # 1. Port scanning
         if "ports" in modules:
@@ -56,13 +61,12 @@ class Scanner:
             findings, open_ports = scanner.run(host, port_range)
             all_findings.extend(findings)
 
-            # Adjust scheme if only HTTP available
             if 443 not in open_ports and 8443 not in open_ports:
                 if 80 in open_ports or 8080 in open_ports:
                     scheme = "http"
                     web_port = 80 if 80 in open_ports else 8080
 
-        # 2. SSL/TLS analysis
+        # 2. SSL/TLS
         if "ssl" in modules:
             ssl_port_to_use = ssl_port if ssl_port in open_ports else (
                 8443 if 8443 in open_ports else (443 if 443 in open_ports else None)
@@ -74,7 +78,7 @@ class Scanner:
             else:
                 self.logger.warning("No SSL port found, skipping SSL analysis")
 
-        # 3. Banking protocol detection
+        # 3. Banking protocols
         if "protocols" in modules:
             detector = ProtocolDetector(self.logger)
             findings = detector.run(host, open_ports)
@@ -112,7 +116,7 @@ class Scanner:
                 findings = auditor.run(host, ssl_target)
                 all_findings.extend(findings)
 
-        # 9. ATM XFS analysis
+        # 9. ATM XFS
         if "atm" in modules:
             analyzer = XFSAnalyzer(self.logger)
             findings = analyzer.run(host, open_ports)
