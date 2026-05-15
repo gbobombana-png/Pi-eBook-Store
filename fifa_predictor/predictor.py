@@ -259,31 +259,58 @@ def predict_match(team_a, team_b, mode="normal", home_a=False):
 
 
 def _predict_penalty(stats_a, stats_b, name_a, name_b):
-    # Penalty: shooting + composure (approximé par overall) + gk adverse
-    score_a = stats_a["sho"] * 0.50 + stats_a["ovr"] * 0.30 + (100 - stats_b["gk"]) * 0.20
-    score_b = stats_b["sho"] * 0.50 + stats_b["ovr"] * 0.30 + (100 - stats_a["gk"]) * 0.20
-    total = score_a + score_b
-    prob_a = score_a / total
-    prob_b = score_b / total
+    # Probabilité de marquer un penalty : sho/110 modifié par gk adverse
+    p_score_a = (stats_a["sho"] / 110) * (1 - (stats_b["gk"] - 75) / 200)
+    p_score_b = (stats_b["sho"] / 110) * (1 - (stats_a["gk"] - 75) / 200)
+    p_score_a = max(0.55, min(0.92, p_score_a))
+    p_score_b = max(0.55, min(0.92, p_score_b))
 
-    # Monte Carlo penalties (5 tirs chacun)
+    # Intégrer l'Elo dans les probabilités de tir
+    elo_a = get_elo(name_a)
+    elo_b = get_elo(name_b)
+    elo_factor = expected_score(elo_a, elo_b)  # 0..1
+    p_score_a = p_score_a * 0.80 + elo_factor * 0.20
+    p_score_b = p_score_b * 0.80 + (1 - elo_factor) * 0.20
+
+    N = 50000
     wins_a = wins_b = 0
-    for _ in range(50000):
-        scored_a = sum(1 for _ in range(5) if random.random() < (stats_a["sho"] / 110))
-        scored_b = sum(1 for _ in range(5) if random.random() < (stats_b["sho"] / 110))
-        if scored_a > scored_b:
-            wins_a += 1
-        elif scored_b > scored_a:
-            wins_b += 1
-        else:  # sudden death
-            p_sd_a = stats_a["sho"] / (stats_a["sho"] + stats_b["sho"])
-            if random.random() < p_sd_a:
-                wins_a += 1
-            else:
-                wins_b += 1
+    score_counts = {}
 
-    final_pa = wins_a / 50000
-    final_pb = wins_b / 50000
+    for _ in range(N):
+        # Phase 5 tirs chacun
+        sa = sum(1 for _ in range(5) if random.random() < p_score_a)
+        sb = sum(1 for _ in range(5) if random.random() < p_score_b)
+
+        # Sudden death si égalité (rounds infinis comme dans FC25)
+        extra = 0
+        while sa == sb:
+            extra += 1
+            if random.random() < p_score_a:
+                sa += 1
+            if random.random() < p_score_b:
+                sb += 1
+            # Si encore égalité après ce round, continuer (déjà géré par while)
+            if sa != sb:
+                break
+
+        key = (sa, sb)
+        score_counts[key] = score_counts.get(key, 0) + 1
+
+        if sa > sb:
+            wins_a += 1
+        else:
+            wins_b += 1
+
+    final_pa = wins_a / N
+    final_pb = wins_b / N
+
+    # Top scores probables
+    top_raw = sorted(score_counts.items(), key=lambda x: -x[1])[:8]
+    top_scores = [(f"{s[0]}-{s[1]}", round(c / N * 100, 1)) for s, c in top_raw]
+
+    winner = name_a if final_pa > final_pb else name_b
+    confidence = "HAUTE" if abs(final_pa - final_pb) > 0.10 else \
+                 "MOYENNE" if abs(final_pa - final_pb) > 0.04 else "FAIBLE — très serré"
 
     return {
         "team_a": name_a, "team_b": name_b, "mode": "penalty",
@@ -291,19 +318,23 @@ def _predict_penalty(stats_a, stats_b, name_a, name_b):
         "star_a": f"{stats_a['star_name']} ({stats_a['star']})",
         "star_b": f"{stats_b['star_name']} ({stats_b['star']})",
         "xg_a": "-", "xg_b": "-",
-        "elo_a": get_elo(name_a), "elo_b": get_elo(name_b),
+        "elo_a": elo_a, "elo_b": elo_b,
         "prob_a_wins": round(final_pa * 100, 1),
         "prob_draw": 0.0,
         "prob_b_wins": round(final_pb * 100, 1),
         "mc_prob_a": round(final_pa * 100, 1),
         "mc_prob_b": round(final_pb * 100, 1),
-        "predicted_score": "Tirs au but",
-        "score_probability": round(max(final_pa, final_pb) * 100, 1),
-        "top_scores": [],
-        "recommendation": f"Victoire {name_a} aux TAB" if final_pa > final_pb else f"Victoire {name_b} aux TAB",
-        "confidence": "MOYENNE",
-        "analysis": [f"Shooting {name_a}: {stats_a['sho']} | {name_b}: {stats_b['sho']}",
-                     f"GK {name_a}: {stats_a['gk']} | GK {name_b}: {stats_b['gk']}"],
+        "predicted_score": top_scores[0][0] if top_scores else "5-4",
+        "score_probability": top_scores[0][1] if top_scores else 0,
+        "top_scores": [(s, p) for s, p in top_scores],
+        "recommendation": f"Victoire {winner} aux tirs au but",
+        "confidence": confidence,
+        "analysis": [
+            f"Prob. marquer: {name_a} {p_score_a*100:.0f}% | {name_b} {p_score_b*100:.0f}% par penalty",
+            f"Shooting {name_a}: {stats_a['sho']} | {name_b}: {stats_b['sho']}",
+            f"Gardien {name_a}: {stats_a['gk']} | {name_b}: {stats_b['gk']}",
+            f"Elo {name_a}: {elo_a:.0f} | {name_b}: {elo_b:.0f}",
+        ],
     }
 
 
