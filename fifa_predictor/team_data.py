@@ -45,7 +45,8 @@ TEAM_RATINGS = {
     "Morocco":     {"ovr":81,"att":80,"mid":80,"def":83,"pac":82,"sho":79,"pas":80,"dri":81,"phy":82,"gk":83,"star":85,"star_name":"Hakimi","depth":82},
     "Senegal":     {"ovr":80,"att":80,"mid":79,"def":80,"pac":84,"sho":79,"pas":78,"dri":80,"phy":83,"gk":80,"star":85,"star_name":"Mane","depth":80},
     "USA":         {"ovr":79,"att":79,"mid":78,"def":78,"pac":83,"sho":77,"pas":78,"dri":79,"phy":81,"gk":78,"star":83,"star_name":"Pulisic","depth":78},
-    "Japan":       {"ovr":79,"att":78,"mid":79,"def":79,"pac":81,"sho":77,"pas":80,"dri":80,"phy":77,"gk":79,"star":83,"star_name":"Mitoma","depth":78},
+    "Al Nassr":    {"ovr":82,"att":85,"mid":79,"def":79,"pac":78,"sho":92,"pas":78,"dri":82,"phy":83,"gk":79,"star":99,"star_name":"Ronaldo","depth":81},
+    "Inter Miami": {"ovr":79,"att":82,"mid":78,"def":76,"pac":80,"sho":80,"pas":78,"dri":82,"phy":78,"gk":76,"star":99,"star_name":"Messi","depth":78},
 }
 
 
