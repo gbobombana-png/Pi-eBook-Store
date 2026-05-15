@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>BankSec Report - testphp.vulnweb.com</title>
+<style>
+  body{font-family:'Courier New',monospace;background:#0d1117;color:#e6edf3;margin:0;padding:20px}
+  .header{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:20px;margin-bottom:20px}
+  h1{color:#58a6ff;margin:0 0 5px 0;font-size:1.8em} h2{color:#3fb950;border-bottom:1px solid #30363d;padding-bottom:5px}
+  table{border-collapse:collapse;width:100%;margin-top:10px}
+  th{background:#161b22;color:#58a6ff;padding:12px;text-align:left;border-bottom:2px solid #30363d}
+  td{padding:10px 12px;border-bottom:1px solid #21262d;vertical-align:top}
+  tr:hover{background:#161b22}
+  .risk-score{font-size:3em;font-weight:bold;color:#c0392b}
+  code{background:#161b22;padding:2px 6px;border-radius:4px;font-size:0.9em}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🏦 BankSec — Rapport d'Audit Sécurité <span style="background:#9b59b6;color:#fff;padding:3px 10px;border-radius:4px;font-size:0.8em">MODE THÈSE</span></h1>
+  <p>Cible: <code>testphp.vulnweb.com</code> &nbsp;|&nbsp; Date: 20260515_033805</p>
+</div>
+
+<h2>📊 Résumé Exécutif</h2>
+<div><div style="display:inline-block;margin:5px;padding:10px 20px;background:#f1c40f;color:#fff;border-radius:8px;font-weight:bold">MEDIUM: 6</div><div style="display:inline-block;margin:5px;padding:10px 20px;background:#95a5a6;color:#fff;border-radius:8px;font-weight:bold">INFO: 2</div></div>
+
+<h2>🔍 Findings Détaillés</h2>
+<table>
+  <tr><th width="120">Sévérité</th><th width="40%">Vulnérabilité</th><th>Détails & Analyse</th></tr>
+  
+            <tr>
+                <td><span style="background:#f1c40f;color:#fff;padding:2px 8px;border-radius:4px;font-weight:bold">MEDIUM</span></td>
+                <td><strong>Aucun WAF détecté</strong><br><small style="color:#aaa">📚 OWASP A05:2021 | — | PCI-DSS 6.4.2</small></td>
+                <td style="font-size:0.9em">Pas de Web Application Firewall identifié. Recommandé en environnement bancaire.</td>
+            </tr>
+            <tr>
+                <td><span style="background:#f1c40f;color:#fff;padding:2px 8px;border-radius:4px;font-weight:bold">MEDIUM</span></td>
+                <td><strong>Missing security header: X-Frame-Options</strong><br><small style="color:#aaa">📚 OWASP A05:2021 | CWE-693 | PCI-DSS 6.4.1</small></td>
+                <td style="font-size:0.9em">Clickjacking protection not configured</td>
+            </tr>
+            <tr>
+                <td><span style="background:#f1c40f;color:#fff;padding:2px 8px;border-radius:4px;font-weight:bold">MEDIUM</span></td>
+                <td><strong>Missing security header: X-Content-Type-Options</strong><br><small style="color:#aaa">📚 OWASP A05:2021 | CWE-693 | PCI-DSS 6.4.1</small></td>
+                <td style="font-size:0.9em">MIME-type sniffing protection not configured</td>
+            </tr>
+            <tr>
+                <td><span style="background:#f1c40f;color:#fff;padding:2px 8px;border-radius:4px;font-weight:bold">MEDIUM</span></td>
+                <td><strong>Missing security header: Content-Security-Policy</strong><br><small style="color:#aaa">📚 OWASP A05:2021 | CWE-693 | PCI-DSS 6.4.1</small></td>
+                <td style="font-size:0.9em">XSS/injection protection not configured</td>
+            </tr>
+            <tr>
+                <td><span style="background:#f1c40f;color:#fff;padding:2px 8px;border-radius:4px;font-weight:bold">MEDIUM</span></td>
+                <td><strong>Missing security header: X-XSS-Protection</strong><br><small style="color:#aaa">📚 OWASP A03:2021 | CWE-79 | PCI-DSS 6.2.4</small></td>
+                <td style="font-size:0.9em">Browser XSS filter not configured<br><small style="color:#88bbff;font-style:italic">Le Cross-Site Scripting permet l'injection de scripts malveillants dans des pages web vues par d'autres utilisateurs. Dans le secteur bancaire, cela peut permettre le vol de sessions, la redirection v...</small></td>
+            </tr>
+            <tr>
+                <td><span style="background:#f1c40f;color:#fff;padding:2px 8px;border-radius:4px;font-weight:bold">MEDIUM</span></td>
+                <td><strong>Missing security header: Referrer-Policy</strong><br><small style="color:#aaa">📚 OWASP A05:2021 | CWE-693 | PCI-DSS 6.4.1</small></td>
+                <td style="font-size:0.9em">Referrer information leakage not configured</td>
+            </tr>
+            <tr>
+                <td><span style="background:#95a5a6;color:#fff;padding:2px 8px;border-radius:4px;font-weight:bold">INFO</span></td>
+                <td><strong>OS fingerprint: Unknown</strong></td>
+                <td style="font-size:0.9em">Basé sur l'analyse TTL des paquets ICMP</td>
+            </tr>
+            <tr>
+                <td><span style="background:#95a5a6;color:#fff;padding:2px 8px;border-radius:4px;font-weight:bold">INFO</span></td>
+                <td><strong>IP cible: 44.228.249.3</strong></td>
+                <td style="font-size:0.9em">testphp.vulnweb.com</td>
+            </tr>
+</table>
+
+<br><p style="color:#444;font-size:0.8em">Généré par BankSec v1.0 — Usage autorisé uniquement</p>
+</body>
+</html>
