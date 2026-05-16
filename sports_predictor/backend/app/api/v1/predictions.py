@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Query, HTTPException
 from datetime import date, datetime, timedelta
-from typing import List
-from app.services.predictor import generate_daily_tickets
-from app.schemas.prediction import DailyTicketsOut, TicketOut
+from app.services.predictor import generate_daily_tickets, LEAGUES
+from app.services.data_fetcher import get_fixtures
+from app.schemas.prediction import DailyTicketsOut
 from app.utils.cache import cache_get, cache_set, cache_key
 
 router = APIRouter(prefix="/predictions", tags=["Predictions"])
@@ -61,33 +61,25 @@ async def get_history(limit: int = Query(default=50, le=200)):
 
 
 @router.get("/matches/upcoming", summary="Get upcoming matches")
-async def get_upcoming_matches(league_id: int = Query(default=None)):
-    from app.services.data_fetcher import DataFetcher
-    async with DataFetcher() as fetcher:
-        tomorrow = date.today() + timedelta(days=1)
-        fixtures = await fetcher.get_fixtures(league_id or 39, tomorrow.year, str(tomorrow))
+async def get_upcoming_matches(days_ahead: int = Query(default=1, ge=1, le=7)):
+    tomorrow = date.today() + timedelta(days=days_ahead)
+    from_date = str(tomorrow)
+    all_fixtures = []
+    for league_id, season in LEAGUES:
+        fixtures = await get_fixtures(league_id, season, from_date, from_date)
+        all_fixtures.extend(fixtures)
+    all_fixtures.sort(key=lambda x: x.get("fixture", {}).get("date", ""))
     matches = []
-    for f in fixtures[:30]:
+    for f in all_fixtures[:40]:
         fix = f.get("fixture", {})
         teams = f.get("teams", {})
         league = f.get("league", {})
-        odds_data = f.get("odds", [{}])
-        home_odds = draw_odds = away_odds = None
-        if odds_data:
-            vals = odds_data[0].get("values", [])
-            if len(vals) >= 3:
-                home_odds = float(vals[0].get("odd", 0)) or None
-                draw_odds = float(vals[1].get("odd", 0)) or None
-                away_odds = float(vals[2].get("odd", 0)) or None
         matches.append({
             "fixture_id": fix.get("id", 0),
             "home_team": teams.get("home", {}).get("name", ""),
             "away_team": teams.get("away", {}).get("name", ""),
             "league": league.get("name", ""),
             "match_time": fix.get("date", ""),
-            "venue": fix.get("venue", {}).get("name") if isinstance(fix.get("venue"), dict) else None,
-            "home_odds": home_odds,
-            "draw_odds": draw_odds,
-            "away_odds": away_odds,
+            "venue": fix.get("venue", {}).get("name", "") if isinstance(fix.get("venue"), dict) else "",
         })
     return matches
