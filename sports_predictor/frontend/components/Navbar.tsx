@@ -7,10 +7,13 @@ import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { getUser, logout, AuthUser } from "@/lib/auth";
 
-const nav = [
+const publicNav = [
   { href: "/", label: "Dashboard", icon: Home },
   { href: "/matches", label: "Matchs", icon: Activity },
   { href: "/history", label: "Historique", icon: Clock },
+];
+const adminNav = [
+  { href: "/admin", label: "Admin", icon: Shield },
 ];
 
 export default function Navbar() {
@@ -38,7 +41,7 @@ export default function Navbar() {
         </Link>
 
         <nav className="flex items-center gap-1">
-          {nav.map(({ href, label, icon: Icon }) => (
+          {[...publicNav, ...(user?.is_admin ? adminNav : [])].map(({ href, label, icon: Icon }) => (
             <Link
               key={href}
               href={href}

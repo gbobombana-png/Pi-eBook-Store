@@ -24,6 +24,14 @@ def start_scheduler():
         replace_existing=True,
         misfire_grace_time=300,
     )
+    # Collecte + réentraînement chaque lundi à 03:00 UTC
+    scheduler.add_job(
+        _weekly_retrain_job,
+        trigger=CronTrigger(day_of_week="mon", hour=3, minute=0),
+        id="weekly_retrain",
+        replace_existing=True,
+        misfire_grace_time=3600,
+    )
     scheduler.start()
     logger.info(
         f"Scheduler démarré — génération quotidienne à "
@@ -35,6 +43,23 @@ def stop_scheduler():
     if scheduler.running:
         scheduler.shutdown(wait=False)
         logger.info("Scheduler arrêté")
+
+
+async def _weekly_retrain_job():
+    logger.info("Réentraînement hebdomadaire démarré...")
+    try:
+        from app.services.historical_collector import collect_historical
+        from app.ml.trainer import main as train_main
+        from app.ml.model import load_model
+
+        collect_result = await collect_historical(max_per_league=300)
+        logger.info(f"Collecte: {collect_result}")
+
+        await train_main(force_synthetic=False)
+        load_model()
+        logger.info("Modèle ML rechargé après réentraînement")
+    except Exception as e:
+        logger.error(f"Réentraînement hebdomadaire échoué: {e}", exc_info=True)
 
 
 async def _daily_job():

@@ -34,7 +34,7 @@ class Prediction(Base):
     risks = Column(Text)
     score_breakdown = Column(JSON, default={})
     key_stats = Column(JSON, default={})
-    result = Column(Enum(PredictionResult), default=PredictionResult.PENDING)
+    result = Column(Enum(PredictionResult, native_enum=False), default=PredictionResult.PENDING)
     actual_home_score = Column(Integer)
     actual_away_score = Column(Integer)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -53,7 +53,7 @@ class Ticket(Base):
     total_odds = Column(Float)
     stake = Column(Float, default=1.0)
     potential_gain = Column(Float)
-    result = Column(Enum(PredictionResult), default=PredictionResult.PENDING)
+    result = Column(Enum(PredictionResult, native_enum=False), default=PredictionResult.PENDING)
     resolved_at = Column(DateTime(timezone=True))
 
     predictions = relationship("Prediction", back_populates="ticket", lazy="selectin")

@@ -29,7 +29,7 @@ class Match(Base):
     venue = Column(String(100))
     city = Column(String(50))
     country = Column(String(50))
-    status = Column(Enum(MatchStatus), default=MatchStatus.SCHEDULED)
+    status = Column(Enum(MatchStatus, native_enum=False), default=MatchStatus.SCHEDULED)
 
     # Result
     home_score = Column(Integer)

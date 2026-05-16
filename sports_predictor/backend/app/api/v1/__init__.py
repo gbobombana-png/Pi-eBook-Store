@@ -1,8 +1,9 @@
 from fastapi import APIRouter
-from app.api.v1 import predictions, matches, stats, auth
+from app.api.v1 import predictions, matches, stats, auth, admin
 
 router = APIRouter(prefix="/v1")
 router.include_router(auth.router)
 router.include_router(predictions.router)
 router.include_router(matches.router)
 router.include_router(stats.router)
+router.include_router(admin.router)
