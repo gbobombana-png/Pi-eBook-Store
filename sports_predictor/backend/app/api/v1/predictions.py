@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Query, HTTPException
 from datetime import date, datetime, timedelta
+from typing import List
 from app.services.predictor import generate_daily_tickets
-from app.schemas.prediction import DailyTicketsOut
+from app.schemas.prediction import DailyTicketsOut, TicketOut
 from app.utils.cache import cache_get, cache_set, cache_key
 
 router = APIRouter(prefix="/predictions", tags=["Predictions"])
@@ -45,3 +46,48 @@ async def trigger_generation(target_date: date = Query(default=None)):
 
     tickets = await generate_daily_tickets(target_date)
     return {"message": f"Generated {len(tickets)} tickets for {target_date}", "tickets_count": len(tickets)}
+
+
+@router.get("/history", summary="Get historical prediction tickets")
+async def get_history(limit: int = Query(default=50, le=200)):
+    ck = cache_key("history_tickets")
+    cached = await cache_get(ck)
+    if cached:
+        return cached
+
+    result = {"tickets": [], "total": 0}
+    await cache_set(ck, result, ttl=600)
+    return result
+
+
+@router.get("/matches/upcoming", summary="Get upcoming matches")
+async def get_upcoming_matches(league_id: int = Query(default=None)):
+    from app.services.data_fetcher import DataFetcher
+    async with DataFetcher() as fetcher:
+        tomorrow = date.today() + timedelta(days=1)
+        fixtures = await fetcher.get_fixtures(league_id or 39, tomorrow.year, str(tomorrow))
+    matches = []
+    for f in fixtures[:30]:
+        fix = f.get("fixture", {})
+        teams = f.get("teams", {})
+        league = f.get("league", {})
+        odds_data = f.get("odds", [{}])
+        home_odds = draw_odds = away_odds = None
+        if odds_data:
+            vals = odds_data[0].get("values", [])
+            if len(vals) >= 3:
+                home_odds = float(vals[0].get("odd", 0)) or None
+                draw_odds = float(vals[1].get("odd", 0)) or None
+                away_odds = float(vals[2].get("odd", 0)) or None
+        matches.append({
+            "fixture_id": fix.get("id", 0),
+            "home_team": teams.get("home", {}).get("name", ""),
+            "away_team": teams.get("away", {}).get("name", ""),
+            "league": league.get("name", ""),
+            "match_time": fix.get("date", ""),
+            "venue": fix.get("venue", {}).get("name") if isinstance(fix.get("venue"), dict) else None,
+            "home_odds": home_odds,
+            "draw_odds": draw_odds,
+            "away_odds": away_odds,
+        })
+    return matches
