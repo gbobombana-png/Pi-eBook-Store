@@ -18,7 +18,7 @@ async def get_daily_predictions(
     force_refresh: bool = Query(default=False),
 ):
     if target_date is None:
-        target_date = date.today() + timedelta(days=1)
+        target_date = date.today()
 
     ck = cache_key("daily_tickets", str(target_date))
 
@@ -48,7 +48,7 @@ async def trigger_generation(
     _admin: dict = Depends(require_admin),
 ):
     if target_date is None:
-        target_date = date.today() + timedelta(days=1)
+        target_date = date.today()
 
     ck = cache_key("daily_tickets", str(target_date))
     await cache_delete(ck)
@@ -73,12 +73,13 @@ async def get_history_endpoint(
 
 
 @router.get("/matches/upcoming", summary="Prochains matchs")
-async def get_upcoming_matches(days_ahead: int = Query(default=1, ge=1, le=7)):
-    tomorrow = date.today() + timedelta(days=days_ahead)
-    from_date = str(tomorrow)
+async def get_upcoming_matches(days_ahead: int = Query(default=3, ge=1, le=7)):
+    today = date.today()
+    to_date = str(today + timedelta(days=days_ahead))
+    from_date = str(today)
     all_fixtures = []
     for league_id, season in LEAGUES:
-        fixtures = await get_fixtures(league_id, season, from_date, from_date)
+        fixtures = await get_fixtures(league_id, season, from_date, to_date)
         all_fixtures.extend(fixtures)
     all_fixtures.sort(key=lambda x: x.get("fixture", {}).get("date", ""))
     matches = []

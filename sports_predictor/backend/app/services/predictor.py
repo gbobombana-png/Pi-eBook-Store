@@ -18,19 +18,19 @@ logger = get_logger(__name__)
 
 # Leagues to analyze (API-Football IDs)
 LEAGUES = [
-    (39, 2024),   # Premier League
-    (140, 2024),  # La Liga
-    (61, 2024),   # Ligue 1
-    (78, 2024),   # Bundesliga
-    (135, 2024),  # Serie A
-    (2, 2024),    # Champions League
+    (39, 2025),   # Premier League
+    (140, 2025),  # La Liga
+    (61, 2025),   # Ligue 1
+    (78, 2025),   # Bundesliga
+    (135, 2025),  # Serie A
+    (2, 2025),    # Champions League
 ]
 
 
 async def generate_daily_tickets(target_date: Optional[date] = None) -> list[dict]:
     """Generate 5 prediction tickets targeting ~5.0 total odds."""
     if target_date is None:
-        target_date = date.today() + timedelta(days=1)
+        target_date = date.today()
 
     from_date = target_date.strftime("%Y-%m-%d")
     to_date   = target_date.strftime("%Y-%m-%d")
