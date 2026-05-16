@@ -6,7 +6,7 @@ import { Ticket } from "@/lib/types";
 import { formatOdds } from "@/lib/utils";
 import ConfidenceBadge from "@/components/ConfidenceBadge";
 
-const BACKEND = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const BACKEND = process.env.NEXT_PUBLIC_API_URL || "";
 
 interface HistoryResponse {
   tickets: Ticket[];
