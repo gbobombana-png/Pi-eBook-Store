@@ -6,7 +6,7 @@ import { Ticket } from "@/lib/types";
 import { formatOdds } from "@/lib/utils";
 import ConfidenceBadge from "@/components/ConfidenceBadge";
 
-const BACKEND = "";
+const BACKEND = "https://pi-ebook-store-production.up.railway.app";
 
 interface HistoryResponse {
   tickets: Ticket[];
