@@ -36,7 +36,7 @@ export default function MatchesPage() {
     setError(null);
     try {
       const data = await getUpcomingMatches();
-      setMatches(data);
+      setMatches(data as Match[]);
     } catch {
       setError("Failed to load upcoming matches.");
     } finally {

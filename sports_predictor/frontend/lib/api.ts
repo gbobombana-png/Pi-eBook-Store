@@ -33,11 +33,11 @@ export async function getDailyPredictions(date?: string): Promise<DailyTickets> 
   return fetchAPI<DailyTickets>(`/api/v1/predictions/daily${qs}`);
 }
 
-export async function getUpcomingMatches() {
-  return fetchAPI(`/api/v1/predictions/matches/upcoming`);
+export async function getUpcomingMatches(): Promise<unknown[]> {
+  return fetchAPI<unknown[]>(`/api/v1/predictions/matches/upcoming`);
 }
 
-export async function triggerGeneration(date?: string) {
+export async function triggerGeneration(date?: string): Promise<unknown> {
   const qs = date ? `?target_date=${date}` : "";
-  return fetchAPI(`/api/v1/predictions/trigger${qs}`, { method: "GET", auth: true });
+  return fetchAPI<unknown>(`/api/v1/predictions/trigger${qs}`, { method: "GET", auth: true });
 }
