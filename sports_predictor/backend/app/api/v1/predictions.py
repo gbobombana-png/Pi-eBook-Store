@@ -1,17 +1,21 @@
-from fastapi import APIRouter, Query, HTTPException
+from fastapi import APIRouter, Query, HTTPException, Header
 from datetime import date, datetime, timedelta
+import uuid
 from app.services.predictor import generate_daily_tickets, LEAGUES
 from app.services.data_fetcher import get_fixtures
 from app.schemas.prediction import DailyTicketsOut
-from app.utils.cache import cache_get, cache_set, cache_key
+from app.utils.cache import cache_get, cache_set, cache_key, cache_delete
+from app.config import settings
 
 router = APIRouter(prefix="/predictions", tags=["Predictions"])
+
+_ticket_store: list[dict] = []
 
 
 @router.get("/daily", response_model=DailyTicketsOut, summary="Get today's prediction tickets")
 async def get_daily_predictions(
-    target_date: date = Query(default=None, description="Date (YYYY-MM-DD), defaults to tomorrow"),
-    force_refresh: bool = Query(default=False, description="Bypass cache and regenerate"),
+    target_date: date = Query(default=None, description="Date YYYY-MM-DD, défaut demain"),
+    force_refresh: bool = Query(default=False),
 ):
     if target_date is None:
         target_date = date.today() + timedelta(days=1)
@@ -26,7 +30,7 @@ async def get_daily_predictions(
     tickets = await generate_daily_tickets(target_date)
 
     if not tickets:
-        raise HTTPException(status_code=404, detail=f"No predictions available for {target_date}")
+        raise HTTPException(status_code=404, detail=f"Aucune prédiction disponible pour {target_date}")
 
     result = DailyTicketsOut(
         date=str(target_date),
@@ -35,32 +39,52 @@ async def get_daily_predictions(
         total_tickets=len(tickets),
     )
 
-    await cache_set(ck, result.model_dump(), ttl=3600 * 4)
+    payload = result.model_dump()
+    await cache_set(ck, payload, ttl=3600 * 4)
+
+    # Persist to in-memory store for history
+    for t in tickets:
+        entry = {**t, "date": str(target_date), "generated_at": payload["generated_at"]}
+        if not any(e.get("ticket_number") == t["ticket_number"] and e.get("date") == str(target_date)
+                   for e in _ticket_store):
+            _ticket_store.append(entry)
+
     return result
 
 
-@router.get("/trigger", summary="Manually trigger daily generation (admin)")
-async def trigger_generation(target_date: date = Query(default=None)):
+@router.get("/trigger", summary="Déclencher la génération manuellement")
+async def trigger_generation(
+    target_date: date = Query(default=None),
+    x_admin_key: str = Header(default=""),
+):
+    if settings.SECRET_KEY != "change-me-in-production" and x_admin_key != settings.SECRET_KEY:
+        raise HTTPException(status_code=403, detail="Clé admin invalide")
+
     if target_date is None:
         target_date = date.today() + timedelta(days=1)
 
+    ck = cache_key("daily_tickets", str(target_date))
+    await cache_delete(ck)
+
     tickets = await generate_daily_tickets(target_date)
-    return {"message": f"Generated {len(tickets)} tickets for {target_date}", "tickets_count": len(tickets)}
+
+    for t in tickets:
+        entry = {**t, "date": str(target_date), "generated_at": datetime.utcnow().isoformat()}
+        _ticket_store.append(entry)
+
+    return {
+        "message": f"{len(tickets)} tickets générés pour {target_date}",
+        "tickets_count": len(tickets),
+    }
 
 
-@router.get("/history", summary="Get historical prediction tickets")
+@router.get("/history", summary="Historique des tickets")
 async def get_history(limit: int = Query(default=50, le=200)):
-    ck = cache_key("history_tickets")
-    cached = await cache_get(ck)
-    if cached:
-        return cached
-
-    result = {"tickets": [], "total": 0}
-    await cache_set(ck, result, ttl=600)
-    return result
+    recent = list(reversed(_ticket_store))[:limit]
+    return {"tickets": recent, "total": len(_ticket_store)}
 
 
-@router.get("/matches/upcoming", summary="Get upcoming matches")
+@router.get("/matches/upcoming", summary="Prochains matchs")
 async def get_upcoming_matches(days_ahead: int = Query(default=1, ge=1, le=7)):
     tomorrow = date.today() + timedelta(days=days_ahead)
     from_date = str(tomorrow)
