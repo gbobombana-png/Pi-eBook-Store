@@ -1,4 +1,4 @@
-const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API = process.env.NEXT_PUBLIC_API_URL ?? "";
 const TOKEN_KEY = "sp_token";
 const USER_KEY = "sp_user";
 

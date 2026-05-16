@@ -1,7 +1,7 @@
 import { DailyTickets } from "./types";
 import { getToken } from "./auth";
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 async function fetchAPI<T>(path: string, options?: RequestInit & { auth?: boolean }): Promise<T> {
   const headers: Record<string, string> = {
