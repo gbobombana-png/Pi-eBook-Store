@@ -1,15 +1,29 @@
 import { DailyTickets } from "./types";
+import { getToken } from "./auth";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
-async function fetchAPI<T>(path: string, options?: RequestInit): Promise<T> {
+async function fetchAPI<T>(path: string, options?: RequestInit & { auth?: boolean }): Promise<T> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(options?.headers as Record<string, string> ?? {}),
+  };
+
+  if (options?.auth) {
+    const token = getToken();
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const { auth: _auth, ...rest } = options ?? {};
   const res = await fetch(`${API}${path}`, {
-    ...options,
-    next: { revalidate: 3600 },
+    ...rest,
+    headers,
+    cache: "no-store",
   });
+
   if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`API error ${res.status}: ${err}`);
+    const err = await res.json().catch(() => ({ detail: `HTTP ${res.status}` }));
+    throw new Error(err.detail ?? `Erreur ${res.status}`);
   }
   return res.json();
 }
@@ -25,5 +39,5 @@ export async function getUpcomingMatches() {
 
 export async function triggerGeneration(date?: string) {
   const qs = date ? `?target_date=${date}` : "";
-  return fetchAPI(`/api/v1/predictions/trigger${qs}`, { method: "GET", next: { revalidate: 0 } });
+  return fetchAPI(`/api/v1/predictions/trigger${qs}`, { method: "GET", auth: true });
 }

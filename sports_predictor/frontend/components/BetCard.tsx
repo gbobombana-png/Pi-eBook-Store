@@ -45,8 +45,8 @@ export default function BetCard({ bet, index }: Props) {
             <ConfidenceBadge value={bet.confidence} size="sm" />
             <span className="text-xs text-slate-400">
               Edge{" "}
-              <span className={`font-semibold ${confidenceColor(bet.value_edge * 100)}`}>
-                +{(bet.value_edge * 100).toFixed(1)}%
+              <span className={`font-semibold ${bet.value_edge >= 5 ? "text-green-400" : bet.value_edge >= 0 ? "text-yellow-400" : "text-red-400"}`}>
+                {bet.value_edge >= 0 ? "+" : ""}{bet.value_edge.toFixed(1)}%
               </span>
             </span>
           </div>

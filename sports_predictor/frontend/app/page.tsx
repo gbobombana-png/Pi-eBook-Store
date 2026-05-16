@@ -5,6 +5,7 @@ import { RefreshCw, Zap, TrendingUp, Star, AlertTriangle } from "lucide-react";
 import { DailyTickets } from "@/lib/types";
 import { getDailyPredictions, triggerGeneration } from "@/lib/api";
 import { formatDate, formatOdds } from "@/lib/utils";
+import { getUser } from "@/lib/auth";
 import TicketCard from "@/components/TicketCard";
 
 export default function Dashboard() {
@@ -12,6 +13,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [triggering, setTriggering] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isAdmin = getUser()?.is_admin ?? false;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -82,16 +84,18 @@ export default function Dashboard() {
             className="btn-ghost flex items-center gap-1.5"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-            Refresh
+            Actualiser
           </button>
+          {isAdmin && (
           <button
             onClick={handleTrigger}
             disabled={triggering || loading}
             className="btn-primary flex items-center gap-1.5"
           >
             <Zap className="w-3.5 h-3.5" />
-            {triggering ? "Generating…" : "Generate Now"}
+            {triggering ? "Génération…" : "Générer"}
           </button>
+          )}
         </div>
       </div>
 

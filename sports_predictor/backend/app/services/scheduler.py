@@ -1,6 +1,7 @@
 """
 APScheduler — runs prediction generation daily at configured time.
 """
+from datetime import date, timedelta
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from app.services.predictor import generate_daily_tickets
@@ -25,7 +26,7 @@ def start_scheduler():
     )
     scheduler.start()
     logger.info(
-        f"Scheduler started — daily generation at "
+        f"Scheduler démarré — génération quotidienne à "
         f"{settings.DAILY_GENERATION_HOUR:02d}:{settings.DAILY_GENERATION_MINUTE:02d} UTC"
     )
 
@@ -33,13 +34,34 @@ def start_scheduler():
 def stop_scheduler():
     if scheduler.running:
         scheduler.shutdown(wait=False)
-        logger.info("Scheduler stopped")
+        logger.info("Scheduler arrêté")
 
 
 async def _daily_job():
-    logger.info("Running daily prediction generation...")
+    logger.info("Génération quotidienne en cours...")
     try:
-        tickets = await generate_daily_tickets()
-        logger.info(f"Daily job complete — {len(tickets)} tickets generated")
+        from app.database import AsyncSessionLocal
+        from app.services.persistence import save_tickets
+        from app.utils.cache import cache_key, cache_set
+
+        target = date.today() + timedelta(days=1)
+        tickets = await generate_daily_tickets(target)
+
+        if tickets:
+            async with AsyncSessionLocal() as db:
+                await save_tickets(tickets, target, db)
+
+            from datetime import datetime
+            from app.schemas.prediction import DailyTicketsOut
+            result = DailyTicketsOut(
+                date=str(target),
+                generated_at=datetime.utcnow().isoformat(),
+                tickets=tickets,
+                total_tickets=len(tickets),
+            )
+            ck = cache_key("daily_tickets", str(target))
+            await cache_set(ck, result.model_dump(), ttl=3600 * 4)
+
+        logger.info(f"Génération terminée — {len(tickets)} tickets créés et sauvegardés")
     except Exception as e:
-        logger.error(f"Daily job failed: {e}", exc_info=True)
+        logger.error(f"Échec de la génération quotidienne: {e}", exc_info=True)
