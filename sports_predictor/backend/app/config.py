@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from pydantic import model_validator
 from functools import lru_cache
 from typing import Optional
 
@@ -28,20 +29,16 @@ class Settings(BaseSettings):
     MODEL_PATH: str = "ml/models/predictor.pkl"
     MIN_CONFIDENCE: int = 60
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    @model_validator(mode="after")
+    def fix_database_url(self) -> "Settings":
+        url = self.DATABASE_URL
+        if url.startswith("postgres://"):
+            self.DATABASE_URL = url.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif url.startswith("postgresql://"):
+            self.DATABASE_URL = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return self
 
-
-    def __init__(self, **data):
-        super().__init__(**data)
-        # Railway injecte postgresql:// mais asyncpg nécessite postgresql+asyncpg://
-        if self.DATABASE_URL.startswith("postgresql://"):
-            object.__setattr__(self, "DATABASE_URL",
-                self.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1))
-        elif self.DATABASE_URL.startswith("postgres://"):
-            object.__setattr__(self, "DATABASE_URL",
-                self.DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1))
+    model_config = {"env_file": ".env", "case_sensitive": True}
 
 
 @lru_cache()
