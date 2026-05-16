@@ -14,7 +14,12 @@ logger = get_logger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info(f"Starting {settings.APP_NAME} v{settings.VERSION}")
-    await init_db()
+    logger.info(f"DATABASE_URL prefix: {settings.DATABASE_URL[:30]}...")
+    try:
+        await init_db()
+        logger.info("Database connected")
+    except Exception as e:
+        logger.error(f"Database connection failed: {e} — continuing anyway")
     load_model()
     start_scheduler()
     yield
