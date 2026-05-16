@@ -7,7 +7,7 @@ Aucune stat du vrai football — modèle 100% FC25 virtuel.
 import json, os, random, math
 from collections import defaultdict
 
-# ── Tout l'historique FC25 (matchs #55 → #281) ─────────────────────────────
+# ── Tout l'historique FC25 (matchs #55 → #284) ─────────────────────────────
 ALL_MATCHES = [
     # #55–#172 (batch_elo_update.py)
     ("Juventus",4,"Inter Miami",3),("Barcelona",5,"Arsenal",3),
@@ -125,6 +125,9 @@ ALL_MATCHES = [
     ("Barcelona",4,"Man City",1),("Real Madrid",2,"Barcelona",4),
     ("Man City",3,"Arsenal",4),("Inter Miami",4,"Barcelona",5),
     ("Barcelona",4,"Liverpool",5),("PSG",4,"Juventus",2),
+    # #N282–#N284
+    ("Inter Miami",5,"Barcelona",3),("Arsenal",4,"Real Madrid",5),
+    ("Barcelona",6,"Liverpool",5),
 ]
 
 TEAMS = ["PSG","Barcelona","Arsenal","Real Madrid","Man City",
