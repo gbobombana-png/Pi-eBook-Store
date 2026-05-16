@@ -16,6 +16,7 @@ class Settings(BaseSettings):
 
     API_FOOTBALL_KEY: Optional[str] = None
     API_FOOTBALL_HOST: str = "api-football-v1.p.rapidapi.com"
+    FOOTBALL_DATA_TOKEN: Optional[str] = None
     ODDS_API_KEY: Optional[str] = None
     ODDS_API_BASE: str = "https://api.the-odds-api.com/v4"
 
