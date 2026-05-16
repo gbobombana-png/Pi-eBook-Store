@@ -21,8 +21,8 @@ async def register(data: UserCreate, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Email déjà utilisé")
 
     user = User(
-        username=data.username,
-        email=data.email,
+        username=data.username.lower(),
+        email=data.email.lower(),
         hashed_password=hash_password(data.password),
     )
     db.add(user)
@@ -75,8 +75,8 @@ async def init_admin(data: UserCreate, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Nom d'utilisateur déjà utilisé")
 
     user = User(
-        username=data.username,
-        email=data.email,
+        username=data.username.lower(),
+        email=data.email.lower(),
         hashed_password=hash_password(data.password),
         is_admin=True,
     )

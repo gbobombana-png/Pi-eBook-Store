@@ -23,8 +23,8 @@ async def main():
             return
 
         user = User(
-            username=username,
-            email=email,
+            username=username.lower(),
+            email=email.lower(),
             hashed_password=hash_password(password),
             is_admin=True,
             is_active=True,
