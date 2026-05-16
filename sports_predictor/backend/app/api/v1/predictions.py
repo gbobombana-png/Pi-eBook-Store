@@ -1,20 +1,20 @@
-from fastapi import APIRouter, Query, HTTPException, Header
+from fastapi import APIRouter, Query, HTTPException, Depends
 from datetime import date, datetime, timedelta
-import uuid
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.database import get_db
 from app.services.predictor import generate_daily_tickets, LEAGUES
 from app.services.data_fetcher import get_fixtures
+from app.services.persistence import save_tickets, get_history
 from app.schemas.prediction import DailyTicketsOut
 from app.utils.cache import cache_get, cache_set, cache_key, cache_delete
-from app.config import settings
+from app.utils.auth import require_admin
 
 router = APIRouter(prefix="/predictions", tags=["Predictions"])
 
-_ticket_store: list[dict] = []
 
-
-@router.get("/daily", response_model=DailyTicketsOut, summary="Get today's prediction tickets")
+@router.get("/daily", response_model=DailyTicketsOut, summary="Tickets de prédictions du jour")
 async def get_daily_predictions(
-    target_date: date = Query(default=None, description="Date YYYY-MM-DD, défaut demain"),
+    target_date: date = Query(default=None),
     force_refresh: bool = Query(default=False),
 ):
     if target_date is None:
@@ -28,7 +28,6 @@ async def get_daily_predictions(
             return cached
 
     tickets = await generate_daily_tickets(target_date)
-
     if not tickets:
         raise HTTPException(status_code=404, detail=f"Aucune prédiction disponible pour {target_date}")
 
@@ -38,28 +37,16 @@ async def get_daily_predictions(
         tickets=tickets,
         total_tickets=len(tickets),
     )
-
-    payload = result.model_dump()
-    await cache_set(ck, payload, ttl=3600 * 4)
-
-    # Persist to in-memory store for history
-    for t in tickets:
-        entry = {**t, "date": str(target_date), "generated_at": payload["generated_at"]}
-        if not any(e.get("ticket_number") == t["ticket_number"] and e.get("date") == str(target_date)
-                   for e in _ticket_store):
-            _ticket_store.append(entry)
-
+    await cache_set(ck, result.model_dump(), ttl=3600 * 4)
     return result
 
 
-@router.get("/trigger", summary="Déclencher la génération manuellement")
+@router.get("/trigger", summary="Générer les tickets (admin)")
 async def trigger_generation(
     target_date: date = Query(default=None),
-    x_admin_key: str = Header(default=""),
+    db: AsyncSession = Depends(get_db),
+    _admin: dict = Depends(require_admin),
 ):
-    if settings.SECRET_KEY != "change-me-in-production" and x_admin_key != settings.SECRET_KEY:
-        raise HTTPException(status_code=403, detail="Clé admin invalide")
-
     if target_date is None:
         target_date = date.today() + timedelta(days=1)
 
@@ -67,10 +54,8 @@ async def trigger_generation(
     await cache_delete(ck)
 
     tickets = await generate_daily_tickets(target_date)
-
-    for t in tickets:
-        entry = {**t, "date": str(target_date), "generated_at": datetime.utcnow().isoformat()}
-        _ticket_store.append(entry)
+    if tickets:
+        await save_tickets(tickets, target_date, db)
 
     return {
         "message": f"{len(tickets)} tickets générés pour {target_date}",
@@ -78,10 +63,13 @@ async def trigger_generation(
     }
 
 
-@router.get("/history", summary="Historique des tickets")
-async def get_history(limit: int = Query(default=50, le=200)):
-    recent = list(reversed(_ticket_store))[:limit]
-    return {"tickets": recent, "total": len(_ticket_store)}
+@router.get("/history", summary="Historique des tickets depuis la DB")
+async def get_history_endpoint(
+    limit: int = Query(default=50, le=200),
+    db: AsyncSession = Depends(get_db),
+):
+    tickets = await get_history(db, limit=limit)
+    return {"tickets": tickets, "total": len(tickets)}
 
 
 @router.get("/matches/upcoming", summary="Prochains matchs")

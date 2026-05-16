@@ -36,5 +36,11 @@ health:
 dev-backend:
 	cd backend && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
+train:
+	docker-compose exec api python -m app.ml.trainer
+
+train-synthetic:
+	docker-compose exec api python -m app.ml.trainer --synthetic
+
 dev-frontend:
 	cd frontend && npm run dev

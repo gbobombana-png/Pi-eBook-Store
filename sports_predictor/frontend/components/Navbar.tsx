@@ -1,18 +1,32 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Activity, BarChart3, Clock, Home, Zap } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Activity, BarChart3, Clock, Home, LogIn, LogOut, Shield, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { getUser, logout, AuthUser } from "@/lib/auth";
 
 const nav = [
   { href: "/", label: "Dashboard", icon: Home },
-  { href: "/matches", label: "Matches", icon: Activity },
-  { href: "/history", label: "History", icon: Clock },
+  { href: "/matches", label: "Matchs", icon: Activity },
+  { href: "/history", label: "Historique", icon: Clock },
 ];
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = useState<AuthUser | null>(null);
+
+  useEffect(() => {
+    setUser(getUser());
+  }, [pathname]);
+
+  const handleLogout = () => {
+    logout();
+    setUser(null);
+    router.push("/login");
+  };
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 h-14 bg-dark-900/90 backdrop-blur border-b border-slate-700/50">
@@ -41,12 +55,33 @@ export default function Navbar() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5 text-xs text-slate-500">
             <BarChart3 className="w-3.5 h-3.5" />
             <span>Live</span>
             <span className="w-1.5 h-1.5 rounded-full bg-brand-400 animate-pulse" />
           </div>
+
+          {user ? (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400 flex items-center gap-1">
+                {user.is_admin && <Shield className="w-3 h-3 text-amber-400" />}
+                {user.username}
+              </span>
+              <button
+                onClick={handleLogout}
+                className="btn-ghost flex items-center gap-1 text-xs"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                Déconnexion
+              </button>
+            </div>
+          ) : (
+            <Link href="/login" className="btn-primary flex items-center gap-1.5 text-xs py-1.5">
+              <LogIn className="w-3.5 h-3.5" />
+              Connexion
+            </Link>
+          )}
         </div>
       </div>
     </header>
