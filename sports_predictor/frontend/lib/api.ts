@@ -1,7 +1,7 @@
 import { DailyTickets } from "./types";
 import { getToken } from "./auth";
 
-const API = "https://pi-ebook-store-production.up.railway.app";
+const API = "";
 
 async function fetchAPI<T>(path: string, options?: RequestInit & { auth?: boolean }): Promise<T> {
   const headers: Record<string, string> = {

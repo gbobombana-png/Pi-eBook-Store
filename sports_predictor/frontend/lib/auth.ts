@@ -1,4 +1,4 @@
-const API = "https://pi-ebook-store-production.up.railway.app";
+const API = "";
 const TOKEN_KEY = "sp_token";
 const USER_KEY = "sp_user";
 

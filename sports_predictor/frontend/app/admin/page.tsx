@@ -9,7 +9,7 @@ import {
 import { getUser, authHeaders } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
-const API = "https://pi-ebook-store-production.up.railway.app";
+const API = "";
 
 async function adminFetch(path: string, options?: RequestInit) {
   const res = await fetch(`${API}/api/v1/admin${path}`, {
