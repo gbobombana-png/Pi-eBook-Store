@@ -61,3 +61,26 @@ async def login_form(form: OAuth2PasswordRequestForm = Depends(), db: AsyncSessi
 @router.get("/me", response_model=dict)
 async def me(user: dict = Depends(require_auth)):
     return user
+
+
+@router.post("/init-admin", response_model=UserOut, status_code=status.HTTP_201_CREATED)
+async def init_admin(data: UserCreate, db: AsyncSession = Depends(get_db)):
+    """Create first admin — blocked once any admin exists."""
+    existing_admin = await db.execute(select(User).where(User.is_admin == True))
+    if existing_admin.scalar_one_or_none():
+        raise HTTPException(status_code=403, detail="Un administrateur existe déjà")
+
+    existing = await db.execute(select(User).where(User.username == data.username))
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=400, detail="Nom d'utilisateur déjà utilisé")
+
+    user = User(
+        username=data.username,
+        email=data.email,
+        hashed_password=hash_password(data.password),
+        is_admin=True,
+    )
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+    return user
