@@ -4,6 +4,6 @@ builder = "dockerfile"
 [deploy]
 startCommand = "bash start.sh"
 healthcheckPath = "/api/v1/stats/health"
-healthcheckTimeout = 30
+healthcheckTimeout = 120
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3

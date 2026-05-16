@@ -33,6 +33,17 @@ class Settings(BaseSettings):
         case_sensitive = True
 
 
+    def __init__(self, **data):
+        super().__init__(**data)
+        # Railway injecte postgresql:// mais asyncpg nécessite postgresql+asyncpg://
+        if self.DATABASE_URL.startswith("postgresql://"):
+            object.__setattr__(self, "DATABASE_URL",
+                self.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1))
+        elif self.DATABASE_URL.startswith("postgres://"):
+            object.__setattr__(self, "DATABASE_URL",
+                self.DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1))
+
+
 @lru_cache()
 def get_settings() -> Settings:
     return Settings()
