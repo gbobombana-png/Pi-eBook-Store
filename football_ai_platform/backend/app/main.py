@@ -9,7 +9,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 
 from .core.config import get_settings
 from .core.database import init_db
-from .routers import matches, analysis, live
+from .routers import matches, analysis, live, collector
 
 settings = get_settings()
 
@@ -61,9 +61,10 @@ app.add_middleware(GZipMiddleware, minimum_size=1024)
 
 # ── Routers ───────────────────────────────────────────────────────────────────
 
-app.include_router(matches.router, prefix=settings.api_v1_prefix)
-app.include_router(analysis.router, prefix=settings.api_v1_prefix)
-app.include_router(live.router, prefix=settings.api_v1_prefix)
+app.include_router(matches.router,   prefix=settings.api_v1_prefix)
+app.include_router(analysis.router,  prefix=settings.api_v1_prefix)
+app.include_router(live.router,      prefix=settings.api_v1_prefix)
+app.include_router(collector.router, prefix=settings.api_v1_prefix)
 
 
 # ── Health ────────────────────────────────────────────────────────────────────
