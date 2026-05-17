@@ -1,15 +1,26 @@
 #!/usr/bin/env python3
 """
-FC25 PENALTY EXPERT PREDICTOR — Ultra Précis
-Basé sur 272+ vrais matchs FC25 observés.
-Aucune stat du vrai football — modèle 100% FC25 virtuel.
-"""
-import json, os, random, math
-from collections import defaultdict
+FC25 PENALTY EXPERT v4.0 — Modèle RNG-aware
+Basé sur 240+ vrais matchs FC25 1xbet observés.
 
-# ── Tout l'historique FC25 (matchs #55 → #N5) ──────────────────────────────
+VÉRITÉ SUR FC25 1XBET:
+- Résultats générés par RNG avec ratings d'équipes FIXES (côté serveur)
+- Format: 5 tirs par équipe, mort subite si égalité 5:5
+- Les cotes bookmaker = meilleur signal disponible (elles encodent les vraies proba)
+- Chaque match est INDÉPENDANT → pas de dynamique Elo
+
+MODÈLE:
+  Si cotes disponibles: 65% cotes + 25% H2H + 10% taux victoire
+  Sans cotes:           40% taux victoire + 35% H2H + 25% précision/tir
+  Simulation: Binomial(5, p_shot) + mort subite
+"""
+import json, os, math, random
+from collections import defaultdict, Counter
+from math import comb
+
+# ── Historique FC25 (matchs #55 → #N5) ─────────────────────────────────────
 ALL_MATCHES = [
-    # #55–#172 (batch_elo_update.py)
+    # #55–#172
     ("Juventus",4,"Inter Miami",3),("Barcelona",5,"Arsenal",3),
     ("Bayern Munich",3,"Inter Miami",2),("Inter Miami",4,"Barcelona",1),
     ("Arsenal",7,"Man City",6),("Inter Miami",4,"PSG",5),
@@ -125,7 +136,7 @@ ALL_MATCHES = [
     ("Barcelona",4,"Man City",1),("Real Madrid",2,"Barcelona",4),
     ("Man City",3,"Arsenal",4),("Inter Miami",4,"Barcelona",5),
     ("Barcelona",4,"Liverpool",5),("PSG",4,"Juventus",2),
-    # #N282–#N288 + new series
+    # #N282–#N5 (nouvelle série)
     ("Inter Miami",5,"Barcelona",3),("Arsenal",4,"Real Madrid",5),
     ("Barcelona",6,"Liverpool",5),("Barcelona",4,"Al Nassr",5),
     ("Real Madrid",2,"Barcelona",3),("Real Madrid",3,"Inter Miami",4),
@@ -137,278 +148,261 @@ ALL_MATCHES = [
 TEAMS = ["PSG","Barcelona","Arsenal","Real Madrid","Man City",
          "Juventus","Bayern Munich","Liverpool","Inter Miami","Al Nassr"]
 
-ELO_FILE = os.path.join(os.path.dirname(__file__), "elo_ratings.json")
-BASE_ELO  = 1500
 
-
-# ── Analyse complète de l'historique ───────────────────────────────────────
+# ── Stats FC25 depuis l'historique ─────────────────────────────────────────
 
 def build_stats():
-    goals_for     = defaultdict(list)
-    goals_against = defaultdict(list)
-    wins          = defaultdict(int)
-    losses        = defaultdict(int)
-    h2h           = defaultdict(lambda: {"W":0,"L":0,"gf":0,"ga":0})
+    gf = defaultdict(list); ga = defaultdict(list)
+    wins = defaultdict(int); losses = defaultdict(int)
+    h2h  = defaultdict(lambda: {"W":0,"L":0})
 
     for a, sa, b, sb in ALL_MATCHES:
-        goals_for[a].append(sa); goals_against[a].append(sb)
-        goals_for[b].append(sb); goals_against[b].append(sa)
+        gf[a].append(sa); ga[a].append(sb)
+        gf[b].append(sb); ga[b].append(sa)
         if sa > sb:
-            wins[a]  += 1; losses[b] += 1
-            h2h[(a,b)]["W"] += 1; h2h[(a,b)]["gf"] += sa; h2h[(a,b)]["ga"] += sb
-            h2h[(b,a)]["L"] += 1
+            wins[a] += 1; losses[b] += 1
+            h2h[(a,b)]["W"] += 1; h2h[(b,a)]["L"] += 1
         else:
-            wins[b]  += 1; losses[a] += 1
-            h2h[(b,a)]["W"] += 1; h2h[(b,a)]["gf"] += sb; h2h[(b,a)]["ga"] += sa
-            h2h[(a,b)]["L"] += 1
+            wins[b] += 1; losses[a] += 1
+            h2h[(b,a)]["W"] += 1; h2h[(a,b)]["L"] += 1
 
     stats = {}
-    for t in set(list(goals_for.keys())+list(goals_against.keys())):
-        gf = goals_for[t];   ga = goals_against[t]
-        n  = len(gf)
-        w  = wins[t];        l = losses[t]
+    for t in set(list(gf.keys()) + list(ga.keys())):
+        n = len(gf[t])
+        avg = sum(gf[t])/n if n else 4.25
         stats[t] = {
             "games":    n,
-            "win_rate": w/n if n else 0.5,
-            "avg_gf":   sum(gf)/n if n else 4.5,
-            "avg_ga":   sum(ga)/n if n else 4.5,
-            "std_gf":   _std(gf),
-            "attack":   (sum(gf)/n) / _global_avg_goals() if n else 1.0,
-            "defense":  _global_avg_goals() / (sum(ga)/n) if n and sum(ga)/n > 0 else 1.0,
+            "win_rate": wins[t]/n if n else 0.5,
+            "avg_gf":   avg,
+            "p_shot":   min(0.96, max(0.60, avg / 5)),  # précision par tir
         }
     return stats, h2h
 
 
-def _std(lst):
-    if len(lst) < 2: return 1.5
-    m = sum(lst)/len(lst)
-    return math.sqrt(sum((x-m)**2 for x in lst)/len(lst))
+# ── Simulation FC25 (Binomial 5 tirs + mort subite) ─────────────────────────
 
-
-def _global_avg_goals():
-    all_goals = [s for a,sa,b,sb in ALL_MATCHES for s in (sa,sb)]
-    return sum(all_goals)/len(all_goals) if all_goals else 4.5
-
-
-def get_elo(team):
-    if os.path.exists(ELO_FILE):
-        with open(ELO_FILE) as f:
-            ratings = json.load(f)
-        return ratings.get(team, BASE_ELO)
-    return BASE_ELO
-
-
-def elo_win_prob(elo_a, elo_b):
-    return 1 / (1 + 10**((elo_b - elo_a)/400))
-
-
-# ── Monte Carlo FC25 Penalty ────────────────────────────────────────────────
-
-def simulate_fc25_penalty(exp_a, exp_b, std_a, std_b, n=100_000):
+def simulate_binomial(p_a, p_b, n=100_000):
     """
-    Simule des tirs au but FC25 :
-    - Score = Normal(mu=exp, sigma=std), min 1
-    - Pas de nul → si égalité, mort subite simulée
+    Simule le vrai format FC25:
+    - Chaque équipe tire 5 pénalties (Binomial indépendant)
+    - Si égalité → mort subite (tirs 1 vs 1 jusqu'au vainqueur)
     """
     rng = random.Random()
     wa = wb = 0
     scores_a = []; scores_b = []
 
     for _ in range(n):
-        # Score pénalty FC25 ~ Normal tronquée à l'entier le plus proche
-        sa = max(1, round(rng.gauss(exp_a, std_a)))
-        sb = max(1, round(rng.gauss(exp_b, std_b)))
+        # Phase régulation: 5 tirs chacun
+        sa = sum(1 for _ in range(5) if rng.random() < p_a)
+        sb = sum(1 for _ in range(5) if rng.random() < p_b)
 
-        # Mort subite si égalité (probabilité 50/50 légèrement biaisée par attack)
-        if sa == sb:
-            bias = exp_a / (exp_a + exp_b)
-            if rng.random() < bias:
-                sa += 1
-            else:
-                sb += 1
+        # Mort subite si égalité
+        while sa == sb:
+            sa += (1 if rng.random() < p_a else 0)
+            sb += (1 if rng.random() < p_b else 0)
+            if sa != sb:
+                break
 
         scores_a.append(sa); scores_b.append(sb)
         if sa > sb: wa += 1
-        else:       wb += 1
+        else: wb += 1
 
-    # Distribution des scores les plus probables
-    from collections import Counter
+    total = n
     score_counts = Counter(zip(scores_a, scores_b))
-    total = sum(score_counts.values())
     top = [(f"{s[0]}:{s[1]}", round(c/total*100, 1))
-           for s,c in score_counts.most_common(5)]
+           for s, c in score_counts.most_common(5)]
 
     return wa/n, wb/n, top, sum(scores_a)/n, sum(scores_b)/n
 
 
-# ── Prédiction principale ───────────────────────────────────────────────────
+# ── Probabilité depuis les cotes bookmaker ───────────────────────────────────
 
-def predict(team_a, team_b, verbose=True):
+def implied_prob(odds_v1, odds_v2):
+    """Normalise les cotes 1xbet → vraie probabilité (retire la marge)."""
+    raw_a = 1 / odds_v1
+    raw_b = 1 / odds_v2
+    total = raw_a + raw_b  # sans la cote X (nul impossible)
+    return raw_a / total, raw_b / total
+
+
+# ── Prédiction principale ────────────────────────────────────────────────────
+
+def predict(team_a, team_b, odds_v1=None, odds_v2=None, verbose=True):
     stats, h2h = build_stats()
+    global_avg = sum(s for a,sa,b,sb in ALL_MATCHES for s in (sa,sb)) / (2*len(ALL_MATCHES))
 
-    st_a = stats.get(team_a, {"avg_gf":4.5,"avg_ga":4.5,"std_gf":1.5,"attack":1.0,"defense":1.0,"win_rate":0.5,"games":0})
-    st_b = stats.get(team_b, {"avg_gf":4.5,"avg_ga":4.5,"std_gf":1.5,"attack":1.0,"defense":1.0,"win_rate":0.5,"games":0})
+    st_a = stats.get(team_a, {"win_rate":0.5,"avg_gf":global_avg,"p_shot":0.85,"games":0})
+    st_b = stats.get(team_b, {"win_rate":0.5,"avg_gf":global_avg,"p_shot":0.85,"games":0})
 
-    elo_a = get_elo(team_a);  elo_b = get_elo(team_b)
-
-    # Elo probability (poids 45%)
-    p_elo_a = elo_win_prob(elo_a, elo_b)
-
-    # Stats probability (poids 35%) — basé sur attaque/défense FC25
-    att_a = st_a["attack"] * st_b["defense"]  # force relative de A vs défense de B
-    att_b = st_b["attack"] * st_a["defense"]
-    p_stats_a = att_a / (att_a + att_b) if (att_a+att_b) > 0 else 0.5
-
-    # H2H specific (poids 20%)
+    # H2H
     h = h2h.get((team_a, team_b), {"W":0,"L":0})
     total_h2h = h["W"] + h["L"]
-    p_h2h_a = h["W"]/total_h2h if total_h2h >= 3 else p_elo_a
+    p_h2h_a = h["W"] / total_h2h if total_h2h >= 4 else None
 
-    # Probabilité combinée
-    p_a = 0.45*p_elo_a + 0.35*p_stats_a + 0.20*p_h2h_a
+    # Taux de victoire historique global
+    p_wr_a = st_a["win_rate"]
+
+    # Avantage précision/tir
+    p_shot_a = st_a["p_shot"]
+    p_shot_b = st_b["p_shot"]
+    # Proba victoire si p_shot fixe (analytique approx via MC rapide)
+    mc_q_a, mc_q_b, _, _, _ = simulate_binomial(p_shot_a, p_shot_b, n=20_000)
+
+    # ── Calcul probabilité combinée ──────────────────────────────────────────
+    if odds_v1 and odds_v2:
+        # AVEC COTES: cotes bookmaker = signal principal
+        p_odds_a, p_odds_b = implied_prob(odds_v1, odds_v2)
+        p_h2h = p_h2h_a if p_h2h_a is not None else p_odds_a
+        p_a = 0.65 * p_odds_a + 0.25 * p_h2h + 0.10 * p_wr_a
+        mode = f"Cotes×65% + H2H×25% + WR×10%  [cotes: {odds_v1}/{odds_v2}]"
+    else:
+        # SANS COTES: données historiques + précision/tir
+        p_h2h = p_h2h_a if p_h2h_a is not None else p_wr_a
+        p_a = 0.40 * p_wr_a + 0.35 * p_h2h + 0.25 * mc_q_a
+        mode = "WR×40% + H2H×35% + Tir×25%  [sans cotes]"
+
+    p_a = max(0.05, min(0.95, p_a))
     p_b = 1 - p_a
 
-    # Expected goals FC25 (ajusté par la force relative)
-    global_avg = _global_avg_goals()
-    exp_a = global_avg * st_a["attack"] * st_b["defense"]
-    exp_b = global_avg * st_b["attack"] * st_a["defense"]
-    exp_a = max(2.0, min(exp_a, 8.0))
-    exp_b = max(2.0, min(exp_b, 8.0))
+    # p_shot ajustée par la force relative
+    adj = (p_a - 0.5) * 0.08
+    pa_adj = min(0.96, max(0.55, p_shot_a + adj))
+    pb_adj = min(0.96, max(0.55, p_shot_b - adj))
 
-    # Ajustement probabiliste sur les expected goals
-    exp_a *= (1 + 0.1*(p_a - 0.5))
-    exp_b *= (1 + 0.1*(p_b - 0.5))
-
-    # Simulation Monte Carlo FC25
-    mc_a, mc_b, top_scores, sim_gf_a, sim_gf_b = simulate_fc25_penalty(
-        exp_a, exp_b, st_a["std_gf"], st_b["std_gf"]
-    )
+    # Simulation Binomial complète
+    mc_a, mc_b, top_scores, exp_a, exp_b = simulate_binomial(pa_adj, pb_adj, n=100_000)
 
     # Confiance
-    elo_diff = abs(elo_a - elo_b)
-    if p_a >= 0.72 or p_b >= 0.72:
-        confidence = "HAUTE 🔥"
-    elif p_a >= 0.58 or p_b >= 0.58:
-        confidence = "MOYENNE ✅"
+    diff = abs(p_a - 0.5)
+    if odds_v1 and odds_v2:
+        confidence = "HAUTE 🔥" if diff >= 0.15 else "MOYENNE ✅" if diff >= 0.08 else "FAIBLE ⚠️"
     else:
-        confidence = "FAIBLE ⚠️"
+        confidence = "HAUTE 🔥" if diff >= 0.20 else "MOYENNE ✅" if diff >= 0.12 else "FAIBLE ⚠️"
 
     if not verbose:
+        winner = team_a if p_a > p_b else team_b
         return {
-            "team_a": team_a, "team_b": team_b,
-            "p_a": round(p_a*100,1), "p_b": round(p_b*100,1),
+            "winner": winner, "p_a": round(p_a*100,1), "p_b": round(p_b*100,1),
             "mc_a": round(mc_a*100,1), "mc_b": round(mc_b*100,1),
-            "exp_a": round(exp_a,1), "exp_b": round(exp_b,1),
+            "exp_a": round(exp_a,2), "exp_b": round(exp_b,2),
             "top_scores": top_scores, "confidence": confidence,
-            "elo_a": elo_a, "elo_b": elo_b,
             "h2h_w": h["W"], "h2h_l": h["L"],
             "games_a": st_a["games"], "games_b": st_b["games"],
-            "win_rate_a": round(st_a["win_rate"]*100,1),
+            "win_rate_a": round(p_wr_a*100,1),
             "win_rate_b": round(st_b["win_rate"]*100,1),
         }
 
-    # ── Affichage ──────────────────────────────────────────────────────────
-    W="\033[97m"; B="\033[1m"; G="\033[92m"; RE="\033[91m"
-    Y="\033[93m"; C="\033[96m"; M="\033[95m"; R="\033[0m"; BL="\033[94m"
+    # ── Affichage ────────────────────────────────────────────────────────────
+    B="\033[1m"; G="\033[92m"; RE="\033[91m"
+    Y="\033[93m"; C="\033[96m"; R="\033[0m"; BL="\033[94m"
 
     winner = team_a if p_a > p_b else team_b
-    w_prob  = max(p_a, p_b)
-
-    print(f"\n{B}{BL}{'═'*60}{R}")
-    print(f"{B}  ⚽ FC25 PENALTY EXPERT — Analyse Ultra Précise{R}")
-    print(f"{B}{BL}{'═'*60}{R}")
-    print(f"\n  {G}{B}{team_a}{R}  vs  {RE}{B}{team_b}{R}")
-    print(f"  Elo: {C}{elo_a}{R}  vs  {C}{elo_b}{R}  (diff: {abs(elo_a-elo_b):.0f})")
-
-    print(f"\n{B}  📊 Stats FC25 (sur données réelles){R}")
-    print(f"  {team_a:<20} Taux victoire: {G}{st_a['win_rate']*100:.0f}%{R}  "
-          f"Moy buts: {C}{st_a['avg_gf']:.1f}{R}  Matchs: {st_a['games']}")
-    print(f"  {team_b:<20} Taux victoire: {RE}{st_b['win_rate']*100:.0f}%{R}  "
-          f"Moy buts: {C}{st_b['avg_gf']:.1f}{R}  Matchs: {st_b['games']}")
-
-    if total_h2h > 0:
-        print(f"\n{B}  🔄 H2H direct{R}: {team_a} {G}{h['W']}{R}W – {RE}{h['L']}{R}L  "
-              f"({total_h2h} matchs)")
+    w_prob = max(p_a, p_b)
 
     def bar(p, w=22):
-        f = int(p/100*w)
-        return "█"*f + "░"*(w-f)
+        f = int(p/100*w); return "█"*f + "░"*(w-f)
+
+    print(f"\n{B}{BL}{'═'*62}{R}")
+    print(f"{B}  ⚽ FC25 PENALTY EXPERT v4.0 — Modèle RNG-Aware{R}")
+    print(f"{B}{BL}{'═'*62}{R}")
+    print(f"\n  {G}{B}{team_a}{R}  vs  {RE}{B}{team_b}{R}")
+
+    if odds_v1 and odds_v2:
+        p_o_a, p_o_b = implied_prob(odds_v1, odds_v2)
+        print(f"  {C}Cotes: V1={odds_v1} → {p_o_a*100:.1f}%  |  V2={odds_v2} → {p_o_b*100:.1f}%{R}")
+
+    print(f"\n{B}  📊 Stats FC25 ({len(ALL_MATCHES)} matchs réels){R}")
+    print(f"  {team_a:<22} WR:{G}{st_a['win_rate']*100:.0f}%{R}  "
+          f"Moy:{C}{st_a['avg_gf']:.2f}{R}  p/tir:{C}{st_a['p_shot']:.3f}{R}  N:{st_a['games']}")
+    print(f"  {team_b:<22} WR:{RE}{st_b['win_rate']*100:.0f}%{R}  "
+          f"Moy:{C}{st_b['avg_gf']:.2f}{R}  p/tir:{C}{st_b['p_shot']:.3f}{R}  N:{st_b['games']}")
+
+    if total_h2h > 0:
+        print(f"\n{B}  🔄 H2H direct{R}: {team_a} {G}{h['W']}{R}W – {RE}{h['L']}{R}L "
+              f"({total_h2h} matchs)"
+              + (f"  → {p_h2h_a*100:.0f}% A" if p_h2h_a else "  [< 4 matchs → non utilisé]"))
 
     print(f"\n{B}  🎯 Probabilités de victoire{R}")
-    print(f"  {G}{team_a:<22}{R} {bar(p_a*100)} {B}{p_a*100:.1f}%{R}")
-    print(f"  {RE}{team_b:<22}{R} {bar(p_b*100)} {B}{p_b*100:.1f}%{R}")
-    print(f"\n  Monte Carlo (100k sim): {G}{mc_a*100:.1f}%{R} / {RE}{mc_b*100:.1f}%{R}")
+    print(f"  {G}{team_a:<24}{R} {bar(p_a*100)} {B}{p_a*100:.1f}%{R}")
+    print(f"  {RE}{team_b:<24}{R} {bar(p_b*100)} {B}{p_b*100:.1f}%{R}")
+    print(f"\n  Simulation Binomial(5 tirs): {G}{mc_a*100:.1f}%{R} / {RE}{mc_b*100:.1f}%{R}")
 
-    print(f"\n{B}  📈 Scores FC25 les plus probables{R}")
-    for i,(score,prob) in enumerate(top_scores, 1):
+    print(f"\n{B}  📈 Scores les plus probables (5 tirs + mort subite){R}")
+    for i, (score, prob) in enumerate(top_scores, 1):
         a_s, b_s = score.split(":")
-        color = G if int(a_s) > int(b_s) else RE if int(a_s) < int(b_s) else Y
+        color = G if int(a_s) > int(b_s) else RE
         medal = ["🥇","🥈","🥉","  4.","  5."][i-1]
         print(f"  {medal} {color}{team_a} {score} {team_b}{R}   {bar(prob, 12)} {prob}%")
 
-    print(f"\n  Buts attendus: {G}{team_a}{R} {exp_a:.1f} – {exp_b:.1f} {RE}{team_b}{R}")
+    print(f"\n  Buts attendus: {G}{team_a}{R} {exp_a:.2f} – {exp_b:.2f} {RE}{team_b}{R}  "
+          f"(p_tir: {pa_adj:.3f} vs {pb_adj:.3f})")
 
-    print(f"\n{B}{'═'*60}{R}")
-    print(f"  {B}Vainqueur prédit:{R} {G}{B}{winner}{R}  ({w_prob*100:.1f}%)")
+    print(f"\n{B}{'═'*62}{R}")
+    print(f"  {B}Vainqueur prédit:{R} {G if p_a>p_b else RE}{B}{winner}{R}  ({w_prob*100:.1f}%)")
     print(f"  {B}Confiance:       {R} {B}{confidence}{R}")
-    conf_detail = (f"Elo×45% + Stats FC25×35% + H2H×20%")
-    print(f"  {B}Modèle:          {R} {C}{conf_detail}{R}")
-    print(f"{B}{'═'*60}{R}\n")
-    print(f"  {Y}⚠  FC25 virtuel — résultat statistique, pas de garantie.{R}\n")
+    print(f"  {B}Modèle:          {R} {C}{mode}{R}")
+    print(f"{B}{'═'*62}{R}\n")
+    print(f"  {Y}⚠  FC25 RNG virtuel — résultats indépendants, pas de garantie.{R}\n")
 
     return {"winner": winner, "prob": round(w_prob*100,1)}
 
 
-# ── Interface interactive ───────────────────────────────────────────────────
+# ── Interface CLI ────────────────────────────────────────────────────────────
 
 def interactive():
-    G="\033[92m"; B="\033[1m"; C="\033[96m"; R="\033[0m"; BL="\033[94m"
-    print(f"\n{B}{BL}  FC25 PENALTY EXPERT — Ultra Précis v3.0{R}")
-    print(f"  {C}272+ matchs réels analysés | Modèle hybride Elo+Stats+H2H+MC{R}\n")
+    B="\033[1m"; C="\033[96m"; G="\033[92m"; R="\033[0m"; BL="\033[94m"
+    print(f"\n{B}{BL}  FC25 PENALTY EXPERT v4.0 — RNG-Aware{R}")
+    print(f"  {C}240+ matchs FC25 | Binomial(5,p) + mort subite | Cotes intégrées{R}\n")
     print(f"Équipes: {', '.join(TEAMS)}\n")
 
     while True:
         try:
             print(f"{B}Équipe A > {R}", end=""); a = input().strip()
-            if a.lower() in ("quit","q","exit"): break
-            if not a: continue
-
+            if a.lower() in ("quit","q","exit",""): break
             print(f"{B}Équipe B > {R}", end=""); b = input().strip()
             if not b: continue
+            print(f"{B}Cote V1 (laisser vide si inconnue) > {R}", end="")
+            o1 = input().strip()
+            print(f"{B}Cote V2 (laisser vide si inconnue) > {R}", end="")
+            o2 = input().strip()
 
-            # Matching partiel
-            a_match = next((t for t in TEAMS if t.lower().startswith(a.lower())), a)
-            b_match = next((t for t in TEAMS if t.lower().startswith(b.lower())), b)
+            a_m = next((t for t in TEAMS if t.lower().startswith(a.lower())), a)
+            b_m = next((t for t in TEAMS if t.lower().startswith(b.lower())), b)
+            odds1 = float(o1) if o1 else None
+            odds2 = float(o2) if o2 else None
 
-            predict(a_match, b_match)
-
-        except (KeyboardInterrupt, EOFError):
+            predict(a_m, b_m, odds1, odds2)
+        except (KeyboardInterrupt, EOFError, ValueError):
             break
     print(f"\n{G}Au revoir.{R}")
 
 
 def main():
     import argparse
-    p = argparse.ArgumentParser(description="FC25 Penalty Expert Predictor v3.0")
-    p.add_argument("--a", help="Équipe A")
-    p.add_argument("--b", help="Équipe B")
-    p.add_argument("--stats", action="store_true", help="Afficher toutes les stats")
+    p = argparse.ArgumentParser(description="FC25 Penalty Expert v4.0 — RNG-Aware")
+    p.add_argument("--a",    help="Équipe A")
+    p.add_argument("--b",    help="Équipe B")
+    p.add_argument("--v1",   type=float, help="Cote V1 (ex: 2.555)")
+    p.add_argument("--v2",   type=float, help="Cote V2 (ex: 2.57)")
+    p.add_argument("--stats",action="store_true", help="Afficher toutes les stats")
     args = p.parse_args()
 
     if args.stats:
         stats, _ = build_stats()
-        print(f"\n{'='*55}")
+        print(f"\n{'='*62}")
         print(f"  STATS FC25 — {len(ALL_MATCHES)} matchs analysés")
-        print(f"{'='*55}")
+        print(f"{'='*62}")
+        print(f"  {'Équipe':<22} {'WR':>5}  {'Moy':>5}  {'p/tir':>6}  {'N':>4}")
+        print(f"  {'-'*55}")
         for t, s in sorted(stats.items(), key=lambda x: -x[1]["win_rate"]):
-            print(f"  {t:<20} WR:{s['win_rate']*100:.0f}%  "
-                  f"Moy:{s['avg_gf']:.1f}  σ:{s['std_gf']:.1f}  N:{s['games']}")
+            print(f"  {t:<22} {s['win_rate']*100:>4.0f}%  {s['avg_gf']:>5.2f}  "
+                  f"{s['p_shot']:>6.3f}  {s['games']:>4}")
         return
 
     if args.a and args.b:
         a = next((t for t in TEAMS if t.lower().startswith(args.a.lower())), args.a)
         b = next((t for t in TEAMS if t.lower().startswith(args.b.lower())), args.b)
-        predict(a, b)
+        predict(a, b, args.v1, args.v2)
     else:
         interactive()
 
