@@ -204,9 +204,22 @@ def analyze_match(match_data, home_stats=None, away_stats=None, h2h_data=None):
     else:
         p_odds_h, p_odds_d, p_odds_a = 0.45, 0.25, 0.30
 
-    # Profils équipes (défaut si non fournis)
-    hs = home_stats or {"avg_gf":1.5,"avg_ga":1.3,"form":"WDDLL","wr":0.5}
-    as_ = away_stats or {"avg_gf":1.2,"avg_ga":1.5,"form":"LWDWL","wr":0.45}
+    # Profils équipes — calibrés depuis les cotes si les stats sont absentes
+    if home_stats is None and has_odds:
+        scale_h = max(0.35, min(2.8, (p_odds_h / 0.40) ** 0.55))
+        hs = {"avg_gf": round(1.5 * scale_h, 2),
+              "avg_ga": round(min(3.0, max(0.35, 1.3 / scale_h)), 2),
+              "form": "DDDDD", "wr": p_odds_h}
+    else:
+        hs = home_stats or {"avg_gf":1.5,"avg_ga":1.3,"form":"WDDLL","wr":0.5}
+
+    if away_stats is None and has_odds:
+        scale_a = max(0.35, min(2.8, (p_odds_a / 0.30) ** 0.55))
+        as_ = {"avg_gf": round(1.2 * scale_a, 2),
+               "avg_ga": round(min(3.5, max(0.35, 1.5 / scale_a)), 2),
+               "form": "DDDDD", "wr": p_odds_a}
+    else:
+        as_ = away_stats or {"avg_gf":1.2,"avg_ga":1.5,"form":"LWDWL","wr":0.45}
 
     # Forces
     atk_h = max(0.3, hs["avg_gf"] / 1.52)
