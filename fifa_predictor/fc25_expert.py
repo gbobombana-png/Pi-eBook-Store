@@ -147,6 +147,7 @@ ALL_MATCHES = [
     ("Juventus",4,"Liverpool",5),("Barcelona",4,"Liverpool",5),
     ("Juventus",4,"Inter Miami",2),("PSG",5,"Arsenal",4),
     ("Barcelona",8,"Man City",7),("Barcelona",5,"Man City",6),
+    ("Juventus",4,"PSG",3),
 ]
 
 TEAMS = ["PSG","Barcelona","Arsenal","Real Madrid","Man City",
