@@ -370,6 +370,13 @@ ALL_MATCHES = [
     ("Real Madrid",4,"Inter Miami",5),("Barcelona",4,"Liverpool",5),
     ("Inter Miami",4,"Juventus",2),("Barcelona",5,"Man City",3),
     ("PSG",5,"Inter Miami",3),("Barcelona",3,"PSG",4),
+    # #N141–#N152
+    ("Arsenal",4,"Man City",5),("Arsenal",9,"Real Madrid",10),
+    ("Real Madrid",1,"Inter Miami",3),("Liverpool",8,"Man City",7),
+    ("Real Madrid",4,"Inter Miami",2),("Juventus",4,"PSG",3),
+    ("Juventus",4,"PSG",2),("PSG",4,"Juventus",2),
+    ("PSG",2,"Inter Miami",1),("Man City",4,"Arsenal",1),
+    ("Barcelona",5,"Al Nassr",4),("Juventus",4,"Liverpool",5),
 ]
 
 TEAMS = ["PSG","Barcelona","Arsenal","Real Madrid","Man City",
