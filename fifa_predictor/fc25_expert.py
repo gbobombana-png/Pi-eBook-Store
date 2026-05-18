@@ -386,6 +386,8 @@ ALL_MATCHES = [
     ("Barcelona",4,"Arsenal",1),
     ("Inter Miami",3,"Juventus",1),
     ("PSG",5,"Inter Miami",3),
+    # #N161
+    ("Barcelona",1,"Al Nassr",2),
 ]
 
 TEAMS = ["PSG","Barcelona","Arsenal","Real Madrid","Man City",
