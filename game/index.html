@@ -406,6 +406,67 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
 .tutorial-text{font-size:13px;font-weight:600;line-height:1.5}
 .tutorial-arrow{font-size:20px;margin:8px 0;color:var(--orange)}
 .tutorial-next{margin-top:10px;padding:8px 16px;border-radius:8px;border:none;background:var(--orange);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:'Sora',sans-serif;width:100%}
+
+/* ===== BATTLE PASS ===== */
+#battlePass{background:var(--bg)}
+.bp-header{padding:16px;flex-shrink:0;background:linear-gradient(135deg,rgba(155,47,255,.2),rgba(255,107,26,.1));border-bottom:1px solid var(--border)}
+.bp-season{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--purple);margin-bottom:2px}
+.bp-title{font-size:22px;font-weight:800}
+.bp-progress{margin-top:12px}
+.bp-xp-bar{height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin:6px 0 4px}
+.bp-xp-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--purple),var(--pink))}
+.bp-xp-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.bp-content{flex:1;overflow-y:auto;padding:12px 16px 80px}
+.bp-tracks{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.bp-track-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.bp-free-label{color:var(--muted)}
+.bp-premium-label{color:var(--gold)}
+.bp-tiers{display:flex;flex-direction:column;gap:8px}
+.bp-tier{display:flex;gap:8px;align-items:center}
+.bp-tier-num{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:20px;text-align:center;flex-shrink:0}
+.bp-reward{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px;text-align:center;flex:1;position:relative}
+.bp-reward.unlocked{border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.05)}
+.bp-reward.current{border-color:var(--orange);box-shadow:0 0 10px rgba(255,107,26,.3)}
+.bp-reward.locked{opacity:.45}
+.bp-reward-icon{font-size:18px}
+.bp-reward-val{font-size:9px;font-family:'Space Mono',monospace;color:var(--gold);margin-top:2px}
+.bp-buy-banner{background:linear-gradient(135deg,rgba(255,215,0,.15),rgba(155,47,255,.1));border:1px solid rgba(255,215,0,.4);border-radius:14px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:12px}
+
+/* ===== CREW WARS ===== */
+.wars-section{background:linear-gradient(135deg,rgba(255,45,120,.1),rgba(255,107,26,.05));border:1px solid rgba(255,45,120,.3);border-radius:14px;padding:14px;margin-bottom:14px}
+.wars-title{font-size:14px;font-weight:800;color:var(--pink);margin-bottom:10px}
+.wars-district-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.war-target{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px;text-align:center;cursor:pointer;transition:all .2s}
+.war-target:active{transform:scale(.95)}
+.war-target.selected{border-color:var(--pink);background:rgba(255,45,120,.1)}
+.war-target-icon{font-size:20px}
+.war-target-name{font-size:9px;color:var(--muted);margin-top:2px;font-weight:600}
+.war-log{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.war-log-title{padding:8px 12px;border-bottom:1px solid var(--border);font-size:12px;font-weight:700}
+.war-log-list{padding:8px 12px;display:flex;flex-direction:column;gap:6px}
+.war-log-item{font-size:11px;line-height:1.4}
+.war-outcome-win{color:var(--green)}
+.war-outcome-loss{color:var(--pink)}
+
+/* ===== NOTIFICATIONS ===== */
+#notifPanel{position:fixed;top:0;right:0;bottom:0;width:280px;background:var(--card);border-left:1px solid var(--border);z-index:300;transform:translateX(100%);transition:transform .3s;display:flex;flex-direction:column}
+#notifPanel.open{transform:translateX(0)}
+.notif-header{padding:16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.notif-close{width:28px;height:28px;border-radius:50%;background:var(--border);border:none;color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.notif-list{flex:1;overflow-y:auto;padding:8px}
+.notif-item{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px}
+.notif-item.unread{border-left:3px solid var(--orange)}
+.notif-item-icon{font-size:16px}
+.notif-item-text{font-size:12px;margin:4px 0 2px;line-height:1.4}
+.notif-item-time{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace}
+#notifBadge{position:absolute;top:-4px;right:-4px;width:14px;height:14px;background:var(--pink);border-radius:50%;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#fff}
+
+/* ===== VFX COIN ===== */
+.coin-particle{position:fixed;pointer-events:none;z-index:999;font-size:14px;font-weight:700;color:var(--gold);font-family:'Space Mono',monospace;animation:coin-fly 1s ease-out forwards}
+@keyframes coin-fly{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-80px) scale(.7)}}
+
+/* ===== SOUND BTN ===== */
+.sound-btn{position:fixed;bottom:80px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;z-index:150;box-shadow:0 2px 8px rgba(0,0,0,.3)}
 </style>
 </head>
 <body>
@@ -452,7 +513,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
       <div class="username" id="hubUsername">Player</div>
       <div class="rep-title" id="hubRepTitle">Street Rookie</div>
     </div>
-    <div class="notif-btn" onclick="showToast('Pas de nouvelles notifications','info')">🔔</div>
+    <div class="notif-btn" onclick="openNotifPanel()" style="position:relative">🔔<div id="notifBadge" style="display:none">0</div></div>
   </div>
   <div class="stats-bar">
     <div class="stat-item">
@@ -576,7 +637,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
 <div id="piMarket" class="screen">
   <div class="market-header" style="flex-shrink:0">
     <div class="back-btn" onclick="goBack()">← Hub</div>
-    <div class="market-title">Pi Market</div>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div class="market-title">Pi Market</div>
+      <button class="btn btn-purple" style="padding:8px 14px;font-size:12px" onclick="showScreen('battlePass')">⚔️ Battle Pass</button>
+    </div>
     <div class="market-note">Items premium payés avec de vrais Pi Coins</div>
   </div>
   <div class="market-items scrollable" id="marketItems"></div>
@@ -658,6 +722,39 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
     <button class="tutorial-next" onclick="nextTutorialStep()">Compris →</button>
   </div>
 </div>
+
+<!-- BATTLE PASS SCREEN -->
+<div id="battlePass" class="screen">
+  <div class="bp-header" style="flex-shrink:0">
+    <div class="back-btn" onclick="goBack()">← Hub</div>
+    <div class="bp-season">Saison 1</div>
+    <div class="bp-title">⚔️ Battle Pass</div>
+    <div class="bp-progress">
+      <div class="bp-xp-label"><span id="bpXpLabel">0 XP</span><span id="bpTierLabel">Palier 1</span></div>
+      <div class="bp-xp-bar"><div class="bp-xp-fill" id="bpXpFill" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="bp-content scrollable" id="bpContent"></div>
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="navTo('hub',this)"><div class="nav-icon">🏠</div><div class="nav-label">Hub</div></div>
+    <div class="nav-item" onclick="navTo('cityMap',this)"><div class="nav-icon">🏙️</div><div class="nav-label">Ville</div></div>
+    <div class="nav-item active" onclick="navTo('piMarket',this)"><div class="nav-icon">⭐</div><div class="nav-label">Boutique</div></div>
+    <div class="nav-item" onclick="navTo('crew',this)"><div class="nav-icon">👥</div><div class="nav-label">Crew</div></div>
+    <div class="nav-item" onclick="navTo('profile',this)"><div class="nav-icon">👤</div><div class="nav-label">Profil</div></div>
+  </div>
+</div>
+
+<!-- NOTIFICATIONS PANEL -->
+<div id="notifPanel">
+  <div class="notif-header">
+    <div class="fw7 fs14">🔔 Notifications</div>
+    <button class="notif-close" onclick="closeNotifPanel()">✕</button>
+  </div>
+  <div class="notif-list" id="notifList"></div>
+</div>
+
+<!-- SOUND BUTTON -->
+<div class="sound-btn" id="soundBtn" onclick="toggleSound()" title="Son">🔊</div>
 
 <!-- BUILD MODAL -->
 <div class="modal-overlay" id="buildModal">
@@ -1005,6 +1102,7 @@ function buyBuilding(districtId, buildingId, slotIndex) {
   checkDistrictUnlocks();
   checkAchievements();
   saveGame();
+  Sound.play('build');
   closeModal('buildModal');
   renderDistrictView(districtId);
   updateHUDStats();
@@ -1026,6 +1124,7 @@ function upgradeBuilding(districtId, slotIndex) {
   trackMission('upgrade', 1);
   checkAchievements();
   saveGame();
+  Sound.play('upgrade');
   closeModal('detailModal');
   renderDistrictView(districtId);
   updateHUDStats();
@@ -1037,6 +1136,8 @@ function checkDistrictUnlocks() {
     if (!state.districts[d.id].unlocked && state.rep >= d.req) {
       state.districts[d.id].unlocked = true;
       state.buildings[d.id] = state.buildings[d.id]||[];
+      Sound.play('unlock');
+      addNotification('🔓 District débloqué!', d.name + ' est maintenant accessible.');
       showToast('🔓 ' + d.name + ' débloqué!', 'success');
       addActivity('🔓 District ' + d.name + ' débloqué!');
     }
@@ -1102,6 +1203,8 @@ function showScreen(id) {
   if (id==='profile') renderProfile();
   if (id==='missions') { initMissions(); renderMissions(); }
   if (id==='garage') renderGarage();
+  if (id==='battlePass') renderBattlePass();
+  Sound.play('click');
 }
 
 function goBack() { showScreen(prevScreen==='districtView'?'cityMap':prevScreen); }
@@ -1490,6 +1593,7 @@ function renderCrew() {
           ${msgs.map(m=>`<div class="chat-msg"><span class="chat-author" style="color:${f.color}">${m.author}</span> : ${m.text}</div>`).join('')}
         </div>
       </div>
+      ${renderWarsSection()}
       <div class="fs13 fw7 mt12 mb8">📋 Missions Crew</div>
       <div class="card mb16">
         <div class="fs13 fw6">Construire 3 bâtiments</div>
@@ -1910,6 +2014,7 @@ function claimDailyReward() {
   addActivity('🎁 Récompense jour ' + state.dailyReward.streak + ': +$' + reward.money);
   saveGame();
   updateHUDStats();
+  Sound.play('reward');
   document.getElementById('dailyModal').classList.remove('open');
   showToast('🎁 +$' + fmt(reward.money) + ' récompense quotidienne!', 'success');
 }
@@ -2092,6 +2197,308 @@ function collectAllDistricts() {
 }
 
 // ============================================================
+// SOUND SYSTEM (Web Audio API)
+// ============================================================
+const Sound = {
+  ctx: null, muted: false,
+  init() {
+    try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+  },
+  tone(freq, dur, vol=0.08, type='sine') {
+    if (this.muted || !this.ctx) return;
+    try {
+      const o = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      o.connect(g); g.connect(this.ctx.destination);
+      o.type = type; o.frequency.value = freq;
+      g.gain.setValueAtTime(vol, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + dur);
+      o.start(this.ctx.currentTime); o.stop(this.ctx.currentTime + dur);
+    } catch(e) {}
+  },
+  play(type) {
+    if (!this.ctx) this.init();
+    if (this.muted) return;
+    switch(type) {
+      case 'click':   this.tone(600, 0.06, 0.05); break;
+      case 'collect': this.tone(523, 0.08, 0.08); setTimeout(()=>this.tone(659, 0.08, 0.08), 80); setTimeout(()=>this.tone(784, 0.12, 0.08), 160); break;
+      case 'build':   this.tone(200, 0.15, 0.1, 'sawtooth'); setTimeout(()=>this.tone(400, 0.1, 0.06), 120); break;
+      case 'upgrade': this.tone(440, 0.06, 0.07); setTimeout(()=>this.tone(550, 0.06, 0.07), 80); setTimeout(()=>this.tone(660, 0.15, 0.09), 160); break;
+      case 'unlock':  [0,80,160,240].forEach((d,i)=>setTimeout(()=>this.tone([523,659,784,1047][i],0.18,0.08),d)); break;
+      case 'error':   this.tone(220, 0.2, 0.08, 'sawtooth'); break;
+      case 'reward':  [0,100,200].forEach((d,i)=>setTimeout(()=>this.tone([440,554,659][i],0.15,0.07),d)); break;
+    }
+  }
+};
+
+function toggleSound() {
+  Sound.muted = !Sound.muted;
+  document.getElementById('soundBtn').textContent = Sound.muted ? '🔇' : '🔊';
+  if (!Sound.muted) Sound.play('click');
+}
+
+// ============================================================
+// VFX — COIN PARTICLES
+// ============================================================
+function spawnCoinParticles(amount, x, y) {
+  const count = Math.min(Math.floor(Math.log10(amount + 1)) + 1, 6);
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'coin-particle';
+      el.textContent = '+$' + fmt(Math.floor(amount / count));
+      el.style.left = (x + (Math.random()-0.5)*60) + 'px';
+      el.style.top = (y + (Math.random()-0.5)*30) + 'px';
+      el.style.animationDelay = (Math.random()*0.2) + 's';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1200);
+    }, i * 60);
+  }
+}
+
+function collectWithVFX(districtId, event) {
+  const total = collectDistrict(districtId);
+  if (total > 0) {
+    Sound.play('collect');
+    const rect = event ? event.target.getBoundingClientRect() : {left: window.innerWidth/2, top: window.innerHeight/2};
+    spawnCoinParticles(total, rect.left + rect.width/2, rect.top);
+    if (currentScreen === 'districtView') renderDistrictView(districtId);
+    updateHUDStats();
+    showToast('💰 +$' + fmt(total) + ' collectés!', 'success');
+  } else {
+    showToast('Rien à collecter encore', 'info');
+  }
+}
+
+// Override collect functions to use VFX
+function collectCurrentDistrict(event) {
+  if (!currentDistrictId) return;
+  collectWithVFX(currentDistrictId, event);
+}
+
+function collectAllDistricts(event) {
+  let total = 0;
+  let collected = false;
+  DISTRICTS.forEach(d => {
+    if (state.districts[d.id]?.unlocked) {
+      const earned = collectDistrict(d.id);
+      total += earned;
+      if (earned > 0) collected = true;
+    }
+  });
+  if (collected) {
+    Sound.play('collect');
+    const x = event ? event.clientX : window.innerWidth/2;
+    const y = event ? event.clientY : window.innerHeight/3;
+    spawnCoinParticles(total, x, y);
+    updateHUDStats();
+    showToast('💰 +$' + fmt(total) + ' collectés!', 'success');
+  } else {
+    showToast('Aucun revenu à collecter', 'info');
+  }
+}
+
+// ============================================================
+// BATTLE PASS
+// ============================================================
+const BP_TIERS = [
+  {free:{icon:'💰',val:'$200'},prem:{icon:'💎',val:'$500'}},
+  {free:{icon:'⭐',val:'+50 rep'},prem:{icon:'🏍️',val:'Street Bike'}},
+  {free:{icon:'💰',val:'$500'},prem:{icon:'💰',val:'$2K'}},
+  {free:{icon:'🏗️',val:'+1 slot'},prem:{icon:'🎭',val:'Emote rare'}},
+  {free:{icon:'💰',val:'$1K'},prem:{icon:'💜',val:'Skin violet'}},
+  {free:{icon:'⭐',val:'+100 rep'},prem:{icon:'💰',val:'$5K'}},
+  {free:{icon:'💰',val:'$2K'},prem:{icon:'🚗',val:'Muscle Car'}},
+  {free:{icon:'🏗️',val:'+1 slot'},prem:{icon:'⭐',val:'+500 rep'}},
+  {free:{icon:'💰',val:'$5K'},prem:{icon:'👑',val:'Skin légend.'}},
+  {free:{icon:'🏆',val:'Titre exclusif'},prem:{icon:'🌟',val:'Pack ultime'}},
+];
+
+function getBPXP() { return state.totalEarned ? Math.floor(state.totalEarned / 100) : 0; }
+function getBPTier() { return Math.min(Math.floor(getBPXP() / 100), 9); }
+function getBPProgress() { return (getBPXP() % 100) / 100; }
+function hasPremiumPass() { return state.premiumOwned.includes('battle'); }
+
+function renderBattlePass() {
+  const el = document.getElementById('bpContent');
+  if (!el) return;
+  const tier = getBPTier();
+  const xp = getBPXP();
+  const pct = getBPProgress();
+  const premium = hasPremiumPass();
+
+  document.getElementById('bpXpLabel').textContent = xp + ' XP';
+  document.getElementById('bpTierLabel').textContent = 'Palier ' + (tier + 1) + '/10';
+  document.getElementById('bpXpFill').style.width = (pct * 100) + '%';
+
+  let html = '';
+  if (!premium) {
+    html += `<div class="bp-buy-banner">
+      <div style="font-size:32px">⚔️</div>
+      <div style="flex:1">
+        <div class="fw7 fs14">Pass Premium</div>
+        <div class="fs12 text-muted mt4">Double les récompenses + items exclusifs</div>
+      </div>
+      <button class="btn btn-gold" style="padding:8px 14px;font-size:12px" onclick="buyPiItem('battle')">π5</button>
+    </div>`;
+  }
+
+  // Two tracks side by side
+  html += `<div style="display:grid;grid-template-columns:40px 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px">
+    <div></div>
+    <div class="bp-track-label bp-free-label" style="text-align:center">🆓 GRATUIT</div>
+    <div class="bp-track-label bp-premium-label" style="text-align:center">⭐ PREMIUM</div>
+  </div>`;
+
+  BP_TIERS.forEach((t, i) => {
+    const isUnlocked = i <= tier;
+    const isCurrent = i === tier;
+    const freeClass = isUnlocked ? 'unlocked' : isCurrent ? 'current' : 'locked';
+    const premClass = (isUnlocked && premium) ? 'unlocked' : isCurrent ? 'current' : 'locked';
+    html += `<div style="display:grid;grid-template-columns:40px 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px">
+      <div class="bp-tier-num fw7" style="${isCurrent?'color:var(--orange)':''}">${i+1}</div>
+      <div class="bp-reward ${freeClass}">
+        <div class="bp-reward-icon">${t.free.icon}</div>
+        <div class="bp-reward-val">${t.free.val}</div>
+      </div>
+      <div class="bp-reward ${premium ? premClass : 'locked'}" style="${!premium?'opacity:.3':''}">
+        <div class="bp-reward-icon">${t.prem.icon}</div>
+        <div class="bp-reward-val">${t.prem.val}</div>
+      </div>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+// ============================================================
+// CREW WARS
+// ============================================================
+const WAR_LOG_KEY = 'blockside_wars';
+let warLog = [];
+
+function loadWarLog() {
+  try { warLog = JSON.parse(localStorage.getItem(WAR_LOG_KEY))||[]; } catch(e) { warLog=[]; }
+}
+function saveWarLog() {
+  try { localStorage.setItem(WAR_LOG_KEY, JSON.stringify(warLog.slice(0,10))); } catch(e) {}
+}
+
+let selectedWarTarget = null;
+
+function selectWarTarget(districtId) {
+  selectedWarTarget = districtId;
+  document.querySelectorAll('.war-target').forEach(el => {
+    el.classList.toggle('selected', el.dataset.district === districtId);
+  });
+}
+
+function launchWar() {
+  if (!selectedWarTarget) { showToast('Choisis un district cible!', 'info'); return; }
+  if (!state.crew) { showToast('Rejoins une faction d\'abord!', 'error'); return; }
+  const d = DISTRICTS.find(x=>x.id===selectedWarTarget);
+  if (!d) return;
+  // War outcome: weighted by buildings + rep
+  const power = state.totalBuildings * 10 + state.rep;
+  const roll = Math.random() * 1000;
+  const win = roll < Math.min(power, 700);
+  const reward = win ? Math.floor(Math.random() * 500 + 200) : 0;
+  const repGain = win ? Math.floor(Math.random() * 50 + 20) : -10;
+  if (win) {
+    state.money += reward;
+    state.rep = Math.max(0, state.rep + repGain);
+    Sound.play('unlock');
+  } else {
+    state.rep = Math.max(0, state.rep + repGain);
+    Sound.play('error');
+  }
+  const entry = {
+    district: d.name, win,
+    reward, rep: repGain,
+    time: Date.now(),
+  };
+  warLog.unshift(entry);
+  saveWarLog();
+  addActivity(win ? '⚔️ Guerre gagnée sur ' + d.name + ' +$' + reward : '⚔️ Guerre perdue sur ' + d.name);
+  addNotification(win ? '⚔️ Victoire!' : '⚔️ Défaite', win ? 'Guerre gagnée sur ' + d.name + ' (+$'+reward+')' : 'Guerre perdue sur ' + d.name);
+  saveGame();
+  updateHUDStats();
+  selectedWarTarget = null;
+  renderCrew();
+  showToast(win ? '⚔️ Victoire! +$' + fmt(reward) : '⚔️ Défaite... -10 rep', win?'success':'error');
+}
+
+function renderWarsSection() {
+  if (!state.crew) return '';
+  loadWarLog();
+  const targetDistricts = DISTRICTS.filter(d => d.id !== 'lowside');
+  return `<div class="wars-section">
+    <div class="wars-title">⚔️ Crew Wars</div>
+    <div class="fs12 text-muted mb8">Attaque un district pour piller ses ressources</div>
+    <div class="wars-district-grid">
+      ${targetDistricts.map(d=>`
+        <div class="war-target" data-district="${d.id}" onclick="selectWarTarget('${d.id}')">
+          <div class="war-target-icon">${d.icon}</div>
+          <div class="war-target-name">${d.name.split(' ')[0]}</div>
+        </div>`).join('')}
+    </div>
+    <button class="btn btn-primary btn-full mb12" onclick="launchWar()" style="font-size:13px">⚔️ Lancer l'attaque</button>
+    ${warLog.length ? `<div class="war-log">
+      <div class="war-log-title">📋 Historique</div>
+      <div class="war-log-list">
+        ${warLog.slice(0,5).map(w=>`<div class="war-log-item">
+          <span class="${w.win?'war-outcome-win':'war-outcome-loss'}">${w.win?'✓ Victoire':'✗ Défaite'}</span>
+          — ${w.district}
+          ${w.win?' +$'+w.reward:''}
+        </div>`).join('')}
+      </div>
+    </div>` : ''}
+  </div>`;
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+let notifications = [];
+
+function addNotification(title, text) {
+  notifications.unshift({ title, text, time: Date.now(), read: false });
+  if (notifications.length > 20) notifications.pop();
+  const badge = document.getElementById('notifBadge');
+  const unread = notifications.filter(n=>!n.read).length;
+  if (badge) {
+    badge.style.display = unread > 0 ? 'flex' : 'none';
+    badge.textContent = unread;
+  }
+}
+
+function openNotifPanel() {
+  Sound.play('click');
+  notifications.forEach(n => n.read = true);
+  const badge = document.getElementById('notifBadge');
+  if (badge) badge.style.display = 'none';
+  const list = document.getElementById('notifList');
+  if (list) {
+    list.innerHTML = notifications.length
+      ? notifications.map(n => `<div class="notif-item">
+          <div class="notif-item-text fw6">${n.title}</div>
+          <div class="notif-item-text">${n.text}</div>
+          <div class="notif-item-time">${timeAgo(n.time)}</div>
+        </div>`).join('')
+      : '<div class="text-muted fs13" style="padding:20px;text-align:center">Aucune notification</div>';
+  }
+  document.getElementById('notifPanel').classList.add('open');
+}
+
+function closeNotifPanel() {
+  document.getElementById('notifPanel').classList.remove('open');
+}
+
+function timeAgo(ts) {
+  const d = Math.floor((Date.now()-ts)/60000);
+  return d < 1 ? 'À l\'instant' : d < 60 ? d+'min' : Math.floor(d/60)+'h';
+}
+
+// ============================================================
 // GAME TICK
 // ============================================================
 function startGameTick() {
@@ -2118,6 +2525,8 @@ function startGameTick() {
 // ============================================================
 window.addEventListener('load', () => {
   initParticles();
+  Sound.init();
+  loadWarLog();
   // Check for existing save
   const saved = loadGame();
   if (saved && state.character) {
