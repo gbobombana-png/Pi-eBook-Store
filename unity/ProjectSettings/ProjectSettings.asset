@@ -1,0 +1,293 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!129 &1
+PlayerSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 24
+  productGUID: b10c5d3e9a2f4c8d8e7a6b5c4d3e2f1a
+  AndroidProfiler: 0
+  AndroidFilterTouchesWhenObscured: 0
+  AndroidEnableSustainedPerformanceMode: 0
+  defaultScreenOrientation: 1
+  targetDevice: 0
+  useOnDemandResources: 0
+  accelerometerFrequency: 60
+  companyName: BOBO MBANA GAEL
+  productName: BLOCKSIDE
+  defaultCursor: {fileID: 0}
+  cursorHotspot: {x: 0, y: 0}
+  m_SplashScreenBackgroundColor: {r: 0.027, g: 0.027, b: 0.059, a: 1}
+  m_ShowUnitySplashScreen: 0
+  m_ShowUnitySplashLogo: 0
+  m_SplashScreenOverlayOpacity: 1
+  m_SplashScreenAnimation: 1
+  m_SplashScreenLogoStyle: 1
+  m_SplashScreenDrawMode: 0
+  m_SplashScreenBackgroundAnimationZoom: 1
+  m_SplashScreenLogoAnimationZoom: 1
+  m_SplashScreenBackgroundLandscapeAspect: 1
+  m_SplashScreenBackgroundPortraitAspect: 1
+  m_SplashScreenBackgroundLandscapeUvs: {x: 0, y: 0, width: 1, height: 1}
+  m_SplashScreenBackgroundPortraitUvs: {x: 0, y: 0, width: 1, height: 1}
+  m_VirtualRealitySplashScreen: {fileID: 0}
+  m_HolographicTrackingLossScreen: {fileID: 0}
+  defaultScreenWidth: 1080
+  defaultScreenHeight: 1920
+  defaultScreenWidthWeb: 960
+  defaultScreenHeightWeb: 600
+  m_StereoRenderingPath: 0
+  m_ActiveColorSpace: 1
+  m_MTRendering: 1
+  mipStripping: 1
+  m_StackTraceTypes: 010000000100000001000000010000000100000001000000
+  iosShowActivityIndicatorOnLoading: -1
+  androidShowActivityIndicatorOnLoading: -1
+  iosUseCustomAppBackgroundBehavior: 0
+  allowedAutorotateToPortrait: 1
+  allowedAutorotateToPortraitUpsideDown: 0
+  allowedAutorotateToLandscapeRight: 0
+  allowedAutorotateToLandscapeLeft: 0
+  useOSAutorotation: 0
+  use32BitDisplayBuffer: 1
+  preserveFramebufferAlpha: 0
+  disableDepthAndStencilBuffers: 0
+  androidStartInFullscreen: 1
+  androidRenderOutsideSafeArea: 1
+  androidUseSwappy: 1
+  androidBlitType: 0
+  androidResizableWindow: 0
+  androidDefaultWindowWidth: 1080
+  androidDefaultWindowHeight: 1920
+  androidMinimumWindowWidth: 400
+  androidMinimumWindowHeight: 300
+  androidFullscreenMode: 1
+  defaultIsNativeResolution: 1
+  macRetinaSupport: 1
+  runInBackground: 0
+  captureSingleScreen: 0
+  muteOtherAudioSources: 0
+  Prepare IOS For Recording: 0
+  Force IOS Speakers When Recording: 0
+  deferSystemGesturesMode: 0
+  hideHomeButton: 1
+  submitAnalytics: 0
+  usePlayerLog: 1
+  bakeCollisionMeshes: 1
+  forceSingleInstance: 0
+  useFlipModelSwapchain: 1
+  resizableWindow: 0
+  useMacAppStoreValidation: 0
+  macAppStoreCategory: public.app-category.games
+  gpuSkinning: 1
+  xboxPIXTextureCapture: 0
+  xboxEnableAvatar: 0
+  xboxEnableKinect: 0
+  xboxEnableKinectAutoTracking: 0
+  xboxEnableFitness: 0
+  visibleInBackground: 1
+  allowFullscreenSwitch: 1
+  fullscreenMode: 1
+  xboxSpeechDB: 0
+  xboxEnableHeadOrientation: 0
+  xboxEnableGuest: 0
+  xboxEnableIPv6: 0
+  ps4ConnectAsParty: 0
+  ps4RemotePlayKeyAssignment: -1
+  ps4ContentID: EP0000-ABCD12345_00-BLOCKSIDEGAME0001
+  ps4Category: 0
+  ps4MasterVersion: 01.00
+  ps4AppVersion: 01.00
+  ps4AppType: 0
+  ps4ParentalLevel: 11
+  ps4ContentSearchTag01:
+  ps4ContentSearchTag02:
+  ps4NPAgeRating: 12
+  ps4NPTitleSecret:
+  ps4NPTrophyPackPath:
+  ps4BackgroundPath:
+  ps4StartPath:
+  ps4StartLocale:
+  ps4PatchPkgPath:
+  ps4PatchLatestPkgPath:
+  ps4PatchChangeinfoPath:
+  ps4PatchOriginalPackage:
+  ps4RemotePlayKeyMappingPs4:
+  ps4RemotePlayKeyMappingPsVita:
+  ps4PlayTogetherPlayerCount: 0
+  ps4EnterButtonAssignment: 1
+  ps4ApplicationParam1: 0
+  ps4ApplicationParam2: 0
+  ps4ApplicationParam3: 0
+  ps4ApplicationParam4: 0
+  ps4DownloadDataSize: 0
+  ps4GarlicHeapSize: 160
+  ps4ProGarlicHeapSize: 512
+  playerPrefsMaxSize: 32768
+  ps4Acquire3DAuthority: 0
+  ps4UseResolutionFallback: 0
+  ps4ReprojectionSupport: 0
+  ps4UseAudio3dBackend: 0
+  ps4SocialScreenEnabled: 0
+  ps4ScriptOptimizationLevel: 0
+  ps4AudioMasteringVersion: 0
+  ps4VROutputEnabled: 0
+  ps4IPFragmentPadding: 128
+  ps4EnableApplicationExit: 0
+  ps4FullscreenCutout: 0
+  ps4DrawCalls: 0
+  ps4ParentalLockEnabled: 0
+  ps4Passcode: frAQBc8Wsa1xVPfvJcrgRYwTiizs2trQ
+  ps4pnFriends: 0
+  ps4pnPresence: 1
+  ps4pnSessions: 1
+  ps4pnOneGameMessage: 1
+  ps4pnTrophies: 1
+  ps4GameIntent: 0
+  ps4RuntimeSku: 0
+  ps4SkuProject: 0
+  ps4UseStderr: 0
+  ps4UseLowGarlicFragmentationAlgorithm: 1
+  playerPrefsSupport: 0
+  enableInternalProfiler: 0
+  actionOnDotNetUnhandledException: 1
+  logObjCUncaughtExceptions: 1
+  enableCrashReportAPI: 0
+  cameraUsageDescription:
+  locationUsageDescription:
+  microphoneUsageDescription:
+  bluetoothUsageDescription:
+  accelerometerUsageDescription:
+  gyroscopeUsageDescription:
+  userTrackingUsageDescription:
+  faceIDUsageDescription:
+  NFC Tag Reader Usage Description:
+  Android:
+    bundleVersionCode: 1
+    minSdkVersion: 24
+    targetSdkVersion: 34
+    preferredInstallLocation: 1
+    forceInternetPermission: 1
+    forceSDCardPermission: 0
+    createWallpaper: 0
+    APKExpansionFiles: 0
+    keepLoadedShadersAlive: 0
+    useMachineLearning: 0
+    enableMultipleDisplays: 0
+    androidTVCompatibility: 0
+    androidIsGame: 1
+    androidEnableTango: 0
+    androidEnableSustainedPerformanceMode: 0
+    chromeosInputEmulation: 1
+    AndroidGamepadSupportLevel: 0
+    targetArchitectures: 3
+    targetDevices: 0
+    splashScreenScale: 0
+    splashScreenScalePortrait: 0
+    ARCOrientationLockBehavior: 0
+    useCustomKeystore: 0
+    keystoreName:
+    keystorePass:
+    keyaliasName:
+    keyaliasPass:
+    useApkExpansionFiles: 0
+    showActivityIndicatorOnLoading: -1
+    use24BitDepthBuffer: 1
+    useVulkan: 1
+    useVulkanForAndroidOnly: 0
+    vulkanEnableSetSRGBWrite: 0
+    vulkanUseSWCommandBuffers: 0
+    vulkanEnablePreTransform: 0
+    vulkanEnableLateAcquireNextImage: 0
+    vulkanEnableCommandBufferRecycling: 1
+    openGLRequireES31: 0
+    openGLRequireES31AEP: 0
+    openGLRequireES32: 0
+    androidSupportedAspectRatio: 1
+    androidMaxAspectRatio: 2.1
+    applicationEntry: 0
+    autoRotationBehavior: 0
+    autorotateToPortrait: 1
+    autorotateToReversePortrait: 0
+    autorotateToLandscapeRight: 0
+    autorotateToLandscapeLeft: 0
+    androidFullscreenMode: 1
+    androidResizableWindow: 0
+    defaultWindowWidth: 1080
+    defaultWindowHeight: 1920
+    minimumWindowWidth: 400
+    minimumWindowHeight: 300
+    bundleID: com.blockside.pinetwork
+  bundleVersion: 1.0.0
+  preloadedAssets: []
+  metroInputSource: 0
+  wsaTransparentSwapchain: 0
+  m_HolographicPauseOnTrackingLoss: 1
+  xboxOneDisableKinectGpuReservation: 1
+  xboxOneEnable7thCore: 1
+  vrSettings:
+    cardboard:
+      depthFormat: 0
+      enableTransitionView: 0
+    daydream:
+      depthFormat: 0
+      useSustainedPerformanceMode: 0
+      enableVideoLayer: 0
+      useProtectedVideoMemory: 0
+      minimumSupportedHeadTracking: 0
+      maximumSupportedHeadTracking: 1
+    hololens:
+      depthFormat: 1
+      depthBufferSharingEnabled: 1
+    lumin:
+      depthFormat: 0
+      frameTiming: 2
+      enableGLCache: 0
+      glCacheMaxBlobSize: 524288
+      glCacheMaxFileSize: 8388608
+    oculus:
+      sharedDepthBuffer: 1
+      dashSupport: 1
+      lowOverheadMode: 0
+      optimizeBufferDiscards: 1
+      PhaseSync: 0
+      enableEyeTrackedFoveatedRendering: 0
+  applicationIdentifier:
+    Android: com.blockside.pinetwork
+    Standalone: com.blockside.pinetwork
+    iPhone: com.blockside.pinetwork
+  buildNumber:
+    Android: 1
+    Standalone: 0
+    iPhone: 0
+  AndroidBundleVersionCode: 1
+  AndroidMinSdkVersion: 24
+  AndroidTargetSdkVersion: 34
+  AndroidPreferredInstallLocation: 1
+  aotOptions:
+  stripEngineCode: 1
+  iPhoneStrippingLevel: 0
+  iPhoneScriptCallOptimization: 0
+  ForceInternetPermission: 1
+  ForceExitOnSuspend: 0
+  apiCompatibilityLevel: 6
+  scriptingRuntimeVersion: 1
+  gcIncremental: 1
+  assemblyVersionValidation: 1
+  renderingPath: 1
+  mobileRenderingPath: 1
+  activeInputHandler: 2
+  cloudProjectId:
+  framebufferDepthMemorylessMode: 0
+  qualitySettingsNames:
+    - Low
+    - Medium
+    - High
+  projectName: BLOCKSIDE
+  organizationId:
+  cloudEnabled: 0
+  enableNativePlatformBackendsForNewInputSystem: 1
+  disableOldInputManagerSupport: 0
+  legacyClampBlendShapeWeights: 0
+  playerDataPath:
+  forceSRGBBlit: 0
+  virtualTexturingSupportEnabled: 0

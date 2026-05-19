@@ -1,12 +1,18 @@
 using UnityEngine;
 using System;
-using BLOCKSIDE.Economy;
-using BLOCKSIDE.Social;
-using BLOCKSIDE.Pi;
-using BLOCKSIDE.Districts;
-using BLOCKSIDE.UI;
+using System.Collections.Generic;
+using Blockside.Economy;
+using Blockside.Social;
+using Blockside.Pi;
+using Blockside.Districts;
+using Blockside.UI;
+using Blockside.Leaderboard;
+using Blockside.Progression;
+using Blockside.Customization;
+using Blockside.Events;
+using Blockside.Core;
 
-namespace BLOCKSIDE.Core
+namespace Blockside.Core
 {
     /// <summary>
     /// Central game manager singleton. Initializes and coordinates all subsystems.
@@ -43,6 +49,16 @@ namespace BLOCKSIDE.Core
         [Header("Districts")]
         [SerializeField] private DistrictManager districtManager;
 
+        [Header("Phase 4 — Social")]
+        [SerializeField] private LeaderboardManager leaderboardManager;
+
+        [Header("Phase 5 — Cosmétiques")]
+        [SerializeField] private SkinManager skinManager;
+
+        [Header("Phase 6 — World")]
+        [SerializeField] private PrestigeManager prestigeManager;
+        [SerializeField] private WeatherManager weatherManager;
+
         [Header("Settings")]
         [SerializeField] private bool autoSaveEnabled = true;
         [SerializeField] private float autoSaveInterval = 30f;
@@ -75,6 +91,10 @@ namespace BLOCKSIDE.Core
         public HUDController HUD => hudController;
         public DistrictManager Districts => districtManager;
         public GameState CurrentState => currentState;
+        public LeaderboardManager Leaderboard => leaderboardManager;
+        public SkinManager Skins => skinManager;
+        public PrestigeManager Prestige => prestigeManager;
+        public WeatherManager Weather => weatherManager;
         #endregion
 
         #region Unity Lifecycle
@@ -126,7 +146,11 @@ namespace BLOCKSIDE.Core
             crewManager = crewManager ? crewManager : FindObjectOfType<CrewManager>() ?? gameObject.AddComponent<CrewManager>();
             piNetworkManager = piNetworkManager ? piNetworkManager : FindObjectOfType<PiNetworkManager>() ?? gameObject.AddComponent<PiNetworkManager>();
             marketplaceManager = marketplaceManager ? marketplaceManager : FindObjectOfType<MarketplaceManager>() ?? gameObject.AddComponent<MarketplaceManager>();
-            districtManager = districtManager ? districtManager : FindObjectOfType<DistrictManager>() ?? gameObject.AddComponent<DistrictManager>();
+            districtManager    = districtManager    ? districtManager    : FindObjectOfType<DistrictManager>()    ?? gameObject.AddComponent<DistrictManager>();
+            leaderboardManager = leaderboardManager ? leaderboardManager : FindObjectOfType<LeaderboardManager>() ?? gameObject.AddComponent<LeaderboardManager>();
+            skinManager        = skinManager        ? skinManager        : FindObjectOfType<SkinManager>()        ?? gameObject.AddComponent<SkinManager>();
+            prestigeManager    = prestigeManager    ? prestigeManager    : FindObjectOfType<PrestigeManager>()    ?? gameObject.AddComponent<PrestigeManager>();
+            weatherManager     = weatherManager     ? weatherManager     : FindObjectOfType<WeatherManager>()     ?? gameObject.AddComponent<WeatherManager>();
         }
 
         private void StartGame()
@@ -242,6 +266,46 @@ namespace BLOCKSIDE.Core
 
         /// <summary>Shortcut to transition to city view.</summary>
         public void GoToCity() => SetState(GameState.City);
+
+        /// <summary>
+        /// Retourne une vue unifiée des données du joueur (utilisée par Leaderboard, Prestige, etc.).
+        /// </summary>
+        public PlayerData GetPlayerData()
+        {
+            return new PlayerData
+            {
+                playerId      = PlayerPrefs.GetString("piUid", "local"),
+                username      = PlayerPrefs.GetString("username", "Player"),
+                characterId   = PlayerPrefs.GetString("selectedCharacter", ""),
+                faction       = crewManager?.CurrentCrewId,
+                money         = economyManager?.Money ?? 500,
+                totalEarned   = economyManager?.TotalEarned ?? 0,
+                reputation    = reputationSystem?.Reputation ?? 0,
+                totalBuildings = buildingManager?.TotalBuildings ?? 0,
+                prestigeLevel = prestigeManager?.CurrentPrestigeLevel ?? 0,
+                activeSkin    = skinManager?.ActiveSkinId ?? "default",
+                ownedSkins    = skinManager?.GetOwnedSkinIds() ?? new List<string> { "default" },
+                premiumOwned  = marketplaceManager?.GetOwnedItemIds() ?? new List<string>(),
+                currentWeather = weatherManager?.CurrentWeather?.id ?? "clear",
+            };
+        }
+
+        /// <summary>Efface tous les bâtiments — utilisé par le système Prestige.</summary>
+        public void ClearAllBuildings()
+        {
+            buildingManager?.Reset();
+            districtManager?.Reset();
+        }
+
+        /// <summary>Recharge les données après un Prestige.</summary>
+        public void OnPrestigeApplied(int newLevel)
+        {
+            economyManager?.Reset(500);
+            reputationSystem?.Reset();
+            ClearAllBuildings();
+            hudController?.RefreshAll();
+            NotificationSystem.Show("✨ Prestige", $"Prestige {newLevel} activé! Bonus permanent appliqué.");
+        }
         #endregion
     }
 }

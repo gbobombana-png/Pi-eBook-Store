@@ -1,0 +1,27 @@
+version: '3.9'
+
+services:
+  blockside-api:
+    build: .
+    container_name: blockside-backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - PI_API_KEY=${PI_API_KEY}
+      - PI_API_BASE=https://api.minepi.com/v2
+      - JWT_SECRET=${JWT_SECRET}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://blockside.io}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
