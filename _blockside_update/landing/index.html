@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="BLOCKSIDE — Le jeu urbain sandbox de nouvelle génération intégré à Pi Network. Build. Fight. Own.">
+<meta property="og:title" content="BLOCKSIDE — Build. Fight. Own.">
+<meta property="og:description" content="Construis ton empire. Domine la ville. Intégré à Pi Network.">
+<meta property="og:image" content="og-cover.jpg">
+<meta name="theme-color" content="#FF6B1A">
+<title>BLOCKSIDE — Build. Fight. Own.</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#FF6B1A;--purple:#9B2FFF;--pink:#FF2D78;--blue:#2F9BFF;
+  --gold:#FFD700;--green:#4ADE80;--bg:#07070F;--card:#0D0D1C;
+  --border:#1A1A35;--text:#E8E8FF;--muted:#6B6B9A;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;overflow-x:hidden;line-height:1.6}
+canvas#bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+section{position:relative;z-index:1}
+
+/* ── TYPOGRAPHIE ──────────────────────────────────────── */
+.mono{font-family:'Space Mono',monospace}
+.gradient-text{background:linear-gradient(135deg,var(--orange),var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.gradient-gold{background:linear-gradient(135deg,var(--gold),#FF9500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* ── NAVBAR ───────────────────────────────────────────── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:16px 40px;display:flex;align-items:center;justify-content:space-between;
+  background:rgba(7,7,15,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);
+  transition:all .3s
+}
+.nav-logo{display:flex;align-items:center;text-decoration:none}
+.nav-logo img{height:36px;width:auto;filter:drop-shadow(0 0 8px rgba(255,107,26,.5))}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:600;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{background:linear-gradient(135deg,var(--orange),var(--pink));border:none;color:#fff;padding:10px 24px;border-radius:10px;font-family:'Sora',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all .2s;text-decoration:none}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(255,107,26,.4)}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px}
+.hamburger span{width:24px;height:2px;background:var(--text);border-radius:2px;transition:all .3s}
+
+/* ── HERO ─────────────────────────────────────────────── */
+#hero{
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:120px 24px 80px;position:relative;overflow:hidden
+}
+.hero-orbs{position:absolute;inset:0;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(100px);animation:pulse-orb 6s ease-in-out infinite}
+.orb1{width:600px;height:600px;background:rgba(155,47,255,.12);top:-200px;right:-200px;animation-delay:0s}
+.orb2{width:400px;height:400px;background:rgba(255,107,26,.1);bottom:-100px;left:-150px;animation-delay:3s}
+.orb3{width:300px;height:300px;background:rgba(255,45,120,.1);top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:1.5s}
+@keyframes pulse-orb{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(155,47,255,.2);border:1px solid rgba(155,47,255,.4);color:#CC77FF;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:24px;font-family:'Space Mono',monospace;animation:fade-up .8s ease both}
+.hero-logo{max-width:min(480px,80vw);width:100%;margin-bottom:8px;animation:fade-up .8s .1s ease both;filter:drop-shadow(0 0 40px rgba(255,107,26,.35)) drop-shadow(0 0 80px rgba(155,47,255,.25))}
+.hero-slogan{font-size:clamp(14px,2vw,18px);color:var(--muted);letter-spacing:4px;text-transform:uppercase;margin:32px 0 48px;animation:fade-up .8s .3s ease both}
+.hero-btns{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;animation:fade-up .8s .4s ease both}
+.btn-hero-primary{
+  background:linear-gradient(135deg,var(--orange),var(--pink));border:none;color:#fff;
+  padding:18px 40px;border-radius:14px;font-family:'Sora',sans-serif;font-weight:800;font-size:16px;
+  cursor:pointer;letter-spacing:.5px;position:relative;overflow:hidden;text-decoration:none;display:inline-block;
+  box-shadow:0 8px 40px rgba(255,107,26,.5);animation:btn-glow 2s ease-in-out infinite
+}
+@keyframes btn-glow{0%,100%{box-shadow:0 8px 40px rgba(255,107,26,.5)}50%{box-shadow:0 8px 60px rgba(255,107,26,.9)}}
+.btn-hero-primary:hover{transform:translateY(-2px)}
+.btn-hero-secondary{
+  background:transparent;border:1px solid var(--border);color:var(--text);
+  padding:18px 40px;border-radius:14px;font-family:'Sora',sans-serif;font-weight:700;font-size:16px;
+  cursor:pointer;text-decoration:none;display:inline-block;transition:all .2s;backdrop-filter:blur(10px)
+}
+.btn-hero-secondary:hover{border-color:var(--orange);color:var(--orange)}
+.hero-scroll{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--muted);font-size:12px;letter-spacing:2px;animation:bounce 2s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
+.hero-scroll-line{width:1px;height:40px;background:linear-gradient(var(--orange),transparent)}
+@keyframes fade-up{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── STATS STRIP ──────────────────────────────────────── */
+.stats-strip{background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:32px 40px;display:grid;grid-template-columns:repeat(4,1fr);text-align:center;gap:0}
+.stat-item{padding:0 20px;border-right:1px solid var(--border)}
+.stat-item:last-child{border-right:none}
+.stat-num{font-family:'Space Mono',monospace;font-size:clamp(28px,4vw,40px);font-weight:700;color:var(--gold)}
+.stat-label{font-size:13px;color:var(--muted);margin-top:4px;font-weight:600}
+
+/* ── SECTIONS ─────────────────────────────────────────── */
+.section{padding:100px 40px;max-width:1200px;margin:0 auto}
+.section-eyebrow{font-size:11px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--orange);font-family:'Space Mono',monospace;margin-bottom:16px}
+.section-title{font-size:clamp(32px,5vw,56px);font-weight:900;letter-spacing:-1px;line-height:1.1;margin-bottom:24px}
+.section-sub{font-size:16px;color:var(--muted);max-width:560px;line-height:1.7}
+
+/* ── GAMEPLAY FEATURES ────────────────────────────────── */
+#features .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:60px}
+.feature-card{
+  background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;
+  transition:all .3s;position:relative;overflow:hidden;cursor:default
+}
+.feature-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;border-radius:20px}
+.feature-card:hover{transform:translateY(-4px);border-color:var(--card-glow,var(--orange))}
+.feature-card:hover::before{opacity:1}
+.feature-card:nth-child(1){--card-glow:var(--orange)}
+.feature-card:nth-child(1)::before{background:radial-gradient(circle at top left,rgba(255,107,26,.08),transparent)}
+.feature-card:nth-child(2){--card-glow:var(--purple)}
+.feature-card:nth-child(2)::before{background:radial-gradient(circle at top left,rgba(155,47,255,.08),transparent)}
+.feature-card:nth-child(3){--card-glow:var(--pink)}
+.feature-card:nth-child(3)::before{background:radial-gradient(circle at top left,rgba(255,45,120,.08),transparent)}
+.feature-card:nth-child(4){--card-glow:var(--blue)}
+.feature-card:nth-child(4)::before{background:radial-gradient(circle at top left,rgba(47,155,255,.08),transparent)}
+.feature-card:nth-child(5){--card-glow:var(--gold)}
+.feature-card:nth-child(5)::before{background:radial-gradient(circle at top left,rgba(255,215,0,.08),transparent)}
+.feature-card:nth-child(6){--card-glow:var(--green)}
+.feature-card:nth-child(6)::before{background:radial-gradient(circle at top left,rgba(74,222,128,.08),transparent)}
+.feature-icon{font-size:40px;margin-bottom:16px;display:block}
+.feature-title{font-size:18px;font-weight:800;margin-bottom:8px}
+.feature-desc{font-size:14px;color:var(--muted);line-height:1.6}
+.feature-tag{display:inline-block;margin-top:14px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;font-family:'Space Mono',monospace}
+
+/* ── DISTRICTS ────────────────────────────────────────── */
+#districts{background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+#districts .section{max-width:100%;padding:100px 40px}
+.districts-layout{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;max-width:1200px;margin:0 auto}
+.districts-list{display:flex;flex-direction:column;gap:12px}
+.district-item{
+  display:flex;align-items:center;gap:16px;padding:16px 20px;
+  background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:14px;
+  cursor:pointer;transition:all .3s
+}
+.district-item:hover,.district-item.active{border-color:var(--d-color,var(--orange));background:rgba(255,255,255,.06)}
+.district-item:hover .d-icon,.district-item.active .d-icon{transform:scale(1.1)}
+.d-icon{font-size:28px;flex-shrink:0;transition:transform .2s}
+.d-info{flex:1}
+.d-name{font-weight:800;font-size:15px}
+.d-vibe{font-size:12px;color:var(--muted);margin-top:2px}
+.d-req{font-size:11px;font-family:'Space Mono',monospace;color:var(--d-color,var(--orange));margin-top:4px}
+.district-preview{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:24px;padding:40px;min-height:400px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;transition:all .4s}
+.dp-glow{position:absolute;inset:0;pointer-events:none;transition:all .4s}
+.dp-icon{font-size:80px;text-align:center;display:block;filter:drop-shadow(0 0 40px currentColor)}
+.dp-name{font-size:32px;font-weight:900;letter-spacing:-1px;margin:16px 0 8px}
+.dp-vibe{font-size:15px;color:var(--muted);margin-bottom:20px}
+.dp-buildings{display:flex;flex-wrap:wrap;gap:8px}
+.dp-building{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600}
+.dp-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
+.dp-stat{background:rgba(0,0,0,.3);border-radius:10px;padding:10px;text-align:center}
+.dp-stat-val{font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--gold)}
+.dp-stat-label{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* ── GAMEPLAY LOOP ────────────────────────────────────── */
+#loop{padding:100px 40px}
+.loop-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.loop-steps{display:flex;flex-direction:column;gap:0}
+.loop-step{display:flex;gap:20px;padding:20px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:all .2s}
+.loop-step:last-child{border-bottom:none}
+.loop-step:hover .step-num{background:linear-gradient(135deg,var(--orange),var(--pink));color:#fff}
+.step-num{width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-weight:700;font-size:14px;flex-shrink:0;transition:all .2s;color:var(--muted)}
+.step-info{flex:1}
+.step-title{font-size:16px;font-weight:800;margin-bottom:4px}
+.step-desc{font-size:13px;color:var(--muted);line-height:1.5}
+.loop-visual{
+  background:var(--card);border:1px solid var(--border);border-radius:24px;padding:32px;
+  min-height:480px;display:flex;flex-direction:column;justify-content:center;align-items:center;
+  position:relative;overflow:hidden
+}
+.loop-city-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 80%,rgba(255,107,26,.08),transparent 60%)}
+.loop-buildings{display:flex;align-items:flex-end;justify-content:center;gap:8px;position:relative;z-index:1;margin-bottom:20px}
+.lbuild{background:linear-gradient(180deg,var(--lc,var(--orange)) 0%,rgba(0,0,0,.5) 100%);border-radius:6px 6px 0 0;opacity:.85;animation:build-rise 1s ease both}
+@keyframes build-rise{from{transform:scaleY(0);transform-origin:bottom}to{transform:scaleY(1);transform-origin:bottom}}
+.loop-income{text-align:center;position:relative;z-index:1}
+.income-counter{font-family:'Space Mono',monospace;font-size:36px;font-weight:700;color:var(--gold);display:flex;align-items:center;gap:8px;justify-content:center}
+.income-label{font-size:13px;color:var(--muted);margin-top:4px}
+.income-+{color:var(--green);font-size:16px;animation:float-up .8s ease-out forwards;position:absolute;top:-30px;right:-20px;font-family:'Space Mono',monospace;font-weight:700}
+@keyframes float-up{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-40px)}}
+
+/* ── PI NETWORK ───────────────────────────────────────── */
+#pinetwork{background:linear-gradient(135deg,rgba(155,47,255,.08),rgba(255,45,120,.06));border-top:1px solid rgba(155,47,255,.2);border-bottom:1px solid rgba(155,47,255,.2);padding:100px 40px}
+.pi-section{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.pi-items{display:flex;flex-direction:column;gap:16px;margin-top:40px}
+.pi-item{display:flex;align-items:center;gap:16px;background:rgba(155,47,255,.08);border:1px solid rgba(155,47,255,.25);border-radius:14px;padding:16px 20px}
+.pi-item-icon{font-size:28px;flex-shrink:0}
+.pi-item-info .pi-item-title{font-weight:700;font-size:15px;margin-bottom:2px}
+.pi-item-info .pi-item-desc{font-size:13px;color:var(--muted)}
+.pi-promise{background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.25);border-radius:14px;padding:20px 24px;margin-top:20px}
+.pi-promise-title{font-weight:800;font-size:15px;color:var(--green);margin-bottom:8px}
+.pi-promise-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+.pi-promise-list li{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.pi-promise-list li::before{content:'✓';color:var(--green);font-weight:700;font-family:'Space Mono',monospace}
+.pi-phone-mockup{
+  background:linear-gradient(135deg,#1A1A35,#0D0D1C);border:2px solid var(--border);
+  border-radius:40px;padding:16px;max-width:280px;margin:0 auto;
+  box-shadow:0 40px 80px rgba(0,0,0,.6),0 0 60px rgba(155,47,255,.15);
+  position:relative
+}
+.pi-phone-top{width:80px;height:6px;background:var(--border);border-radius:3px;margin:0 auto 16px}
+.pi-phone-screen{background:var(--bg);border-radius:24px;overflow:hidden;aspect-ratio:9/16;display:flex;flex-direction:column}
+.pi-screen-header{background:linear-gradient(135deg,rgba(255,107,26,.15),rgba(155,47,255,.15));padding:16px;border-bottom:1px solid var(--border)}
+.pi-screen-logo{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;background:linear-gradient(135deg,var(--orange),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.pi-screen-stat{font-size:11px;color:var(--muted);margin-top:2px}
+.pi-screen-items{padding:12px;display:flex;flex-direction:column;gap:8px}
+.pi-screen-item{display:flex;align-items:center;gap:10px;background:rgba(155,47,255,.1);border:1px solid rgba(155,47,255,.2);border-radius:10px;padding:10px}
+.psi-emoji{font-size:20px;flex-shrink:0}
+.psi-name{font-size:11px;font-weight:700}
+.psi-price{font-size:11px;color:var(--purple);font-family:'Space Mono',monospace}
+.pi-screen-btn{background:linear-gradient(135deg,var(--orange),var(--pink));border:none;color:#fff;margin:8px;border-radius:10px;padding:12px;font-family:'Sora',sans-serif;font-weight:700;font-size:12px;cursor:pointer;display:block;text-align:center}
+
+/* ── PERSONNAGES ──────────────────────────────────────── */
+#characters{padding:100px 40px}
+.chars-section{max-width:1200px;margin:0 auto}
+.chars-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:60px}
+@media(max-width:900px){.chars-grid{grid-template-columns:repeat(5,1fr);gap:10px}}
+@media(max-width:600px){.chars-grid{grid-template-columns:repeat(2,1fr);gap:12px}}
+.char-card-lp{
+  background:var(--card);border:2px solid var(--border);border-radius:20px;
+  padding:24px 16px;text-align:center;cursor:pointer;transition:all .3s;position:relative;overflow:hidden
+}
+.char-card-lp::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;background:radial-gradient(circle at 50% 0%,var(--cc,var(--orange)),transparent 60%)}
+.char-card-lp:hover{border-color:var(--cc,var(--orange));transform:translateY(-6px);box-shadow:0 20px 40px rgba(0,0,0,.4)}
+.char-card-lp:hover::before{opacity:.15}
+.char-photo-lp{width:calc(100% + 32px);height:180px;margin:-16px -16px 10px;background-image:url('chars.png');background-size:500% 200%;background-repeat:no-repeat;border-radius:14px 14px 0 0}
+.char-name-lp{font-size:18px;font-weight:900;letter-spacing:1px;margin-bottom:4px}
+.char-role-lp{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.char-bonus-lp{font-size:11px;color:var(--cc,var(--orange));margin-top:10px;background:rgba(255,107,26,.1);border-radius:8px;padding:6px;font-weight:600}
+
+/* ── SEASONS ──────────────────────────────────────────── */
+#seasons{background:linear-gradient(135deg,rgba(155,47,255,.06),rgba(255,45,120,.05));border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:100px 40px}
+.seasons-inner{max-width:1200px;margin:0 auto}
+.season-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:60px}
+.season-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;position:relative;overflow:hidden}
+.sc-glow{position:absolute;top:0;left:0;right:0;height:3px;border-radius:20px 20px 0 0}
+.sc-season{font-size:11px;font-family:'Space Mono',monospace;font-weight:700;letter-spacing:2px;margin-bottom:12px}
+.sc-title{font-size:22px;font-weight:900;margin-bottom:8px}
+.sc-desc{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:16px}
+.sc-features{display:flex;flex-direction:column;gap:6px}
+.sc-feat{font-size:13px;display:flex;align-items:center;gap:8px}
+.sc-feat::before{content:'→';color:var(--orange);font-family:'Space Mono',monospace;font-size:11px}
+.sc-badge{display:inline-block;margin-top:16px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;font-family:'Space Mono',monospace}
+.badge-done{background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.3)}
+.badge-now{background:rgba(155,47,255,.2);color:#CC77FF;border:1px solid rgba(155,47,255,.4);animation:badge-pulse .8s ease-in-out infinite}
+@keyframes badge-pulse{0%,100%{opacity:1}50%{opacity:.65}}
+.badge-soon{background:rgba(255,215,0,.1);color:var(--gold);border:1px solid rgba(255,215,0,.3)}
+
+/* ── CTA FINAL ────────────────────────────────────────── */
+#cta{padding:120px 40px;text-align:center;position:relative;overflow:hidden}
+.cta-orb{position:absolute;width:800px;height:800px;border-radius:50%;filter:blur(150px);background:rgba(255,107,26,.07);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
+.cta-inner{position:relative;z-index:1}
+.cta-title{font-size:clamp(40px,8vw,90px);font-weight:900;letter-spacing:-3px;line-height:.95;margin-bottom:24px}
+.cta-sub{font-size:18px;color:var(--muted);max-width:480px;margin:0 auto 48px;line-height:1.6}
+.cta-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.cta-stores{display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+.store-btn{
+  display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:12px 20px;text-decoration:none;color:var(--text);transition:all .2s
+}
+.store-btn:hover{border-color:var(--orange);transform:translateY(-2px)}
+.store-icon{font-size:24px}
+.store-info .store-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.store-info .store-name{font-size:15px;font-weight:700}
+.cta-note{font-size:12px;color:var(--muted);margin-top:32px;font-family:'Space Mono',monospace}
+
+/* ── FOOTER ───────────────────────────────────────────── */
+footer{background:var(--card);border-top:1px solid var(--border);padding:60px 40px 40px}
+.footer-inner{max-width:1200px;margin:0 auto}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:48px}
+.footer-brand .fb-logo img{height:44px;width:auto;filter:drop-shadow(0 0 8px rgba(255,107,26,.4));margin-bottom:12px}
+.footer-brand .fb-desc{font-size:14px;color:var(--muted);line-height:1.7;max-width:280px}
+.footer-col h4{font-size:12px;font-weight:800;letter-spacing:2px;color:var(--orange);text-transform:uppercase;margin-bottom:16px;font-family:'Space Mono',monospace}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.footer-col ul a{color:var(--muted);text-decoration:none;font-size:14px;transition:color .2s}
+.footer-col ul a:hover{color:var(--text)}
+.footer-bottom{border-top:1px solid var(--border);padding-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:gap}
+.footer-copy{font-size:13px;color:var(--muted)}
+.footer-pi{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.pi-dot{width:8px;height:8px;border-radius:50%;background:var(--purple);animation:pi-pulse 1.5s ease-in-out infinite}
+@keyframes pi-pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── SCROLL REVEAL ────────────────────────────────────── */
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:.1s}
+.reveal-delay-2{transition-delay:.2s}
+.reveal-delay-3{transition-delay:.3s}
+
+/* ── RESPONSIVE ───────────────────────────────────────── */
+@media(max-width:1024px){
+  .features-grid{grid-template-columns:1fr 1fr!important}
+  .chars-grid{grid-template-columns:repeat(3,1fr)!important}
+  .districts-layout,.loop-inner,.pi-section,.footer-top{grid-template-columns:1fr!important}
+  .pi-phone-mockup{display:none}
+}
+@media(max-width:768px){
+  nav{padding:12px 20px}
+  .nav-links{display:none}
+  .hamburger{display:flex}
+  .stats-strip{grid-template-columns:repeat(2,1fr)}
+  .stat-item:nth-child(2){border-right:none}
+  .stat-item:nth-child(3){border-right:1px solid var(--border);border-top:1px solid var(--border)}
+  .stat-item:nth-child(4){border-top:1px solid var(--border)}
+  .section{padding:60px 20px}
+  .features-grid{grid-template-columns:1fr!important}
+  .chars-grid{grid-template-columns:repeat(2,1fr)!important}
+  .season-cards{grid-template-columns:1fr!important}
+  #districts .section,#pinetwork,#seasons,#cta{padding:60px 20px}
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+
+<!-- ── NAV ──────────────────────────────────────────────── -->
+<nav>
+  <a class="nav-logo" href="#"><img src="logo.png" alt="BLOCKSIDE"></a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#districts">Ville</a></li>
+    <li><a href="#pinetwork">Pi Network</a></li>
+    <li><a href="#characters">Personnages</a></li>
+    <li><a href="#seasons">Saisons</a></li>
+  </ul>
+  <a href="../game/index.html" class="nav-cta">Jouer maintenant →</a>
+  <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+</nav>
+
+<!-- ── HERO ─────────────────────────────────────────────── -->
+<section id="hero">
+  <div class="hero-orbs">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+  </div>
+  <div class="hero-badge">✨ Intégré à Pi Network · Season 2 Active</div>
+  <img class="hero-logo" src="logo.png" alt="BLOCKSIDE">
+  <p class="hero-slogan">Build · Fight · Own</p>
+  <div class="hero-btns">
+    <a href="../game/index.html" class="btn-hero-primary">🎮 Jouer gratuitement</a>
+    <a href="#features" class="btn-hero-secondary">Découvrir →</a>
+  </div>
+  <div class="hero-scroll">
+    <div class="hero-scroll-line"></div>
+    <span class="mono" style="font-size:10px;letter-spacing:3px">SCROLL</span>
+  </div>
+</section>
+
+<!-- ── STATS ─────────────────────────────────────────────── -->
+<div class="stats-strip">
+  <div class="stat-item reveal"><div class="stat-num gradient-text" data-count="5">0</div><div class="stat-label">Districts à conquérir</div></div>
+  <div class="stat-item reveal reveal-delay-1"><div class="stat-num gradient-text" data-count="12">0</div><div class="stat-label">Types de bâtiments</div></div>
+  <div class="stat-item reveal reveal-delay-2"><div class="stat-num gradient-text" data-count="10">0</div><div class="stat-label">Personnages uniques</div></div>
+  <div class="stat-item reveal reveal-delay-3"><div class="stat-num gradient-text" data-count="6">0</div><div class="stat-label">Items Pi Network</div></div>
+</div>
+
+<!-- ── FEATURES ───────────────────────────────────────────── -->
+<div class="section" id="features">
+  <p class="section-eyebrow reveal">Gameplay</p>
+  <h2 class="section-title reveal reveal-delay-1">Un jeu <span class="gradient-text">vivant</span><br>chaque jour</h2>
+  <p class="section-sub reveal reveal-delay-2">BLOCKSIDE combine construction, économie, réputation et social dans une ville néon qui ne dort jamais.</p>
+  <div class="features-grid">
+    <div class="feature-card reveal">
+      <span class="feature-icon">🏗️</span>
+      <div class="feature-title">Construction Sandbox</div>
+      <div class="feature-desc">Place des bâtiments sur ta grille, upgrade-les et regarde ton district prendre vie. Snack Shop, Club Néon, Black Market, Skyscraper...</div>
+      <span class="feature-tag" style="background:rgba(255,107,26,.15);color:var(--orange);border:1px solid rgba(255,107,26,.3)">12 bâtiments</span>
+    </div>
+    <div class="feature-card reveal reveal-delay-1">
+      <span class="feature-icon">💰</span>
+      <div class="feature-title">Économie en Temps Réel</div>
+      <div class="feature-desc">Tes bâtiments génèrent des revenus même quand tu es déconnecté. Collecte, réinvestis, domine le classement financier.</div>
+      <span class="feature-tag" style="background:rgba(155,47,255,.15);color:var(--purple);border:1px solid rgba(155,47,255,.3)">Idle + Actif</span>
+    </div>
+    <div class="feature-card reveal reveal-delay-2">
+      <span class="feature-icon">👥</span>
+      <div class="feature-title">Factions & Crew Wars</div>
+      <div class="feature-desc">Rejoins REBEL CITY, BLACK CROW ou PURPLE NATION. Lance des Crew Wars, contrôle The Edge, grimpe le classement mondial.</div>
+      <span class="feature-tag" style="background:rgba(255,45,120,.15);color:var(--pink);border:1px solid rgba(255,45,120,.3)">3 factions</span>
+    </div>
+    <div class="feature-card reveal">
+      <span class="feature-icon">🏆</span>
+      <div class="feature-title">Battle Pass & Missions</div>
+      <div class="feature-desc">Missions quotidiennes et hebdomadaires, Battle Pass de saison, succès collectionnables et récompenses légendaires chaque semaine.</div>
+      <span class="feature-tag" style="background:rgba(47,155,255,.15);color:var(--blue);border:1px solid rgba(47,155,255,.3)">Progression</span>
+    </div>
+    <div class="feature-card reveal reveal-delay-1">
+      <span class="feature-icon">✨</span>
+      <div class="feature-title">Système Prestige</div>
+      <div class="feature-desc">Atteins les sommets, réinitialise ta progression et gagne des bonus permanents. Trois niveaux de Prestige avec récompenses exclusives.</div>
+      <span class="feature-tag" style="background:rgba(255,215,0,.1);color:var(--gold);border:1px solid rgba(255,215,0,.3)">End-game</span>
+    </div>
+    <div class="feature-card reveal reveal-delay-2">
+      <span class="feature-icon">🌩️</span>
+      <div class="feature-title">Météo & Événements Live</div>
+      <div class="feature-desc">5 conditions météo qui affectent tes revenus. Black Market Night, Neon Concert, City Blackout — la ville change chaque jour.</div>
+      <span class="feature-tag" style="background:rgba(74,222,128,.12);color:var(--green);border:1px solid rgba(74,222,128,.3)">Live events</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── DISTRICTS ──────────────────────────────────────────── -->
+<section id="districts">
+  <div class="section">
+    <div class="districts-layout">
+      <div>
+        <p class="section-eyebrow reveal">La Ville</p>
+        <h2 class="section-title reveal reveal-delay-1">5 districts.<br><span class="gradient-text">1 empire.</span></h2>
+        <p class="section-sub reveal reveal-delay-2">Chaque district a son identité, ses bâtiments exclusifs et ses défis. Débloque-les un par un en montant ta réputation.</p>
+        <div class="districts-list" style="margin-top:40px" id="districtsList"></div>
+      </div>
+      <div class="district-preview" id="districtPreview">
+        <div class="dp-glow" id="dpGlow"></div>
+        <span class="dp-icon" id="dpIcon">🏚️</span>
+        <div>
+          <div class="dp-name gradient-text" id="dpName">LOWSIDE</div>
+          <div class="dp-vibe" id="dpVibe">Underground street vibes</div>
+          <div class="dp-buildings" id="dpBuildings"></div>
+          <div class="dp-stats" id="dpStats"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── LOOP ───────────────────────────────────────────────── -->
+<section id="loop" style="background:var(--bg)">
+  <div class="loop-inner">
+    <div>
+      <p class="section-eyebrow reveal">Game Loop</p>
+      <h2 class="section-title reveal reveal-delay-1">Chaque session<br><span class="gradient-text">compte.</span></h2>
+      <div class="loop-steps" id="loopSteps"></div>
+    </div>
+    <div class="loop-visual" id="loopVisual">
+      <div class="loop-city-bg"></div>
+      <div class="loop-buildings" id="loopBuildings"></div>
+      <div class="loop-income">
+        <div class="income-counter"><span style="color:var(--gold)">$</span><span id="incomeCounter" class="mono">0</span></div>
+        <div class="income-label">Revenus en attente</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PI NETWORK ──────────────────────────────────────────── -->
+<section id="pinetwork">
+  <div class="pi-section">
+    <div>
+      <p class="section-eyebrow reveal">Pi Network</p>
+      <h2 class="section-title reveal reveal-delay-1">Joue. Gagne.<br><span class="gradient-gold">Dépense en Pi.</span></h2>
+      <p class="section-sub reveal reveal-delay-2">BLOCKSIDE intègre Pi Network pour les cosmétiques et le contenu premium. Jamais pay-to-win. Toujours équitable.</p>
+      <div class="pi-items">
+        <div class="pi-item reveal"><div class="pi-item-icon">💎</div><div class="pi-item-info"><div class="pi-item-title">VIP Pass — π1</div><div class="pi-item-desc">Revenus ×2 permanents dans tous les districts</div></div></div>
+        <div class="pi-item reveal reveal-delay-1"><div class="pi-item-icon">🌟</div><div class="pi-item-info"><div class="pi-item-title">Season 2 Pass — π5</div><div class="pi-item-desc">Missions exclusives + skin Season 2 offert</div></div></div>
+        <div class="pi-item reveal reveal-delay-2"><div class="pi-item-icon">🎨</div><div class="pi-item-info"><div class="pi-item-title">Skins Personnage — π2–5</div><div class="pi-item-desc">Néon, Void, Gold, Inferno, Ghost</div></div></div>
+        <div class="pi-item reveal reveal-delay-3"><div class="pi-item-icon">🗝️</div><div class="pi-item-info"><div class="pi-item-title">District Key — π2</div><div class="pi-item-desc">Slot de construction supplémentaire</div></div></div>
+      </div>
+      <div class="pi-promise reveal" style="margin-top:20px">
+        <div class="pi-promise-title">Nos engagements</div>
+        <ul class="pi-promise-list">
+          <li>Aucun avantage gameplay via Pi</li>
+          <li>Cosmétiques uniquement — personnalisation pure</li>
+          <li>Paiements sécurisés via Pi SDK officiel</li>
+          <li>Aucune mécanique de gambling</li>
+        </ul>
+      </div>
+    </div>
+    <div class="pi-phone-mockup reveal reveal-delay-2">
+      <div class="pi-phone-top"></div>
+      <div class="pi-phone-screen">
+        <div class="pi-screen-header">
+          <div class="pi-screen-logo">BLOCKSIDE</div>
+          <div class="pi-screen-stat mono" style="font-size:10px;color:var(--muted)">π Market · Season 2</div>
+        </div>
+        <div class="pi-screen-items">
+          <div class="pi-screen-item"><span class="psi-emoji">🌟</span><div><div class="psi-name">Season 2 Pass</div><div class="psi-price">π 5.00</div></div></div>
+          <div class="pi-screen-item"><span class="psi-emoji">💎</span><div><div class="psi-name">VIP Pass ×2</div><div class="psi-price">π 1.00</div></div></div>
+          <div class="pi-screen-item"><span class="psi-emoji">👑</span><div><div class="psi-name">Gold Skin</div><div class="psi-price">π 3.00</div></div></div>
+          <div class="pi-screen-item"><span class="psi-emoji">🗝️</span><div><div class="psi-name">District Key</div><div class="psi-price">π 2.00</div></div></div>
+        </div>
+        <button class="pi-screen-btn">🌐 Connexion Pi Network</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PERSONNAGES ─────────────────────────────────────────── -->
+<section id="characters">
+  <div class="chars-section">
+    <p class="section-eyebrow reveal" style="text-align:center">Personnages</p>
+    <h2 class="section-title reveal reveal-delay-1" style="text-align:center">Choisis ton <span class="gradient-text">identité</span></h2>
+    <p class="section-sub reveal reveal-delay-2" style="text-align:center;margin:0 auto">5 personnages, 5 styles de jeu. Chaque bonus change radicalement ta stratégie.</p>
+    <div class="chars-grid" id="charsGrid"></div>
+  </div>
+</section>
+
+<!-- ── SEASONS ────────────────────────────────────────────── -->
+<section id="seasons">
+  <div class="seasons-inner">
+    <p class="section-eyebrow reveal" style="text-align:center">Roadmap</p>
+    <h2 class="section-title reveal reveal-delay-1" style="text-align:center">L'univers <span class="gradient-text">grandit</span></h2>
+    <div class="season-cards">
+      <div class="season-card reveal">
+        <div class="sc-glow" style="background:linear-gradient(90deg,var(--orange),var(--pink))"></div>
+        <div class="sc-season" style="color:var(--orange)">◎ SEASON 1</div>
+        <div class="sc-title">Les Origines</div>
+        <div class="sc-desc">Le début de BLOCKSIDE. Construis ton premier district et forges ton identité dans les rues de Lowside.</div>
+        <div class="sc-features">
+          <div class="sc-feat">5 districts ouverts</div>
+          <div class="sc-feat">12 types de bâtiments</div>
+          <div class="sc-feat">Système de factions</div>
+          <div class="sc-feat">Battle Pass inaugural</div>
+        </div>
+        <span class="sc-badge badge-done">✓ Disponible</span>
+      </div>
+      <div class="season-card reveal reveal-delay-1">
+        <div class="sc-glow" style="background:linear-gradient(90deg,var(--purple),var(--pink))"></div>
+        <div class="sc-season" style="color:#CC77FF">▶ SEASON 2</div>
+        <div class="sc-title">Neon Uprising</div>
+        <div class="sc-desc">L'Empire Néon s'éveille. Nouveaux skins, missions exclusives, méca Prestige et météo urbaine dynamique.</div>
+        <div class="sc-features">
+          <div class="sc-feat">Système Prestige (3 niveaux)</div>
+          <div class="sc-feat">6 skins personnage</div>
+          <div class="sc-feat">Météo urbaine dynamique</div>
+          <div class="sc-feat">Classement mondial en direct</div>
+        </div>
+        <span class="sc-badge badge-now">● En cours</span>
+      </div>
+      <div class="season-card reveal reveal-delay-2">
+        <div class="sc-glow" style="background:linear-gradient(90deg,var(--gold),#FF9500)"></div>
+        <div class="sc-season" style="color:var(--gold)">◇ SEASON 3</div>
+        <div class="sc-title">Sky Empire</div>
+        <div class="sc-desc">La conquête des hauteurs. Nouveaux bâtiments Sky District, mode coopératif Crew et marché inter-joueurs.</div>
+        <div class="sc-features">
+          <div class="sc-feat">Marché joueur-à-joueur</div>
+          <div class="sc-feat">Mode Crew coopératif</div>
+          <div class="sc-feat">Nouveaux NPCs légendaires</div>
+          <div class="sc-feat">Build Android officiel</div>
+        </div>
+        <span class="sc-badge badge-soon">◇ Bientôt</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ────────────────────────────────────────────────── -->
+<section id="cta">
+  <div class="cta-orb"></div>
+  <div class="cta-inner">
+    <h2 class="cta-title reveal gradient-text">BUILD.<br>FIGHT.<br>OWN.</h2>
+    <p class="cta-sub reveal reveal-delay-1">BLOCKSIDE City t'attend. Commence avec rien. Finis avec tout.</p>
+    <div class="cta-btns reveal reveal-delay-2">
+      <a href="../game/index.html" class="btn-hero-primary">🎮 Jouer maintenant — Gratuit</a>
+    </div>
+    <div class="cta-stores reveal reveal-delay-3">
+      <div class="store-btn" style="cursor:default;opacity:.6">
+        <div class="store-icon">🤖</div>
+        <div class="store-info"><div class="store-label">Bientôt sur</div><div class="store-name">Google Play</div></div>
+      </div>
+      <div class="store-btn" style="cursor:default;opacity:.6">
+        <div class="store-icon">🌐</div>
+        <div class="store-info"><div class="store-label">Disponible dans le</div><div class="store-name">Pi Browser</div></div>
+      </div>
+    </div>
+    <p class="cta-note reveal" style="margin-top:20px">Une propriété de BOBO MBANA GAEL · Propulsé par Pi Network</p>
+  </div>
+</section>
+
+<!-- ── FOOTER ──────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="fb-logo"><img src="logo.png" alt="BLOCKSIDE"></div>
+        <p class="fb-desc">Le jeu urbain sandbox de nouvelle génération. Construit sur Pi Network. Fait pour les créateurs d'empires.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Jeu</h4>
+        <ul>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#districts">Districts</a></li>
+          <li><a href="#characters">Personnages</a></li>
+          <li><a href="../game/index.html">Jouer</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Pi Network</h4>
+        <ul>
+          <li><a href="#pinetwork">Pi Market</a></li>
+          <li><a href="#pinetwork">Skins</a></li>
+          <li><a href="#pinetwork">Battle Pass</a></li>
+          <li><a href="#pinetwork">VIP</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Saisons</h4>
+        <ul>
+          <li><a href="#seasons">Season 1</a></li>
+          <li><a href="#seasons">Season 2 ●</a></li>
+          <li><a href="#seasons">Season 3</a></li>
+          <li><a href="#seasons">Roadmap</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 BOBO MBANA GAEL · BLOCKSIDE · Tous droits réservés</div>
+      <div class="footer-pi"><div class="pi-dot"></div>Propulsé par Pi Network</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────
+const DISTRICTS = [
+  {id:'lowside',    name:'LOWSIDE',      icon:'🏚️', vibe:'Underground street vibes',   color:'#FF6B1A', req:'Disponible',  buildings:['Snack Shop','Parking','Tattoo Studio','Street Gym'],    slots:9,  incomeDay:'$12K'},
+  {id:'neon_market',name:'NEON MARKET',  icon:'🌃', vibe:'Centre économique holographique',color:'#2F9BFF',req:'500 rep',  buildings:['Mini Studio','Club Néon','Gallery','Luxury Apt'],       slots:12, incomeDay:'$85K'},
+  {id:'sky_district',name:'SKY DISTRICT',icon:'🏙️', vibe:'Skyline de luxe futuriste',  color:'#9B2FFF', req:'2000 rep', buildings:['Gallery','Luxury Apt','Hélipad','Skyscraper'],           slots:16, incomeDay:'$865K'},
+  {id:'underblock', name:'UNDERBLOCK',   icon:'🌑', vibe:'Tunnels, clubs et marchés noirs',color:'#FF2D78',req:'1000 rep',buildings:['Mini Studio','Black Market','Casino','Tattoo Studio'],  slots:9,  incomeDay:'$210K'},
+  {id:'the_edge',   name:'THE EDGE',     icon:'⚡', vibe:'Territoire dangereux — Crew Wars',color:'#FFD700',req:'5000 rep',buildings:['Black Market','Hélipad','Casino'],                   slots:12, incomeDay:'$480K'},
+];
+
+const CHARACTERS = [
+  {name:'ZAY',  role:'Street Rookie',icon:'💲',bonus:'+20% revenus commerce',    color:'#FF6B1A',col:0,row:0},
+  {name:'NIA',  role:'Hustler',      icon:'⭐',bonus:'+15% toutes sources',      color:'#FF2D78',col:1,row:0},
+  {name:'KANE', role:'Builder',      icon:'🔨',bonus:'-20% coût construction',   color:'#FFD700',col:2,row:0},
+  {name:'MALIK',role:'Strategist',   icon:'♟️',bonus:'+25% gains district wars', color:'#4ADE80',col:3,row:0},
+  {name:'VEX',  role:'Hacker',       icon:'💻',bonus:'-25% coût marché noir',    color:'#9B2FFF',col:4,row:0},
+  {name:'BRICK',role:'Trader',       icon:'🤝',bonus:'+30% revenus trading',     color:'#FF6B1A',col:0,row:1},
+  {name:'LUNA', role:'Drifter',      icon:'🎯',bonus:'+20% vitesse collecte',    color:'#2F9BFF',col:1,row:1},
+  {name:'KAEL', role:'Investor',     icon:'📈',bonus:'+35% revenus passifs',     color:'#FFD700',col:2,row:1},
+  {name:'RAZE', role:'Enforcer',     icon:'🛡️',bonus:'+40% défense territoire',  color:'#FF2D78',col:3,row:1},
+  {name:'SHADOW',role:'Unknown',     icon:'❓',bonus:'??? capacité cachée',       color:'#9B2FFF',col:4,row:1},
+];
+
+const LOOP_STEPS = [
+  {title:'Construire',  desc:'Place des bâtiments sur ta grille et améliore-les pour augmenter les revenus.'},
+  {title:'Collecter',   desc:'Récolte les revenus générés et réinvestis pour accélérer ta progression.'},
+  {title:'Progresser',  desc:'Augmente ta réputation, débloque de nouveaux districts et bâtiments rares.'},
+  {title:'Socialiser',  desc:'Rejoins une faction, lance des Crew Wars et domine le classement mondial.'},
+  {title:'Prestige',    desc:'Atteins les sommets, réinitialise et gagne des bonus permanents cumulables.'},
+];
+
+// ── CANVAS BG PARTICLES ────────────────────────────────────────
+const canvas = document.getElementById('bg');
+const ctx = canvas.getContext('2d');
+const particles = [];
+const pColors = ['#FF6B1A','#9B2FFF','#FF2D78','#2F9BFF','#FFD700'];
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();
+window.addEventListener('resize',resizeCanvas);
+for(let i=0;i<80;i++){particles.push({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,r:Math.random()*1.5+.3,speed:Math.random()*.3+.1,color:pColors[Math.floor(Math.random()*pColors.length)],opacity:Math.random()*.4+.1});}
+function drawBg(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p=>{
+    p.y-=p.speed;
+    if(p.y<-5){p.y=canvas.height+5;p.x=Math.random()*canvas.width;}
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle=p.color+Math.floor(p.opacity*255).toString(16).padStart(2,'0');
+    ctx.fill();
+  });
+  requestAnimationFrame(drawBg);
+}
+drawBg();
+
+// ── DISTRICTS ─────────────────────────────────────────────────
+let activeDistrict = 0;
+function renderDistricts(){
+  const list=document.getElementById('districtsList');
+  list.innerHTML=DISTRICTS.map((d,i)=>`
+    <div class="district-item ${i===activeDistrict?'active':''}" onclick="selectDistrict(${i})" style="--d-color:${d.color}">
+      <span class="d-icon">${d.icon}</span>
+      <div class="d-info">
+        <div class="d-name">${d.name}</div>
+        <div class="d-vibe">${d.vibe}</div>
+        <div class="d-req" style="color:${d.color}">${d.req}</div>
+      </div>
+    </div>`).join('');
+  updatePreview();
+}
+function selectDistrict(i){activeDistrict=i;renderDistricts();}
+function updatePreview(){
+  const d=DISTRICTS[activeDistrict];
+  document.getElementById('dpGlow').style.background=`radial-gradient(circle at 50% 0%,${d.color}25,transparent 60%)`;
+  document.getElementById('dpIcon').textContent=d.icon;
+  document.getElementById('dpName').style.color=d.color;
+  document.getElementById('dpName').textContent=d.name;
+  document.getElementById('dpVibe').textContent=d.vibe;
+  document.getElementById('dpBuildings').innerHTML=d.buildings.map(b=>`<span class="dp-building">${b}</span>`).join('');
+  document.getElementById('dpStats').innerHTML=`
+    <div class="dp-stat"><div class="dp-stat-val">${d.slots}</div><div class="dp-stat-label">Slots</div></div>
+    <div class="dp-stat"><div class="dp-stat-val">${d.incomeDay}</div><div class="dp-stat-label">Revenus/jour</div></div>`;
+}
+renderDistricts();
+
+// ── LOOP STEPS ────────────────────────────────────────────────
+document.getElementById('loopSteps').innerHTML=LOOP_STEPS.map((s,i)=>`
+  <div class="loop-step">
+    <div class="step-num">${String(i+1).padStart(2,'0')}</div>
+    <div class="step-info"><div class="step-title">${s.title}</div><div class="step-desc">${s.desc}</div></div>
+  </div>`).join('');
+
+// ── LOOP BUILDINGS ANIMATION ──────────────────────────────────
+const buildingsDefs=[
+  {w:28,h:70,c:'#FF6B1A',d:0},{w:18,h:100,c:'#9B2FFF',d:.2},{w:22,h:55,c:'#2F9BFF',d:.4},
+  {w:30,h:130,c:'#FF2D78',d:.1},{w:20,h:80,c:'#FFD700',d:.3},{w:16,h:60,c:'#4ADE80',d:.5},
+  {w:24,h:110,c:'#FF6B1A',d:.2},{w:18,h:40,c:'#9B2FFF',d:.4},
+];
+document.getElementById('loopBuildings').innerHTML=buildingsDefs.map(b=>`
+  <div class="lbuild" style="width:${b.w}px;height:${b.h}px;--lc:${b.c};animation-delay:${b.d}s"></div>`).join('');
+
+// ── INCOME COUNTER ────────────────────────────────────────────
+let inc=0;const target=128340;
+function animateIncome(){if(inc<target){inc=Math.min(inc+Math.ceil((target-inc)*.05)+100,target);document.getElementById('incomeCounter').textContent=inc.toLocaleString('fr-FR');}setTimeout(animateIncome,50);}
+setTimeout(animateIncome,1000);
+
+// ── CHARACTERS ────────────────────────────────────────────────
+document.getElementById('charsGrid').innerHTML=CHARACTERS.map(c=>{
+  const px=c.col*25, py=c.row*100;
+  return `<div class="char-card-lp reveal" style="--cc:${c.color};--cc-bg:${c.color}22">
+    <div class="char-photo-lp" style="background-position:${px}% ${py}%"></div>
+    <div class="char-name-lp">${c.name}</div>
+    <div class="char-role-lp">${c.icon} ${c.role}</div>
+    <div class="char-bonus-lp">${c.bonus}</div>
+  </div>`;
+}).join('');
+
+// ── SCROLL REVEAL ─────────────────────────────────────────────
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');}});
+},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+// ── STAT COUNTER ANIMATION ────────────────────────────────────
+const statObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const el=e.target.querySelector('[data-count]');
+      if(el&&!el.dataset.animated){
+        el.dataset.animated='1';
+        const target=parseInt(el.dataset.count);
+        let n=0;
+        const step=()=>{n=Math.min(n+1,target);el.textContent=n;if(n<target)setTimeout(step,60);};
+        setTimeout(step,300);
+      }
+    }
+  });
+},{threshold:.5});
+document.querySelectorAll('.stat-item').forEach(el=>statObs.observe(el));
+
+// ── NAV HAMBURGER ─────────────────────────────────────────────
+function toggleMenu(){
+  const links=document.querySelector('.nav-links');
+  if(!links.style.display||links.style.display==='none'){
+    links.style.display='flex';links.style.flexDirection='column';
+    links.style.position='absolute';links.style.top='100%';links.style.left='0';links.style.right='0';
+    links.style.background='rgba(7,7,15,.98)';links.style.padding='20px';links.style.gap='16px';
+    links.style.borderBottom='1px solid var(--border)';
+  } else {links.style.display='';}
+}
+
+// ── NAV SCROLL ────────────────────────────────────────────────
+window.addEventListener('scroll',()=>{
+  const nav=document.querySelector('nav');
+  nav.style.background=window.scrollY>50?'rgba(7,7,15,.95)':'rgba(7,7,15,.85)';
+});
+
+// ── DISTRICT AUTO-ROTATE ──────────────────────────────────────
+setInterval(()=>{activeDistrict=(activeDistrict+1)%DISTRICTS.length;renderDistricts();},4000);
+</script>
+</body>
+</html>
