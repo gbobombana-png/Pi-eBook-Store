@@ -327,6 +327,85 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
 .scroll-hint{display:flex;justify-content:center;gap:4px;padding:8px 0}
 .scroll-hint-dot{width:4px;height:4px;border-radius:50%;background:var(--border)}
 .scroll-hint-dot.active{background:var(--orange);width:12px}
+
+/* ===== LIVE EVENTS BANNER ===== */
+.events-banner{margin:0 16px 12px;border-radius:14px;overflow:hidden;position:relative;flex-shrink:0}
+.event-slide{display:none;padding:12px 14px;align-items:center;gap:10px;border-radius:14px;border:1px solid rgba(255,255,255,.1)}
+.event-slide.active{display:flex}
+.event-emoji{font-size:28px;flex-shrink:0}
+.event-info{flex:1;min-width:0}
+.event-title{font-size:12px;font-weight:800;letter-spacing:.5px}
+.event-desc{font-size:11px;color:rgba(255,255,255,.7);margin-top:1px}
+.event-timer{font-size:10px;font-family:'Space Mono',monospace;color:rgba(255,255,255,.5);margin-top:2px}
+.event-btn{padding:6px 12px;border-radius:8px;border:none;background:rgba(255,255,255,.2);color:#fff;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Sora',sans-serif;flex-shrink:0}
+.event-dots{display:flex;justify-content:center;gap:4px;margin-top:6px}
+.event-dot{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.3);transition:all .3s}
+.event-dot.active{width:12px;background:#fff}
+
+/* ===== MISSIONS ===== */
+#missions{background:var(--bg)}
+.missions-content{flex:1;padding:16px;overflow-y:auto;padding-bottom:80px}
+.mission-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;transition:border-color .3s}
+.mission-card.complete{border-color:var(--green)}
+.mission-card.claimed{border-color:var(--border);opacity:.6}
+.mission-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.mission-icon{font-size:24px;width:40px;text-align:center;flex-shrink:0}
+.mission-title{font-size:14px;font-weight:700}
+.mission-desc{font-size:12px;color:var(--muted);margin-top:2px}
+.mission-reward{font-size:11px;color:var(--gold);margin-top:2px}
+.mission-bottom{display:flex;align-items:center;gap:10px}
+.mission-bar-wrap{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.mission-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--orange),var(--pink));transition:width .5s}
+.mission-progress-label{font-size:11px;font-family:'Space Mono',monospace;color:var(--muted);white-space:nowrap}
+.mission-claim-btn{padding:6px 14px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--green),#22c55e);color:#000;font-size:12px;font-weight:700;cursor:pointer;font-family:'Sora',sans-serif;flex-shrink:0}
+.mission-claim-btn:disabled{background:var(--border);color:var(--muted);cursor:default}
+.missions-week-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--blue);margin:16px 0 8px}
+
+/* ===== DAILY REWARD MODAL ===== */
+#dailyModal{position:fixed;inset:0;background:rgba(7,7,15,.92);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+#dailyModal.open{display:flex}
+.daily-box{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:24px 20px;width:100%;max-width:360px;text-align:center}
+.daily-title{font-size:22px;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px}
+.daily-streak{font-size:13px;color:var(--muted);margin-bottom:20px}
+.daily-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:20px}
+.daily-day{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:8px 4px;text-align:center;position:relative}
+.daily-day.past{border-color:var(--green);background:rgba(74,222,128,.08)}
+.daily-day.today{border-color:var(--gold);background:rgba(255,215,0,.1);box-shadow:0 0 12px rgba(255,215,0,.3)}
+.daily-day.future{opacity:.4}
+.daily-day-num{font-size:9px;font-weight:700;color:var(--muted);font-family:'Space Mono',monospace}
+.daily-day-icon{font-size:16px;margin:4px 0 2px}
+.daily-day-amount{font-size:9px;font-weight:700;color:var(--gold);font-family:'Space Mono',monospace}
+.daily-day.past .daily-day-icon::after{content:'✓';position:absolute;top:3px;right:3px;font-size:8px;color:var(--green)}
+
+/* ===== GARAGE ===== */
+#garage{background:var(--bg)}
+.garage-content{flex:1;padding:16px;overflow-y:auto;padding-bottom:80px}
+.garage-active-banner{background:linear-gradient(135deg,rgba(255,107,26,.15),rgba(155,47,255,.1));border:1px solid rgba(255,107,26,.3);border-radius:14px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:12px}
+.garage-active-emoji{font-size:32px}
+.garage-active-info{flex:1}
+.garage-active-name{font-weight:700;font-size:15px}
+.garage-active-bonus{font-size:12px;color:var(--orange);margin-top:2px}
+.vehicle-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;transition:border-color .3s}
+.vehicle-card.owned{border-color:rgba(255,255,255,.15)}
+.vehicle-card.active-vehicle{border-color:var(--orange);box-shadow:0 0 16px rgba(255,107,26,.2)}
+.vehicle-emoji{font-size:36px;width:52px;text-align:center;flex-shrink:0}
+.vehicle-info{flex:1;min-width:0}
+.vehicle-name{font-weight:700;font-size:14px}
+.vehicle-desc{font-size:12px;color:var(--muted);margin-top:2px}
+.vehicle-cost{font-size:12px;font-family:'Space Mono',monospace;margin-top:4px}
+.vehicle-btn{padding:8px 14px;border-radius:10px;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:'Sora',sans-serif;flex-shrink:0}
+.vehicle-btn-buy{background:linear-gradient(135deg,var(--orange),var(--pink));color:#fff}
+.vehicle-btn-activate{background:rgba(255,107,26,.2);color:var(--orange);border:1px solid rgba(255,107,26,.4)}
+.vehicle-btn-active{background:rgba(74,222,128,.2);color:var(--green);border:1px solid rgba(74,222,128,.4)}
+
+/* ===== TUTORIAL OVERLAY ===== */
+#tutorialOverlay{position:fixed;inset:0;z-index:400;display:none;pointer-events:none}
+#tutorialOverlay.open{display:block}
+.tutorial-box{position:absolute;background:var(--card);border:1px solid var(--orange);border-radius:16px;padding:16px;max-width:260px;box-shadow:0 8px 32px rgba(255,107,26,.3);pointer-events:all}
+.tutorial-step{font-size:10px;color:var(--orange);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.tutorial-text{font-size:13px;font-weight:600;line-height:1.5}
+.tutorial-arrow{font-size:20px;margin:8px 0;color:var(--orange)}
+.tutorial-next{margin-top:10px;padding:8px 16px;border-radius:8px;border:none;background:var(--orange);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:'Sora',sans-serif;width:100%}
 </style>
 </head>
 <body>
@@ -389,13 +468,17 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
       <div class="stat-label">🏗️ Bâtiments</div>
     </div>
   </div>
+  <!-- Live Events Banner -->
+  <div class="events-banner" id="eventsBanner"></div>
+
   <div class="hub-content scrollable">
-    <div class="income-card">
+    <div class="income-card" style="cursor:pointer" onclick="collectAllDistricts()">
       <div class="income-top">
         <div class="income-title">💵 Revenus en attente</div>
+        <div class="fs11 text-muted">Tap pour tout collecter</div>
       </div>
       <div class="income-value" id="hubPendingIncome">0</div>
-      <div class="income-sub">Visite tes districts pour collecter</div>
+      <div class="income-sub">Total de tous tes districts</div>
     </div>
     <div class="section-title mb8">Actions rapides</div>
     <div class="quick-grid mb16">
@@ -409,15 +492,15 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
         <div class="quick-btn-label">Construire</div>
         <div class="quick-btn-sub">Ajoute des bâtiments</div>
       </div>
-      <div class="quick-btn" onclick="showScreen('crew')">
-        <div class="quick-btn-icon">👥</div>
-        <div class="quick-btn-label">Crew</div>
-        <div class="quick-btn-sub">Rejoins une faction</div>
+      <div class="quick-btn" id="missionsQuickBtn" onclick="showScreen('missions')">
+        <div class="quick-btn-icon">🎯</div>
+        <div class="quick-btn-label">Missions</div>
+        <div class="quick-btn-sub" id="missionsQuickSub">Quotidiennes & hebdo</div>
       </div>
-      <div class="quick-btn" onclick="showScreen('piMarket')">
-        <div class="quick-btn-icon">⭐</div>
-        <div class="quick-btn-label">Pi Market</div>
-        <div class="quick-btn-sub">Items premium</div>
+      <div class="quick-btn" onclick="showScreen('garage')">
+        <div class="quick-btn-icon">🚗</div>
+        <div class="quick-btn-label">Garage</div>
+        <div class="quick-btn-sub">Tes véhicules</div>
       </div>
     </div>
     <div class="section-title mb8">Activité récente</div>
@@ -519,6 +602,60 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
     <div class="nav-item" onclick="navTo('piMarket',this)"><div class="nav-icon">⭐</div><div class="nav-label">Boutique</div></div>
     <div class="nav-item" onclick="navTo('crew',this)"><div class="nav-icon">👥</div><div class="nav-label">Crew</div></div>
     <div class="nav-item active" onclick="navTo('profile',this)"><div class="nav-icon">👤</div><div class="nav-label">Profil</div></div>
+  </div>
+</div>
+
+<!-- MISSIONS SCREEN -->
+<div id="missions" class="screen">
+  <div class="district-header" style="flex-shrink:0">
+    <div class="back-btn" onclick="goBack()">← Hub</div>
+    <div class="district-header-name">🎯 Missions</div>
+  </div>
+  <div class="missions-content scrollable" id="missionsContent"></div>
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="navTo('hub',this)"><div class="nav-icon">🏠</div><div class="nav-label">Hub</div></div>
+    <div class="nav-item" onclick="navTo('cityMap',this)"><div class="nav-icon">🏙️</div><div class="nav-label">Ville</div></div>
+    <div class="nav-item" onclick="navTo('piMarket',this)"><div class="nav-icon">⭐</div><div class="nav-label">Boutique</div></div>
+    <div class="nav-item" onclick="navTo('crew',this)"><div class="nav-icon">👥</div><div class="nav-label">Crew</div></div>
+    <div class="nav-item" onclick="navTo('profile',this)"><div class="nav-icon">👤</div><div class="nav-label">Profil</div></div>
+  </div>
+</div>
+
+<!-- GARAGE SCREEN -->
+<div id="garage" class="screen">
+  <div class="district-header" style="flex-shrink:0">
+    <div class="back-btn" onclick="goBack()">← Hub</div>
+    <div class="district-header-name">🚗 Garage</div>
+    <div class="district-header-vibe">Tes véhicules et leurs bonus</div>
+  </div>
+  <div class="garage-content scrollable" id="garageContent"></div>
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="navTo('hub',this)"><div class="nav-icon">🏠</div><div class="nav-label">Hub</div></div>
+    <div class="nav-item" onclick="navTo('cityMap',this)"><div class="nav-icon">🏙️</div><div class="nav-label">Ville</div></div>
+    <div class="nav-item" onclick="navTo('piMarket',this)"><div class="nav-icon">⭐</div><div class="nav-label">Boutique</div></div>
+    <div class="nav-item" onclick="navTo('crew',this)"><div class="nav-icon">👥</div><div class="nav-label">Crew</div></div>
+    <div class="nav-item" onclick="navTo('profile',this)"><div class="nav-icon">👤</div><div class="nav-label">Profil</div></div>
+  </div>
+</div>
+
+<!-- DAILY REWARD MODAL -->
+<div id="dailyModal">
+  <div class="daily-box">
+    <div class="daily-title">🎁 Récompense Quotidienne</div>
+    <div class="daily-streak" id="dailyStreakText">Jour 1 — Connecte-toi chaque jour!</div>
+    <div class="daily-grid" id="dailyGrid"></div>
+    <button class="btn btn-gold btn-full" id="dailyClaimBtn" onclick="claimDailyReward()">Réclamer la récompense</button>
+    <div class="mt8 fs12 text-muted" id="dailyClaimedMsg" style="display:none">✅ Déjà réclamée aujourd'hui. Reviens demain!</div>
+  </div>
+</div>
+
+<!-- TUTORIAL OVERLAY -->
+<div id="tutorialOverlay">
+  <div class="tutorial-box" id="tutorialBox" style="bottom:120px;left:50%;transform:translateX(-50%)">
+    <div class="tutorial-step" id="tutorialStep">ÉTAPE 1/4</div>
+    <div class="tutorial-text" id="tutorialText">Bienvenue dans BLOCKSIDE City!</div>
+    <div class="tutorial-arrow">↓</div>
+    <button class="tutorial-next" onclick="nextTutorialStep()">Compris →</button>
   </div>
 </div>
 
@@ -630,6 +767,43 @@ const ACHIEVEMENTS = [
   {id:'pi_buy',icon:'🌐',name:'Achat\nPi',cond:s=>s.premiumOwned.length>0}
 ];
 
+const DAILY_MISSIONS = [
+  {id:'dm_build',title:'Constructeur du jour',desc:'Construire 1 bâtiment',type:'build',target:1,reward:{money:200,rep:20}},
+  {id:'dm_collect',title:'Collecteur actif',desc:'Collecter des revenus 3 fois',type:'collect',target:3,reward:{money:300,rep:0}},
+  {id:'dm_visit',title:'Explorateur',desc:'Visiter 2 districts différents',type:'visit',target:2,reward:{money:150,rep:15}},
+  {id:'dm_upgrade',title:'Perfectionniste',desc:'Améliorer 1 bâtiment',type:'upgrade',target:1,reward:{money:500,rep:50}},
+];
+
+const WEEKLY_MISSIONS = [
+  {id:'wm_rep',title:'Montée en puissance',desc:'Atteindre 1000 de réputation',type:'rep',target:1000,reward:{money:2000,rep:0}},
+  {id:'wm_buildings',title:'Empire en expansion',desc:'Posséder 5 bâtiments',type:'buildings',target:5,reward:{money:1000,rep:0}},
+  {id:'wm_crew',title:'Solidarité des rues',desc:'Rejoindre une faction',type:'crew',target:1,reward:{money:800,rep:0}},
+];
+
+const DAILY_REWARDS_DATA = [
+  {day:1,money:100,rep:0,special:null},
+  {day:2,money:200,rep:0,special:null},
+  {day:3,money:300,rep:0,special:'Bonus VIP 1h'},
+  {day:4,money:500,rep:0,special:null},
+  {day:5,money:800,rep:0,special:'Skin débloqué'},
+  {day:6,money:1200,rep:0,special:null},
+  {day:7,money:2000,rep:500,special:'RÉCOMPENSE LÉGENDAIRE'},
+];
+
+const VEHICLES = [
+  {id:'bike',emoji:'🏍️',name:'Street Bike',desc:'+10% revenus Lowside',cost:2000,costType:'money',bonusType:'district',bonusDistrict:'lowside',bonusMult:1.1},
+  {id:'car',emoji:'🚗',name:'Muscle Car',desc:'+15% revenus Neon Market',cost:8000,costType:'money',bonusType:'district',bonusDistrict:'neon_market',bonusMult:1.15},
+  {id:'truck',emoji:'🚛',name:'Armored Truck',desc:'+20% collecte partout',cost:25000,costType:'money',bonusType:'global',bonusMult:1.2},
+  {id:'heli',emoji:'🚁',name:'Attack Helicopter',desc:'+50% revenus The Edge',cost:3,costType:'pi',bonusType:'district',bonusDistrict:'the_edge',bonusMult:1.5},
+  {id:'boat',emoji:'⛵',name:'Speed Boat',desc:'+25% revenus Underblock',cost:1,costType:'pi',bonusType:'district',bonusDistrict:'underblock',bonusMult:1.25},
+];
+
+const LIVE_EVENTS = [
+  {emoji:'🔥',title:'BLACK MARKET NIGHT',desc:'Revenus ×3 dans Underblock',timer:'1h 42min',color:'#FF2D78'},
+  {emoji:'⚔️',title:'DISTRICT WARS',desc:'Crew Wars — contrôle de The Edge',timer:'23h 15min',color:'#FF6B1A'},
+  {emoji:'🎵',title:'NEON CONCERT',desc:'Snack Shop rapporte ×5 ce soir',timer:'3h 08min',color:'#9B2FFF'},
+];
+
 // ============================================================
 // GAME STATE
 // ============================================================
@@ -645,9 +819,22 @@ let state = {
   totalEarned: 0,
   totalBuildings: 0,
   clickCount: 0,
+  collectCount: 0,
+  upgradeCount: 0,
+  visitedDistricts: [],
   activities: [],
   piAuthenticated: false,
-  lastSave: Date.now()
+  lastSave: Date.now(),
+  // Missions
+  missions: null,
+  missionsLastDailyReset: 0,
+  missionsLastWeeklyReset: 0,
+  // Daily Rewards
+  dailyReward: { streak: 0, lastClaimed: 0 },
+  // Vehicles
+  vehicles: { owned: [], active: null },
+  // Tutorial
+  tutorialDone: false,
 };
 
 let currentScreen = 'splash';
@@ -736,7 +923,7 @@ function getBuildingCost(building) {
   return cost;
 }
 
-function calcPendingIncome(b) {
+function calcPendingIncome(b, districtId) {
   const def = BUILDINGS.find(x=>x.id===b.buildingId);
   if (!def) return 0;
   const now = Date.now();
@@ -744,6 +931,7 @@ function calcPendingIncome(b) {
   let income = elapsed * def.income * b.level;
   if (state.premiumOwned.includes('vip')) income *= 2;
   if (state.character==='zay') income *= 1.2;
+  if (districtId) income *= getVehicleBonus(districtId);
   return Math.floor(income);
 }
 
@@ -780,7 +968,9 @@ function collectDistrict(districtId) {
   if (total > 0) {
     state.money += total;
     state.totalEarned += total;
+    state.collectCount = (state.collectCount||0) + 1;
     addActivity('💰 Collecte ' + districtId.replace('_',' ').toUpperCase() + ': +' + fmt(total));
+    trackMission('collect', 1);
     checkAchievements();
     saveGame();
   }
@@ -811,6 +1001,7 @@ function buyBuilding(districtId, buildingId, slotIndex) {
   state.buildings[districtId].push(b);
   state.totalBuildings++;
   addActivity('🏗️ Construit ' + def.name + ' dans ' + districtId.replace('_',' ').toUpperCase());
+  trackMission('build', 1);
   checkDistrictUnlocks();
   checkAchievements();
   saveGame();
@@ -832,6 +1023,7 @@ function upgradeBuilding(districtId, slotIndex) {
   state.money -= upgradeCost;
   b.level++;
   addActivity('⬆️ Amélioré ' + def.name + ' → Niveau ' + b.level);
+  trackMission('upgrade', 1);
   checkAchievements();
   saveGame();
   closeModal('detailModal');
@@ -903,11 +1095,13 @@ function showScreen(id) {
   const el = document.getElementById(id);
   if (el) el.classList.add('active');
   currentScreen = id;
-  if (id==='hub') { updateHUDStats(); renderActivity(); }
+  if (id==='hub') { updateHUDStats(); renderActivity(); startEventCarousel(); updateMissionsBadge(); }
   if (id==='cityMap') renderCityMap();
   if (id==='crew') renderCrew();
   if (id==='piMarket') renderMarket();
   if (id==='profile') renderProfile();
+  if (id==='missions') { initMissions(); renderMissions(); }
+  if (id==='garage') renderGarage();
 }
 
 function goBack() { showScreen(prevScreen==='districtView'?'cityMap':prevScreen); }
@@ -930,10 +1124,13 @@ function openFirstDistrict() {
 function goToCharSelect() {
   if (loadGame() && state.character) {
     initDistricts();
+    initMissions();
     updateHUDStats();
     renderActivity();
+    startEventCarousel();
     showScreen('hub');
     startGameTick();
+    checkDailyReward();
     return;
   }
   initDistricts();
@@ -985,11 +1182,14 @@ function startGame() {
   state.username = state.username||('Player_'+c.name);
   initDistricts();
   addActivity('🎮 Début du jeu avec ' + c.name);
+  initMissions();
   saveGame();
   updateHUDStats();
   renderActivity();
+  startEventCarousel();
   showScreen('hub');
   startGameTick();
+  if (!state.tutorialDone) setTimeout(startTutorial, 1200);
 }
 
 // ============================================================
@@ -1074,6 +1274,11 @@ function renderCityMap() {
 // ============================================================
 function openDistrict(districtId) {
   currentDistrictId = districtId;
+  if (!state.visitedDistricts) state.visitedDistricts = [];
+  if (!state.visitedDistricts.includes(districtId)) {
+    state.visitedDistricts.push(districtId);
+    trackMission('visit', 1);
+  }
   renderDistrictView(districtId);
   prevScreen = 'cityMap';
   showScreen('districtView');
@@ -1299,6 +1504,7 @@ function joinFaction(id) {
   state.crew = id;
   const f = FACTIONS.find(x=>x.id===id);
   addActivity('👥 Rejoint ' + f.name);
+  trackMission('crew', 1);
   checkAchievements();
   saveGame();
   renderCrew();
@@ -1512,6 +1718,377 @@ function initParticles() {
     requestAnimationFrame(draw);
   }
   draw();
+}
+
+// ============================================================
+// MISSIONS
+// ============================================================
+function initMissions() {
+  if (!state.missions) {
+    state.missions = {
+      daily: DAILY_MISSIONS.map(m => ({id:m.id, progress:0, claimed:false})),
+      weekly: WEEKLY_MISSIONS.map(m => ({id:m.id, progress:0, claimed:false})),
+    };
+  }
+  checkMissionReset();
+}
+
+function checkMissionReset() {
+  const now = Date.now();
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayTs = today.getTime();
+  const thisWeek = (() => { const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()-d.getDay()); return d.getTime(); })();
+
+  if (state.missionsLastDailyReset < todayTs) {
+    state.missions.daily = DAILY_MISSIONS.map(m => ({id:m.id, progress:0, claimed:false}));
+    state.missionsLastDailyReset = todayTs;
+    state.collectCount = 0;
+    state.visitedDistricts = [];
+    state.upgradeCount = 0;
+  }
+  if (state.missionsLastWeeklyReset < thisWeek) {
+    state.missions.weekly = WEEKLY_MISSIONS.map(m => ({id:m.id, progress:0, claimed:false}));
+    state.missionsLastWeeklyReset = thisWeek;
+  }
+  // Sync live progress for weekly missions
+  syncWeeklyProgress();
+}
+
+function syncWeeklyProgress() {
+  if (!state.missions) return;
+  state.missions.weekly.forEach(ms => {
+    const def = WEEKLY_MISSIONS.find(m=>m.id===ms.id);
+    if (!def || ms.claimed) return;
+    if (def.type==='rep') ms.progress = state.rep;
+    if (def.type==='buildings') ms.progress = state.totalBuildings;
+    if (def.type==='crew') ms.progress = state.crew ? 1 : 0;
+  });
+}
+
+function trackMission(type, amount) {
+  if (!state.missions) return;
+  state.missions.daily.forEach(ms => {
+    const def = DAILY_MISSIONS.find(m=>m.id===ms.id);
+    if (!def || ms.claimed || ms.progress >= def.target) return;
+    if (def.type === type) {
+      ms.progress = Math.min(ms.progress + amount, def.target);
+    }
+  });
+  syncWeeklyProgress();
+  updateMissionsBadge();
+}
+
+function claimMission(missionId, isWeekly) {
+  const list = isWeekly ? state.missions.weekly : state.missions.daily;
+  const defs = isWeekly ? WEEKLY_MISSIONS : DAILY_MISSIONS;
+  const ms = list.find(m=>m.id===missionId);
+  const def = defs.find(m=>m.id===missionId);
+  if (!ms || !def || ms.claimed || ms.progress < def.target) return;
+  ms.claimed = true;
+  state.money += def.reward.money;
+  state.rep += def.reward.rep;
+  if (def.reward.rep) checkDistrictUnlocks();
+  addActivity('🎯 Mission: ' + def.title + ' +$' + fmt(def.reward.money));
+  checkAchievements();
+  saveGame();
+  renderMissions();
+  updateHUDStats();
+  showToast('🎯 +$' + fmt(def.reward.money) + (def.reward.rep?' +'+def.reward.rep+' rep':''), 'success');
+}
+
+function updateMissionsBadge() {
+  if (!state.missions) return;
+  const readyDaily = state.missions.daily.some(ms => {
+    const def = DAILY_MISSIONS.find(m=>m.id===ms.id);
+    return def && !ms.claimed && ms.progress >= def.target;
+  });
+  const readyWeekly = state.missions.weekly.some(ms => {
+    const def = WEEKLY_MISSIONS.find(m=>m.id===ms.id);
+    return def && !ms.claimed && ms.progress >= def.target;
+  });
+  const sub = document.getElementById('missionsQuickSub');
+  if (sub) sub.textContent = (readyDaily || readyWeekly) ? '🔴 Récompenses dispo!' : 'Quotidiennes & hebdo';
+}
+
+function renderMissions() {
+  const el = document.getElementById('missionsContent');
+  if (!el || !state.missions) return;
+  syncWeeklyProgress();
+
+  const missionCard = (ms, def, isWeekly) => {
+    const pct = Math.min(ms.progress / def.target, 1);
+    const ready = ms.progress >= def.target && !ms.claimed;
+    const icons = ['🏗️','💰','🗺️','⬆️','⭐','🏘️','👥'];
+    const icon = icons[DAILY_MISSIONS.concat(WEEKLY_MISSIONS).indexOf(def)] || '🎯';
+    return `<div class="mission-card ${ms.claimed?'claimed':ready?'complete':''}">
+      <div class="mission-top">
+        <div class="mission-icon">${icon}</div>
+        <div>
+          <div class="mission-title">${def.title}</div>
+          <div class="mission-desc">${def.desc}</div>
+          <div class="mission-reward">💰 +$${fmt(def.reward.money)}${def.reward.rep?' · ⭐ +'+def.reward.rep+' rep':''}</div>
+        </div>
+      </div>
+      <div class="mission-bottom">
+        <div class="mission-bar-wrap"><div class="mission-bar-fill" style="width:${pct*100}%"></div></div>
+        <div class="mission-progress-label">${ms.progress}/${def.target}</div>
+        <button class="mission-claim-btn" ${!ready?'disabled':''} onclick="claimMission('${ms.id}',${isWeekly})">
+          ${ms.claimed ? '✓' : 'Réclamer'}
+        </button>
+      </div>
+    </div>`;
+  };
+
+  el.innerHTML = `
+    <div class="section-title" style="margin-bottom:10px">🌅 Missions du jour</div>
+    ${state.missions.daily.map(ms => {
+      const def = DAILY_MISSIONS.find(m=>m.id===ms.id);
+      return def ? missionCard(ms, def, false) : '';
+    }).join('')}
+    <div class="missions-week-title">📅 Missions de la semaine</div>
+    ${state.missions.weekly.map(ms => {
+      const def = WEEKLY_MISSIONS.find(m=>m.id===ms.id);
+      return def ? missionCard(ms, def, true) : '';
+    }).join('')}`;
+}
+
+// ============================================================
+// DAILY REWARDS
+// ============================================================
+function checkDailyReward() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayTs = today.getTime();
+  if (state.dailyReward.lastClaimed < todayTs) {
+    setTimeout(() => showDailyRewardModal(), 800);
+  }
+}
+
+function showDailyRewardModal() {
+  const streak = state.dailyReward.streak;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayTs = today.getTime();
+  const alreadyClaimed = state.dailyReward.lastClaimed >= todayTs;
+
+  document.getElementById('dailyStreakText').textContent =
+    `Série : ${streak} jour${streak!==1?'s':''} consécutif${streak!==1?'s':''}`;
+
+  const grid = document.getElementById('dailyGrid');
+  grid.innerHTML = DAILY_REWARDS_DATA.map((r, i) => {
+    const dayNum = (streak % 7) || 7;
+    const isPast = i < (dayNum - 1);
+    const isToday = i === (dayNum - 1);
+    const cls = isPast ? 'past' : isToday ? 'today' : 'future';
+    return `<div class="daily-day ${cls}">
+      <div class="daily-day-num">J${r.day}</div>
+      <div class="daily-day-icon">${r.day===7?'👑':r.day>=5?'💎':r.day>=3?'🟠':'💰'}</div>
+      <div class="daily-day-amount">$${r.money}</div>
+    </div>`;
+  }).join('');
+
+  const claimBtn = document.getElementById('dailyClaimBtn');
+  const claimedMsg = document.getElementById('dailyClaimedMsg');
+  if (alreadyClaimed) {
+    claimBtn.style.display = 'none';
+    claimedMsg.style.display = 'block';
+  } else {
+    claimBtn.style.display = 'block';
+    claimedMsg.style.display = 'none';
+    const dayIdx = (state.dailyReward.streak % 7);
+    const reward = DAILY_REWARDS_DATA[dayIdx];
+    claimBtn.textContent = `Réclamer $${reward.money}${reward.rep?' + '+reward.rep+' rep':''}`;
+  }
+  document.getElementById('dailyModal').classList.add('open');
+}
+
+function claimDailyReward() {
+  const dayIdx = state.dailyReward.streak % 7;
+  const reward = DAILY_REWARDS_DATA[dayIdx];
+  state.money += reward.money;
+  if (reward.rep) state.rep += reward.rep;
+  state.dailyReward.streak++;
+  state.dailyReward.lastClaimed = Date.now();
+  addActivity('🎁 Récompense jour ' + state.dailyReward.streak + ': +$' + reward.money);
+  saveGame();
+  updateHUDStats();
+  document.getElementById('dailyModal').classList.remove('open');
+  showToast('🎁 +$' + fmt(reward.money) + ' récompense quotidienne!', 'success');
+}
+
+// Close daily modal on overlay click
+document.getElementById('dailyModal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+
+// ============================================================
+// LIVE EVENTS BANNER
+// ============================================================
+let eventIndex = 0;
+let eventInterval = null;
+
+function renderLiveEvents() {
+  const el = document.getElementById('eventsBanner');
+  if (!el) return;
+  const ev = LIVE_EVENTS[eventIndex];
+  el.innerHTML = `
+    <div class="event-slide active" style="background:linear-gradient(135deg,${ev.color}22,${ev.color}11)">
+      <div class="event-emoji">${ev.emoji}</div>
+      <div class="event-info">
+        <div class="event-title" style="color:${ev.color}">${ev.title}</div>
+        <div class="event-desc">${ev.desc}</div>
+        <div class="event-timer">⏱ ${ev.timer} restantes</div>
+      </div>
+      <button class="event-btn" style="background:${ev.color}33" onclick="showToast('Événement: ${ev.title}','info')">→</button>
+    </div>
+    <div class="event-dots">
+      ${LIVE_EVENTS.map((_,i)=>`<div class="event-dot ${i===eventIndex?'active':''}"></div>`).join('')}
+    </div>`;
+}
+
+function startEventCarousel() {
+  renderLiveEvents();
+  if (eventInterval) clearInterval(eventInterval);
+  eventInterval = setInterval(() => {
+    eventIndex = (eventIndex + 1) % LIVE_EVENTS.length;
+    renderLiveEvents();
+  }, 4000);
+}
+
+// ============================================================
+// VEHICLES / GARAGE
+// ============================================================
+function getVehicleBonus(districtId) {
+  if (!state.vehicles.active) return 1;
+  const v = VEHICLES.find(x=>x.id===state.vehicles.active);
+  if (!v) return 1;
+  if (v.bonusType==='global') return v.bonusMult;
+  if (v.bonusType==='district' && v.bonusDistrict===districtId) return v.bonusMult;
+  return 1;
+}
+
+function purchaseVehicle(vehicleId) {
+  const v = VEHICLES.find(x=>x.id===vehicleId);
+  if (!v) return;
+  if (state.vehicles.owned.includes(vehicleId)) { setActiveVehicle(vehicleId); return; }
+  if (v.costType==='money') {
+    if (state.money < v.cost) { showToast('Pas assez d\'argent!', 'error'); return; }
+    state.money -= v.cost;
+    state.vehicles.owned.push(vehicleId);
+    setActiveVehicle(vehicleId);
+    saveGame();
+    renderGarage();
+    updateHUDStats();
+    showToast('🚗 ' + v.name + ' acheté!', 'success');
+  } else {
+    // Pi payment
+    paymentItem = {id:'vehicle_'+vehicleId, emoji:v.emoji, name:v.name, price:v.cost, effect:'vehicle'};
+    showPaymentModal('confirm');
+    openModal('paymentModal');
+    // On success, handled in processPiPayment via vehicleId stored
+    window._pendingVehicleId = vehicleId;
+  }
+}
+
+function setActiveVehicle(vehicleId) {
+  state.vehicles.active = vehicleId;
+  const v = VEHICLES.find(x=>x.id===vehicleId);
+  addActivity('🚗 Véhicule actif: ' + (v?v.name:''));
+  saveGame();
+  renderGarage();
+  showToast('🚗 ' + (v?v.name:'Véhicule') + ' activé!', 'success');
+}
+
+function renderGarage() {
+  const el = document.getElementById('garageContent');
+  if (!el) return;
+  const activeVehicle = state.vehicles.active ? VEHICLES.find(x=>x.id===state.vehicles.active) : null;
+  let html = '';
+  if (activeVehicle) {
+    html += `<div class="garage-active-banner">
+      <div class="garage-active-emoji">${activeVehicle.emoji}</div>
+      <div class="garage-active-info">
+        <div class="garage-active-name">${activeVehicle.name} — Actif</div>
+        <div class="garage-active-bonus">✦ ${activeVehicle.desc}</div>
+      </div>
+    </div>`;
+  }
+  html += '<div class="section-title mb8">Tous les véhicules</div>';
+  VEHICLES.forEach(v => {
+    const owned = state.vehicles.owned.includes(v.id);
+    const active = state.vehicles.active === v.id;
+    const canAfford = v.costType==='money' ? state.money >= v.cost : true;
+    const costLabel = v.costType==='pi' ? `π${v.cost}` : `$${fmt(v.cost)}`;
+    const costColor = (v.costType==='money' && !canAfford) ? 'color:var(--pink)' : v.costType==='pi'?'color:var(--gold)':'color:var(--gold)';
+    html += `<div class="vehicle-card ${owned?'owned':''} ${active?'active-vehicle':''}">
+      <div class="vehicle-emoji">${v.emoji}</div>
+      <div class="vehicle-info">
+        <div class="vehicle-name">${v.name}</div>
+        <div class="vehicle-desc">${v.desc}</div>
+        <div class="vehicle-cost" style="${costColor}">${owned?'✓ Possédé':costLabel}</div>
+      </div>
+      ${active
+        ? '<div class="vehicle-btn vehicle-btn-active">✓ Actif</div>'
+        : owned
+          ? `<button class="vehicle-btn vehicle-btn-activate" onclick="setActiveVehicle('${v.id}')">Activer</button>`
+          : `<button class="vehicle-btn vehicle-btn-buy" onclick="purchaseVehicle('${v.id}')" ${v.costType==='money'&&!canAfford?'disabled':''}>Acheter</button>`}
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+// ============================================================
+// TUTORIAL
+// ============================================================
+const TUTORIAL_STEPS = [
+  {text:'Bienvenue dans BLOCKSIDE City! Ta mission : construire ton empire urbain.', arrow:'↓'},
+  {text:'Visite tes districts depuis la Ville. Lowside est déjà disponible!', arrow:'↙'},
+  {text:'Dans un district, tape "+" pour construire ton premier bâtiment.', arrow:'↓'},
+  {text:'Collecte tes revenus régulièrement pour grandir plus vite. Bonne chance!', arrow:'↓'},
+];
+let tutorialStep = 0;
+
+function startTutorial() {
+  if (state.tutorialDone) return;
+  tutorialStep = 0;
+  showTutorialStep();
+  document.getElementById('tutorialOverlay').classList.add('open');
+}
+
+function showTutorialStep() {
+  const step = TUTORIAL_STEPS[tutorialStep];
+  document.getElementById('tutorialStep').textContent = `ÉTAPE ${tutorialStep+1}/${TUTORIAL_STEPS.length}`;
+  document.getElementById('tutorialText').textContent = step.text;
+  document.querySelector('.tutorial-arrow').textContent = step.arrow;
+  const btn = document.querySelector('.tutorial-next');
+  btn.textContent = tutorialStep < TUTORIAL_STEPS.length-1 ? 'Compris →' : 'Commencer! 🔥';
+}
+
+function nextTutorialStep() {
+  tutorialStep++;
+  if (tutorialStep >= TUTORIAL_STEPS.length) {
+    document.getElementById('tutorialOverlay').classList.remove('open');
+    state.tutorialDone = true;
+    saveGame();
+    return;
+  }
+  showTutorialStep();
+}
+
+// ============================================================
+// COLLECT ALL (hub shortcut)
+// ============================================================
+function collectAllDistricts() {
+  let total = 0;
+  DISTRICTS.forEach(d => {
+    if (state.districts[d.id]?.unlocked) {
+      total += collectDistrict(d.id);
+    }
+  });
+  if (total > 0) {
+    showToast('💰 +$' + fmt(total) + ' collectés!', 'success');
+    updateHUDStats();
+  } else {
+    showToast('Aucun revenu à collecter', 'info');
+  }
 }
 
 // ============================================================
