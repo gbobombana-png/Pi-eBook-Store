@@ -1100,6 +1100,71 @@ const EXTRA_BUILDINGS = [
 ];
 
 // ============================================================
+// API CLIENT — Backend BLOCKSIDE
+// ============================================================
+const API_BASE = 'http://localhost:3001/api'; // à changer en prod
+
+let _piAccessToken = null;  // token Pi SDK stocké après login
+let _piUid = null;          // uid Pi du joueur connecté
+
+const API = {
+  _headers() {
+    const h = { 'Content-Type': 'application/json' };
+    if (_piAccessToken) h['Authorization'] = 'Bearer ' + _piAccessToken;
+    // Mode démo : envoie l'uid en header custom
+    if (!_piAccessToken && _piUid) {
+      h['x-demo-uid'] = _piUid;
+      h['x-demo-username'] = state.username;
+    }
+    return h;
+  },
+
+  async post(path, body) {
+    try {
+      const r = await fetch(API_BASE + path, { method:'POST', headers:this._headers(), body:JSON.stringify(body) });
+      return await r.json();
+    } catch { return null; }
+  },
+
+  async get(path) {
+    try {
+      const r = await fetch(API_BASE + path, { headers:this._headers() });
+      return await r.json();
+    } catch { return null; }
+  },
+
+  async login() {
+    const res = await this.post('/auth/login', {});
+    return res?.success || false;
+  },
+
+  async pushSave() {
+    await this.post('/save', { gameState: state });
+  },
+
+  async pullSave() {
+    const res = await this.get('/save');
+    return res?.save || null;
+  },
+
+  async approvePayment(paymentId, itemId) {
+    return await this.post('/payments/approve', { paymentId, itemId });
+  },
+
+  async completePayment(paymentId, txid) {
+    return await this.post('/payments/complete', { paymentId, txid });
+  },
+
+  async getLeaderboard(type = 'global') {
+    return await this.get('/leaderboard/' + type);
+  },
+
+  async getEvents() {
+    return await this.get('/events');
+  },
+};
+
+// ============================================================
 // GAME STATE
 // ============================================================
 let state = {
@@ -1158,6 +1223,8 @@ let gameTickInterval = null;
 // ============================================================
 function saveGame() {
   try { localStorage.setItem('blockside_save', JSON.stringify(state)); } catch(e){}
+  // Sync cloud en arrière-plan si le joueur est connecté
+  if (_piUid) API.pushSave().catch(() => {});
 }
 function loadGame() {
   try {
@@ -1182,9 +1249,18 @@ async function loginWithPi() {
   if (isPiAvailable()) {
     try {
       const scopes = ['username','payments'];
-      Pi.authenticate(scopes, onIncompletePayment).then(auth => {
+      Pi.authenticate(scopes, onIncompletePayment).then(async auth => {
         state.username = auth.user.username || 'PiUser';
         state.piAuthenticated = true;
+        _piAccessToken = auth.accessToken;
+        _piUid = auth.user.uid;
+        // Connexion backend + chargement sauvegarde cloud
+        await API.login();
+        const cloudSave = await API.pullSave();
+        if (cloudSave && cloudSave.character) {
+          state = { ...state, ...cloudSave };
+          showToast('☁️ Sauvegarde cloud chargée!', 'success');
+        }
         saveGame();
         goToCharSelect();
       }).catch(e => { showToast('Erreur Pi: ' + e.message, 'error'); loginDemo(); });
@@ -1195,14 +1271,20 @@ async function loginWithPi() {
 }
 
 function onIncompletePayment(payment) {
-  if (isPiAvailable()) {
-    Pi.completePayment(payment.identifier, { txid: payment.transaction?.txid || 'demo' });
+  // Tente de compléter un paiement interrompu via le backend
+  const txid = payment.transaction?.txid || '';
+  if (txid) {
+    API.completePayment(payment.identifier, txid)
+      .then(() => { if (isPiAvailable()) Pi.completePayment(payment.identifier, { txid }); });
   }
 }
 
 function loginDemo() {
   state.username = 'BlockPlayer_' + Math.floor(Math.random()*9000+1000);
   state.piAuthenticated = false;
+  // En mode démo : uid aléatoire pour le backend
+  _piUid = 'demo_' + Math.random().toString(36).slice(2, 10);
+  API.login(); // Crée le profil en mode démo
   goToCharSelect();
 }
 
@@ -1949,8 +2031,12 @@ async function processPiPayment() {
         memo: 'BLOCKSIDE - ' + paymentItem.name,
         metadata: { itemId: paymentItem.id }
       }, {
-        onReadyForServerApproval: (pid) => { /* Server approve */ },
-        onReadyForServerCompletion: (pid, txid) => {
+        onReadyForServerApproval: async (pid) => {
+          await API.approvePayment(pid, paymentItem.id);
+        },
+        onReadyForServerCompletion: async (pid, txid) => {
+          const res = await API.completePayment(pid, txid);
+          // Applique les effets (venant du backend ou en local si backend KO)
           if (!state.premiumOwned.includes(paymentItem.id)) state.premiumOwned.push(paymentItem.id);
           applyPaymentEffect(paymentItem);
           checkAchievements();
@@ -2063,16 +2149,27 @@ let currentLbTab = 0;
 function switchLbTab(idx, el) {
   currentLbTab = idx;
   document.querySelectorAll('.lb-tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
-  renderLeaderboard();
+  fetchAndRenderLeaderboard();
 }
 
-function renderLeaderboard() {
+async function fetchAndRenderLeaderboard() {
+  const el = document.getElementById('lbContent');
+  if (!el) return;
+  el.innerHTML = '<div class="text-muted fs13" style="padding:30px;text-align:center">⏳ Chargement...</div>';
+  const types = ['global','factions','districts'];
+  const res = await API.getLeaderboard(types[currentLbTab]);
+  renderLeaderboardFromData(res);
+}
+
+function renderLeaderboard() { fetchAndRenderLeaderboard(); }
+
+function renderLeaderboardFromData(apiData) {
   const el = document.getElementById('lbContent');
   if (!el) return;
   if (currentLbTab === 0) {
-    // Insert player's entry at correct rank position
-    const allEntries = [...GLOBAL_LEADERBOARD];
-    const playerScore = state.rep + Math.floor(state.totalEarned/100);
+    const serverBoard = apiData?.board || [];
+    // Fusionne données serveur avec données locales statiques si serveur vide
+    const allEntries = serverBoard.length ? serverBoard : [...GLOBAL_LEADERBOARD];
     const playerEntry = {name:state.username, faction:state.crew||'rebel', rep:state.rep, buildings:state.totalBuildings, prestige:state.prestigeLevel, char:state.username[0].toUpperCase(), color:'#FF6B1A', isMe:true};
     allEntries.push(playerEntry);
     allEntries.sort((a,b)=>(b.rep+Math.floor((b.totalEarned||0)/100))-(a.rep+Math.floor((a.totalEarned||0)/100)));
@@ -2095,23 +2192,30 @@ function renderLeaderboard() {
         </div>`;
       }).join('');
   } else if (currentLbTab === 1) {
+    const fBoard = apiData?.board || FACTION_LEADERBOARD;
+    const fColors = {rebel:'#FF6B1A',crow:'#9B2FFF',purple:'#CC77FF'};
+    const fEmoji  = {rebel:'🔥',crow:'🐦‍⬛',purple:'💜'};
     el.innerHTML = `<div class="fs13 fw7 mb8 text-muted">👥 Classement Factions</div>` +
-      FACTION_LEADERBOARD.map((f,i) => {
+      fBoard.map((f,i) => {
         const rankEmoji = i===0?'🥇':i===1?'🥈':'🥉';
+        const color = f.color || fColors[f.faction] || '#FF6B1A';
+        const emoji = f.emoji || fEmoji[f.faction] || '👥';
+        const dom   = f.dominancePercent || f.dominance || 0;
         return `<div class="lb-faction-entry">
           <div style="font-size:14px;font-weight:700;width:30px;text-align:center">${rankEmoji}</div>
-          <div class="lb-faction-logo" style="background:${f.bg||f.color+'22'}">${f.emoji}</div>
+          <div class="lb-faction-logo" style="background:${color}22">${emoji}</div>
           <div style="flex:1;min-width:0">
-            <div class="lb-name" style="color:${f.color}">${f.name}</div>
-            <div class="lb-sub">👥 ${fmt(f.members)} membres · ⭐ ${fmt(f.totalRep)} rep total</div>
-            <div class="lb-faction-bar" style="background:${f.color};width:${f.dominance}%;margin-top:6px"></div>
-            <div class="fs10 text-muted mt4">${f.dominance}% domination</div>
+            <div class="lb-name" style="color:${color}">${f.factionName || f.name}</div>
+            <div class="lb-sub">👥 ${fmt(f.members||0)} membres · ⭐ ${fmt(f.totalRep||f.totalReputation||0)} rep</div>
+            <div class="lb-faction-bar" style="background:${color};width:${dom}%;margin-top:6px"></div>
+            <div class="fs10 text-muted mt4">${dom}% domination</div>
           </div>
         </div>`;
       }).join('');
   } else {
+    const dBoard = apiData?.board || DISTRICT_LEADERBOARD;
     el.innerHTML = `<div class="fs13 fw7 mb8 text-muted">🏙️ Classement Districts</div>` +
-      DISTRICT_LEADERBOARD.map((d,i) => {
+      dBoard.map((d,i) => {
         const rankEmoji = i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
         return `<div class="lb-entry">
           <div class="lb-rank" style="${i<3?'font-size:18px':''}">${rankEmoji}</div>
