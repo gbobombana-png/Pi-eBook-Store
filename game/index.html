@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>BLOCKSIDE — Build. Fight. Own.</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --orange:#FF6B1A;--purple:#9B2FFF;--pink:#FF2D78;--blue:#2F9BFF;
+  --gold:#FFD700;--bg:#07070F;--card:#0F0F1E;--border:#1E1E40;
+  --text:#E8E8FF;--muted:#6B6B9A;--green:#4ADE80;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;overflow:hidden}
+#app{width:100%;height:100%;position:relative;overflow:hidden}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden}
+.screen.active{display:flex}
+
+/* UTILS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:12px;border:none;font-family:'Sora',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all .2s;letter-spacing:.5px}
+.btn-primary{background:linear-gradient(135deg,var(--orange),var(--pink));color:#fff;box-shadow:0 4px 20px rgba(255,107,26,.4)}
+.btn-primary:active{transform:scale(.96)}
+.btn-secondary{background:var(--card);color:var(--text);border:1px solid var(--border)}
+.btn-purple{background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff;box-shadow:0 4px 20px rgba(155,47,255,.4)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#FF9500);color:#000;box-shadow:0 4px 20px rgba(255,215,0,.3)}
+.btn-full{width:100%}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px}
+.mono{font-family:'Space Mono',monospace}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;font-family:'Space Mono',monospace}
+.badge-common{background:rgba(107,107,154,.3);color:#A0A0CC;border:1px solid rgba(107,107,154,.4)}
+.badge-rare{background:rgba(47,155,255,.2);color:var(--blue);border:1px solid rgba(47,155,255,.4)}
+.badge-epic{background:rgba(155,47,255,.2);color:#CC77FF;border:1px solid rgba(155,47,255,.4)}
+.badge-legendary{background:rgba(255,215,0,.15);color:var(--gold);border:1px solid rgba(255,215,0,.4)}
+.badge-mythic{background:linear-gradient(135deg,rgba(255,45,120,.2),rgba(155,47,255,.2));color:#FF77BB;border:1px solid rgba(255,45,120,.4)}
+.scrollable{overflow-y:auto;-webkit-overflow-scrolling:touch}
+.scrollable::-webkit-scrollbar{width:3px}
+.scrollable::-webkit-scrollbar-track{background:transparent}
+.scrollable::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.hidden{display:none!important}
+.flex{display:flex}.gap4{gap:4px}.gap8{gap:8px}.gap12{gap:12px}.gap16{gap:16px}
+.col{flex-direction:column}.center{align-items:center}.between{justify-content:space-between}
+.fw7{font-weight:700}.fw6{font-weight:600}.fs12{font-size:12px}.fs13{font-size:13px}.fs14{font-size:14px}.fs16{font-size:16px}.fs18{font-size:18px}.fs20{font-size:20px}.fs24{font-size:24px}
+.mt4{margin-top:4px}.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
+.mb8{margin-bottom:8px}.mb12{margin-bottom:12px}.mb16{margin-bottom:16px}
+.text-orange{color:var(--orange)}.text-purple{color:var(--purple)}.text-pink{color:var(--pink)}
+.text-blue{color:var(--blue)}.text-gold{color:var(--gold)}.text-green{color:var(--green)}.text-muted{color:var(--muted)}
+.w100{width:100%}
+
+/* PARTICLES */
+#particles{position:fixed;inset:0;pointer-events:none;z-index:0}
+.particle{position:absolute;width:2px;height:2px;border-radius:50%;animation:float linear infinite}
+@keyframes float{0%{transform:translateY(100vh) scale(0);opacity:0}10%{opacity:1}90%{opacity:.5}100%{transform:translateY(-20px) scale(1);opacity:0}}
+
+/* ===== SPLASH ===== */
+#splash{background:var(--bg);align-items:center;justify-content:center;z-index:10}
+.splash-bg{position:absolute;inset:0;overflow:hidden}
+.splash-orb{position:absolute;border-radius:50%;filter:blur(80px);animation:pulse-orb 4s ease-in-out infinite}
+.orb1{width:400px;height:400px;background:rgba(155,47,255,.2);top:-100px;right:-100px;animation-delay:0s}
+.orb2{width:300px;height:300px;background:rgba(255,107,26,.15);bottom:-50px;left:-80px;animation-delay:2s}
+.orb3{width:200px;height:200px;background:rgba(255,45,120,.15);top:40%;left:30%;animation-delay:1s}
+@keyframes pulse-orb{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.splash-content{position:relative;z-index:2;text-align:center;padding:40px 24px}
+.splash-logo{margin-bottom:12px}
+.logo-block{font-family:'Space Mono',monospace;font-size:52px;font-weight:700;letter-spacing:-2px;
+  background:linear-gradient(135deg,var(--orange),var(--pink),var(--purple));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:logo-glow 3s ease-in-out infinite}
+@keyframes logo-glow{0%,100%{filter:drop-shadow(0 0 20px rgba(255,107,26,.5))}50%{filter:drop-shadow(0 0 40px rgba(255,45,120,.8))}}
+.logo-side{display:block;font-family:'Space Mono',monospace;font-size:18px;letter-spacing:8px;color:var(--muted);margin-top:-8px}
+.splash-slogan{font-size:16px;color:var(--muted);letter-spacing:3px;margin:16px 0 48px;text-transform:uppercase}
+.pi-login-btn{background:linear-gradient(135deg,var(--orange),var(--pink));border:none;color:#fff;
+  padding:18px 48px;border-radius:16px;font-family:'Sora',sans-serif;font-weight:800;font-size:18px;
+  cursor:pointer;letter-spacing:1px;position:relative;overflow:hidden;
+  box-shadow:0 8px 32px rgba(255,107,26,.5);animation:btn-pulse 2s ease-in-out infinite}
+.pi-login-btn::before{content:'';position:absolute;inset:-2px;background:linear-gradient(135deg,var(--orange),var(--pink),var(--purple));border-radius:18px;z-index:-1;animation:border-rotate 3s linear infinite}
+@keyframes btn-pulse{0%,100%{box-shadow:0 8px 32px rgba(255,107,26,.5)}50%{box-shadow:0 8px 48px rgba(255,107,26,.9)}}
+@keyframes border-rotate{0%{filter:hue-rotate(0deg)}100%{filter:hue-rotate(360deg)}}
+.pi-login-btn:active{transform:scale(.97)}
+.splash-demo{margin-top:16px;color:var(--muted);font-size:12px;cursor:pointer;text-decoration:underline}
+.splash-version{position:absolute;bottom:20px;color:var(--muted);font-size:11px;font-family:'Space Mono',monospace}
+
+/* ===== CHARACTER SELECT ===== */
+#charSelect{background:var(--bg)}
+.char-header{padding:20px 20px 0;text-align:center;flex-shrink:0}
+.char-title{font-size:22px;font-weight:800;background:linear-gradient(135deg,var(--orange),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.char-sub{color:var(--muted);font-size:13px;margin-top:4px}
+.chars-scroll{display:flex;gap:12px;padding:20px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-shrink:0;scroll-snap-type:x mandatory}
+.chars-scroll::-webkit-scrollbar{display:none}
+.char-card{min-width:200px;background:var(--card);border:2px solid var(--border);border-radius:20px;padding:20px;cursor:pointer;transition:all .3s;scroll-snap-align:center;position:relative;overflow:hidden}
+.char-card.selected{border-color:var(--char-color, var(--orange));box-shadow:0 0 30px var(--char-glow, rgba(255,107,26,.3))}
+.char-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at top right,var(--char-color,var(--orange)) 0%,transparent 60%);opacity:0;transition:opacity .3s}
+.char-card.selected::before{opacity:.1}
+.char-number{font-family:'Space Mono',monospace;font-size:48px;font-weight:700;color:var(--char-color,var(--orange));line-height:1;opacity:.9}
+.char-name{font-size:22px;font-weight:800;margin:4px 0 2px;letter-spacing:1px}
+.char-role{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:1px}
+.char-desc{font-size:12px;color:var(--text);margin:10px 0;line-height:1.5;opacity:.8}
+.char-bonus{background:rgba(255,255,255,.05);border-radius:8px;padding:8px;font-size:12px;color:var(--char-color,var(--orange));font-weight:600}
+.char-select-indicator{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);position:absolute;top:16px;right:16px;display:flex;align-items:center;justify-content:center;transition:all .3s}
+.char-card.selected .char-select-indicator{background:var(--char-color,var(--orange));border-color:var(--char-color,var(--orange))}
+.char-footer{padding:0 20px 20px;flex-shrink:0}
+.char-dots{display:flex;justify-content:center;gap:6px;margin-bottom:16px}
+.char-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all .3s}
+.char-dot.active{background:var(--orange);width:20px}
+
+/* ===== HUB ===== */
+#hub{background:var(--bg)}
+.top-bar{display:flex;align-items:center;gap:12px;padding:16px 16px 8px;flex-shrink:0}
+.avatar-circle{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;flex-shrink:0;border:2px solid var(--border)}
+.top-bar-info{flex:1;min-width:0}
+.username{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rep-title{font-size:11px;color:var(--orange);font-weight:600;font-family:'Space Mono',monospace}
+.notif-btn{width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer}
+.stats-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 16px 12px;flex-shrink:0}
+.stat-item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px;text-align:center}
+.stat-val{font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--gold)}
+.stat-label{font-size:10px;color:var(--muted);margin-top:2px;font-weight:600}
+.hub-content{flex:1;padding:0 16px;overflow-y:auto}
+.section-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.quick-btn{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 16px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.quick-btn:active{transform:scale(.97);background:#151530}
+.quick-btn-icon{font-size:28px}
+.quick-btn-label{font-weight:700;font-size:14px}
+.quick-btn-sub{font-size:11px;color:var(--muted)}
+.income-card{background:linear-gradient(135deg,rgba(255,107,26,.1),rgba(155,47,255,.1));border:1px solid rgba(255,107,26,.3);border-radius:16px;padding:16px;margin-bottom:16px}
+.income-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.income-title{font-size:13px;font-weight:700;color:var(--orange)}
+.income-value{font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:var(--gold)}
+.income-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.activity-list{display:flex;flex-direction:column;gap:8px;margin-bottom:100px}
+.activity-item{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px}
+.activity-icon{font-size:20px}
+.activity-text{flex:1;font-size:13px}
+.activity-time{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace}
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav{position:absolute;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0 8px;cursor:pointer;transition:all .2s;gap:3px}
+.nav-item.active .nav-icon{color:var(--orange)}
+.nav-item.active .nav-label{color:var(--orange)}
+.nav-icon{font-size:20px;color:var(--muted);transition:color .2s}
+.nav-label{font-size:10px;color:var(--muted);font-weight:600;transition:color .2s}
+.nav-item:active{background:rgba(255,255,255,.03)}
+
+/* ===== CITY MAP ===== */
+#cityMap{background:var(--bg)}
+.city-header{padding:16px 16px 8px;flex-shrink:0}
+.back-btn{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:14px;cursor:pointer;margin-bottom:12px;width:fit-content}
+.city-title{font-size:20px;font-weight:800}
+.city-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.city-grid{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto;gap:12px;padding:12px 16px 80px;overflow-y:auto}
+.district-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;min-height:120px;display:flex;flex-direction:column;justify-content:space-between}
+.district-card.unlocked{border-color:rgba(255,255,255,.1)}
+.district-card.unlocked:active{transform:scale(.97)}
+.district-card.locked{opacity:.6;cursor:default}
+.district-card.featured{grid-column:1/-1}
+.district-glow{position:absolute;inset:0;opacity:.08;pointer-events:none}
+.district-icon{font-size:32px;margin-bottom:6px}
+.district-name{font-size:14px;font-weight:800;letter-spacing:.5px}
+.district-vibe{font-size:11px;color:var(--muted);margin-top:2px}
+.district-stats{display:flex;gap:8px;margin-top:8px}
+.district-stat{font-size:11px;color:var(--muted);background:rgba(255,255,255,.05);padding:3px 8px;border-radius:6px}
+.lock-overlay{position:absolute;inset:0;background:rgba(7,7,15,.7);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.lock-icon{font-size:24px}
+.lock-req{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace}
+
+/* ===== DISTRICT VIEW ===== */
+#districtView{background:var(--bg)}
+.district-header{padding:16px;flex-shrink:0}
+.district-header-name{font-size:22px;font-weight:800}
+.district-header-vibe{font-size:12px;color:var(--muted);margin-top:2px}
+.district-income-bar{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;margin:0 16px 12px;flex-shrink:0}
+.district-income-val{font-family:'Space Mono',monospace;font-size:14px;color:var(--gold)}
+.collect-all-btn{background:linear-gradient(135deg,var(--orange),var(--pink));border:none;color:#fff;padding:8px 16px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Sora',sans-serif}
+.collect-all-btn:disabled{opacity:.4;cursor:default}
+.building-grid{display:grid;gap:10px;padding:0 16px 80px;overflow-y:auto;flex:1}
+.grid-3x3{grid-template-columns:repeat(3,1fr)}
+.grid-3x4{grid-template-columns:repeat(3,1fr)}
+.grid-4x4{grid-template-columns:repeat(4,1fr)}
+.slot{background:var(--card);border:1.5px dashed var(--border);border-radius:14px;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;position:relative;min-height:80px}
+.slot.occupied{border-style:solid;border-color:rgba(255,255,255,.1)}
+.slot.occupied:active,.slot.empty:active{transform:scale(.94)}
+.slot-plus{font-size:24px;color:var(--muted)}
+.slot-add-text{font-size:10px;color:var(--muted);margin-top:2px}
+.slot-emoji{font-size:28px}
+.slot-name{font-size:9px;color:var(--muted);margin-top:2px;text-align:center;line-height:1.2;padding:0 2px}
+.slot-level{font-size:9px;font-family:'Space Mono',monospace;color:var(--orange);font-weight:700}
+.slot-income-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--green);animation:dot-pulse 1.5s ease-in-out infinite}
+@keyframes dot-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+
+/* ===== MODAL ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(7,7,15,.85);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-sheet{background:var(--card);border:1px solid var(--border);border-radius:24px 24px 0 0;width:100%;max-height:85vh;display:flex;flex-direction:column;animation:slide-up .3s cubic-bezier(.34,1.56,.64,1)}
+@keyframes slide-up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0}
+.modal-header{padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);flex-shrink:0}
+.modal-title{font-size:18px;font-weight:800}
+.modal-close{width:32px;height:32px;border-radius:50%;background:var(--border);border:none;color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.modal-body{padding:16px 20px;overflow-y:auto;flex:1}
+.modal-footer{padding:12px 20px;border-top:1px solid var(--border);flex-shrink:0}
+
+/* BUILD MODAL */
+.filter-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:12px;flex-shrink:0}
+.filter-tabs::-webkit-scrollbar{display:none}
+.filter-tab{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .2s}
+.filter-tab.active{background:var(--orange);color:#fff;border-color:var(--orange)}
+.building-list{display:flex;flex-direction:column;gap:10px}
+.building-item{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:14px;padding:12px;cursor:pointer;transition:all .2s}
+.building-item:active{transform:scale(.98)}
+.building-emoji{font-size:32px;width:48px;text-align:center}
+.building-info{flex:1;min-width:0}
+.building-name{font-weight:700;font-size:14px}
+.building-stats{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap}
+.building-stat{font-size:11px;color:var(--muted)}
+.building-buy{text-align:right}
+.building-cost{font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--gold);white-space:nowrap}
+.building-cost.unaffordable{color:var(--pink)}
+.buy-btn{margin-top:6px;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;border:none;cursor:pointer;font-family:'Sora',sans-serif;background:linear-gradient(135deg,var(--orange),var(--pink));color:#fff}
+.buy-btn:disabled{opacity:.4;cursor:default;background:var(--border);color:var(--muted)}
+
+/* BUILDING DETAIL MODAL */
+.detail-hero{text-align:center;padding:16px 0}
+.detail-emoji{font-size:56px;display:block;margin-bottom:8px}
+.detail-name{font-size:22px;font-weight:800}
+.detail-district{font-size:12px;color:var(--muted);margin-top:4px}
+.detail-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+.detail-stat{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center}
+.detail-stat-val{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:var(--gold)}
+.detail-stat-label{font-size:11px;color:var(--muted);margin-top:3px}
+.pending-income-box{background:linear-gradient(135deg,rgba(74,222,128,.1),rgba(47,155,255,.1));border:1px solid rgba(74,222,128,.3);border-radius:12px;padding:14px;text-align:center;margin-bottom:16px}
+.pending-income-val{font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--green)}
+.pending-income-label{font-size:12px;color:var(--muted);margin-top:4px}
+.upgrade-info{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px}
+.upgrade-level{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.level-dots{display:flex;gap:4px}
+.level-dot{width:12px;height:12px;border-radius:50%;background:var(--border)}
+.level-dot.filled{background:var(--orange)}
+
+/* CREW */
+#crew{background:var(--bg)}
+.crew-content{flex:1;padding:16px;overflow-y:auto}
+.faction-cards{display:flex;flex-direction:column;gap:12px;margin-bottom:20px}
+.faction-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:14px}
+.faction-card:active{transform:scale(.98)}
+.faction-logo{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;flex-shrink:0}
+.faction-info{flex:1}
+.faction-name{font-size:16px;font-weight:800;letter-spacing:.5px}
+.faction-vibe{font-size:12px;color:var(--muted);margin-top:2px}
+.faction-members{font-size:11px;margin-top:6px;font-family:'Space Mono',monospace}
+.join-btn{padding:8px 16px;border-radius:10px;border:none;font-weight:700;font-size:12px;cursor:pointer;font-family:'Sora',sans-serif}
+.crew-info-card{background:linear-gradient(135deg,rgba(155,47,255,.1),rgba(255,107,26,.1));border:1px solid rgba(155,47,255,.3);border-radius:16px;padding:16px;margin-bottom:16px}
+.crew-rank-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.rank-item{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 12px}
+.rank-pos{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;width:24px;color:var(--muted)}
+.rank-pos.top{color:var(--gold)}
+.rank-name{flex:1;font-size:13px;font-weight:600}
+.rank-score{font-family:'Space Mono',monospace;font-size:12px;color:var(--orange)}
+.crew-chat{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:16px}
+.chat-title{padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;font-weight:700}
+.chat-messages{padding:12px;display:flex;flex-direction:column;gap:8px}
+.chat-msg{font-size:12px;line-height:1.5}
+.chat-author{font-weight:700;color:var(--orange)}
+
+/* PI MARKET */
+#piMarket{background:var(--bg)}
+.market-header{padding:16px;flex-shrink:0}
+.market-title{font-size:22px;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.market-note{font-size:12px;color:var(--muted);margin-top:4px}
+.market-items{display:flex;flex-direction:column;gap:12px;padding:0 16px 80px;overflow-y:auto;flex:1}
+.market-item{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;position:relative;overflow:hidden}
+.market-item.owned{border-color:var(--green)}
+.market-item-glow{position:absolute;top:0;right:0;width:100px;height:100px;border-radius:50%;filter:blur(40px);pointer-events:none}
+.market-item-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.market-item-emoji{font-size:40px;width:56px;text-align:center}
+.market-item-info{flex:1}
+.market-item-name{font-size:16px;font-weight:800}
+.market-item-desc{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5}
+.market-item-price{display:flex;align-items:center;justify-content:space-between}
+.pi-price{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--gold)}
+.pi-symbol{font-size:13px;margin-right:2px}
+.buy-pi-btn{padding:10px 20px;border-radius:12px;border:none;font-weight:700;font-size:13px;cursor:pointer;font-family:'Sora',sans-serif;background:linear-gradient(135deg,var(--gold),#FF9500);color:#000}
+.owned-badge{padding:8px 16px;border-radius:12px;background:rgba(74,222,128,.2);color:var(--green);font-weight:700;font-size:13px;border:1px solid rgba(74,222,128,.4)}
+
+/* PI PAYMENT MODAL */
+.payment-states{text-align:center;padding:20px 0}
+.payment-icon{font-size:64px;margin-bottom:16px;display:block}
+.payment-title{font-size:20px;font-weight:800;margin-bottom:8px}
+.payment-desc{font-size:14px;color:var(--muted);line-height:1.6}
+.payment-spinner{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--orange);border-radius:50%;animation:spin 1s linear infinite;margin:20px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* PROFILE */
+#profile{background:var(--bg)}
+.profile-content{flex:1;padding:16px;overflow-y:auto;padding-bottom:80px}
+.profile-hero{text-align:center;margin-bottom:20px}
+.profile-avatar{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:800;margin:0 auto 12px;border:3px solid var(--orange)}
+.profile-username{font-size:20px;font-weight:800}
+.profile-title{font-size:13px;margin-top:4px;font-family:'Space Mono',monospace}
+.rep-bar-wrap{margin:16px 0}
+.rep-bar-label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px}
+.rep-bar{height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+.rep-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--orange),var(--pink));transition:width .5s}
+.profile-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.profile-stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center}
+.profile-stat-val{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:var(--orange)}
+.profile-stat-label{font-size:11px;color:var(--muted);margin-top:3px}
+.achievements-title{font-size:14px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
+.achievements-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.achievement{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 6px;text-align:center;transition:all .3s}
+.achievement.unlocked{border-color:var(--gold);background:rgba(255,215,0,.05)}
+.ach-icon{font-size:24px;margin-bottom:4px;display:block;filter:grayscale(1)}
+.achievement.unlocked .ach-icon{filter:none}
+.ach-name{font-size:9px;color:var(--muted);line-height:1.3;font-weight:600}
+.achievement.unlocked .ach-name{color:var(--gold)}
+
+/* TOAST */
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 20px;font-size:13px;font-weight:600;z-index:999;transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;max-width:90vw;text-align:center}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#toast.success{border-color:var(--green);color:var(--green)}
+#toast.error{border-color:var(--pink);color:var(--pink)}
+#toast.info{border-color:var(--blue);color:var(--blue)}
+
+/* SCROLL */
+.scroll-hint{display:flex;justify-content:center;gap:4px;padding:8px 0}
+.scroll-hint-dot{width:4px;height:4px;border-radius:50%;background:var(--border)}
+.scroll-hint-dot.active{background:var(--orange);width:12px}
+</style>
+</head>
+<body>
+<div id="app">
+<canvas id="particles" style="position:fixed;inset:0;pointer-events:none;z-index:0"></canvas>
+
+<!-- SPLASH -->
+<div id="splash" class="screen active">
+  <div class="splash-bg">
+    <div class="splash-orb orb1"></div>
+    <div class="splash-orb orb2"></div>
+    <div class="splash-orb orb3"></div>
+  </div>
+  <div class="splash-content">
+    <div class="splash-logo">
+      <div class="logo-block">BLOCK</div>
+      <span class="logo-side">SIDE</span>
+    </div>
+    <div class="splash-slogan">Build. Fight. Own.</div>
+    <button class="pi-login-btn" onclick="loginWithPi()">🌐 Connexion Pi Network</button>
+    <div class="splash-demo" onclick="loginDemo()">Jouer en mode démo →</div>
+  </div>
+  <div class="splash-version mono">v1.0.0 — Pi Network</div>
+</div>
+
+<!-- CHARACTER SELECT -->
+<div id="charSelect" class="screen">
+  <div class="char-header">
+    <div class="char-title">Choisis ton personnage</div>
+    <div class="char-sub">Chaque personnage a des bonus uniques</div>
+  </div>
+  <div class="chars-scroll" id="charsScroll"></div>
+  <div class="char-dots" id="charDots"></div>
+  <div class="char-footer">
+    <button class="btn btn-primary btn-full" id="startBtn" disabled onclick="startGame()">Choisir un personnage</button>
+  </div>
+</div>
+
+<!-- HUB -->
+<div id="hub" class="screen">
+  <div class="top-bar">
+    <div class="avatar-circle" id="hubAvatar" style="background:rgba(255,107,26,.2);color:var(--orange)">Z</div>
+    <div class="top-bar-info">
+      <div class="username" id="hubUsername">Player</div>
+      <div class="rep-title" id="hubRepTitle">Street Rookie</div>
+    </div>
+    <div class="notif-btn" onclick="showToast('Pas de nouvelles notifications','info')">🔔</div>
+  </div>
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-val" id="hubMoney">0</div>
+      <div class="stat-label">💰 Argent</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-val" id="hubRep">0</div>
+      <div class="stat-label">⭐ Réputation</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-val" id="hubBuildings">0</div>
+      <div class="stat-label">🏗️ Bâtiments</div>
+    </div>
+  </div>
+  <div class="hub-content scrollable">
+    <div class="income-card">
+      <div class="income-top">
+        <div class="income-title">💵 Revenus en attente</div>
+      </div>
+      <div class="income-value" id="hubPendingIncome">0</div>
+      <div class="income-sub">Visite tes districts pour collecter</div>
+    </div>
+    <div class="section-title mb8">Actions rapides</div>
+    <div class="quick-grid mb16">
+      <div class="quick-btn" onclick="showScreen('cityMap')">
+        <div class="quick-btn-icon">🏙️</div>
+        <div class="quick-btn-label">Ville</div>
+        <div class="quick-btn-sub">Explore tes districts</div>
+      </div>
+      <div class="quick-btn" onclick="openFirstDistrict()">
+        <div class="quick-btn-icon">🏗️</div>
+        <div class="quick-btn-label">Construire</div>
+        <div class="quick-btn-sub">Ajoute des bâtiments</div>
+      </div>
+      <div class="quick-btn" onclick="showScreen('crew')">
+        <div class="quick-btn-icon">👥</div>
+        <div class="quick-btn-label">Crew</div>
+        <div class="quick-btn-sub">Rejoins une faction</div>
+      </div>
+      <div class="quick-btn" onclick="showScreen('piMarket')">
+        <div class="quick-btn-icon">⭐</div>
+        <div class="quick-btn-label">Pi Market</div>
+        <div class="quick-btn-sub">Items premium</div>
+      </div>
+    </div>
+    <div class="section-title mb8">Activité récente</div>
+    <div class="activity-list" id="activityList"></div>
+  </div>
+  <div class="bottom-nav" id="hubNav">
+    <div class="nav-item active" onclick="navTo('hub',this)"><div class="nav-icon">🏠</div><div class="nav-label">Hub</div></div>
+    <div class="nav-item" onclick="navTo('cityMap',this)"><div class="nav-icon">🏙️</div><div class="nav-label">Ville</div></div>
+    <div class="nav-item" onclick="navTo('piMarket',this)"><div class="nav-icon">⭐</div><div class="nav-label">Boutique</div></div>
+    <div class="nav-item" onclick="navTo('crew',this)"><div class="nav-icon">👥</div><div class="nav-label">Crew</div></div>
+    <div class="nav-item" onclick="navTo('profile',this)"><div class="nav-icon">👤</div><div class="nav-label">Profil</div></div>
+  </div>
+</div>
+
+<!-- CITY MAP -->
+<div id="cityMap" class="screen">
+  <div class="city-header">
+    <div class="back-btn" onclick="goBack()">← Retour</div>
+    <div class="city-title">🗺️ Ta Ville</div>
+    <div class="city-sub">Clique sur un district pour y accéder</div>
+  </div>
+  <div class="city-grid scrollable" id="cityGrid"></div>
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="navTo('hub',this)"><div class="nav-icon">🏠</div><div class="nav-label">Hub</div></div>
+    <div class="nav-item active" onclick="navTo('cityMap',this)"><div class="nav-icon">🏙️</div><div class="nav-label">Ville</div></div>
+    <div class="nav-item" onclick="navTo('piMarket',this)"><div class="nav-icon">⭐</div><div class="nav-label">Boutique</div></div>
+    <div class="nav-item" onclick="navTo('crew',this)"><div class="nav-icon">👥</div><div class="nav-label">Crew</div></div>
+    <div class="nav-item" onclick="navTo('profile',this)"><div class="nav-icon">👤</div><div class="nav-label">Profil</div></div>
+  </div>
+</div>
+
+<!-- DISTRICT VIEW -->
+<div id="districtView" class="screen">
+  <div class="district-header">
+    <div class="back-btn" onclick="goBack()">← Ville</div>
+    <div class="district-header-name" id="dvName">LOWSIDE</div>
+    <div class="district-header-vibe" id="dvVibe">Underground street vibes</div>
+  </div>
+  <div class="district-income-bar">
+    <div>
+      <div class="fs12 text-muted">Revenus/min</div>
+      <div class="district-income-val" id="dvIncome">0/min</div>
+    </div>
+    <button class="collect-all-btn" id="dvCollectBtn" onclick="collectCurrentDistrict()">💰 Tout Collecter</button>
+  </div>
+  <div class="building-grid grid-3x3 scrollable" id="buildingGrid"></div>
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="navTo('hub',this)"><div class="nav-icon">🏠</div><div class="nav-label">Hub</div></div>
+    <div class="nav-item active" onclick="navTo('cityMap',this)"><div class="nav-icon">🏙️</div><div class="nav-label">Ville</div></div>
+    <div class="nav-item" onclick="navTo('piMarket',this)"><div class="nav-icon">⭐</div><div class="nav-label">Boutique</div></div>
+    <div class="nav-item" onclick="navTo('crew',this)"><div class="nav-icon">👥</div><div class="nav-label">Crew</div></div>
+    <div class="nav-item" onclick="navTo('profile',this)"><div class="nav-icon">👤</div><div class="nav-label">Profil</div></div>
+  </div>
+</div>
+
+<!-- CREW -->
+<div id="crew" class="screen">
+  <div class="district-header" style="flex-shrink:0">
+    <div class="back-btn" onclick="goBack()">← Hub</div>
+    <div class="district-header-name">👥 Factions & Crew</div>
+  </div>
+  <div class="crew-content scrollable" id="crewContent"></div>
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="navTo('hub',this)"><div class="nav-icon">🏠</div><div class="nav-label">Hub</div></div>
+    <div class="nav-item" onclick="navTo('cityMap',this)"><div class="nav-icon">🏙️</div><div class="nav-label">Ville</div></div>
+    <div class="nav-item" onclick="navTo('piMarket',this)"><div class="nav-icon">⭐</div><div class="nav-label">Boutique</div></div>
+    <div class="nav-item active" onclick="navTo('crew',this)"><div class="nav-icon">👥</div><div class="nav-label">Crew</div></div>
+    <div class="nav-item" onclick="navTo('profile',this)"><div class="nav-icon">👤</div><div class="nav-label">Profil</div></div>
+  </div>
+</div>
+
+<!-- PI MARKET -->
+<div id="piMarket" class="screen">
+  <div class="market-header" style="flex-shrink:0">
+    <div class="back-btn" onclick="goBack()">← Hub</div>
+    <div class="market-title">Pi Market</div>
+    <div class="market-note">Items premium payés avec de vrais Pi Coins</div>
+  </div>
+  <div class="market-items scrollable" id="marketItems"></div>
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="navTo('hub',this)"><div class="nav-icon">🏠</div><div class="nav-label">Hub</div></div>
+    <div class="nav-item" onclick="navTo('cityMap',this)"><div class="nav-icon">🏙️</div><div class="nav-label">Ville</div></div>
+    <div class="nav-item active" onclick="navTo('piMarket',this)"><div class="nav-icon">⭐</div><div class="nav-label">Boutique</div></div>
+    <div class="nav-item" onclick="navTo('crew',this)"><div class="nav-icon">👥</div><div class="nav-label">Crew</div></div>
+    <div class="nav-item" onclick="navTo('profile',this)"><div class="nav-icon">👤</div><div class="nav-label">Profil</div></div>
+  </div>
+</div>
+
+<!-- PROFILE -->
+<div id="profile" class="screen">
+  <div class="district-header" style="flex-shrink:0">
+    <div class="back-btn" onclick="goBack()">← Hub</div>
+    <div class="district-header-name">👤 Profil</div>
+  </div>
+  <div class="profile-content scrollable" id="profileContent"></div>
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="navTo('hub',this)"><div class="nav-icon">🏠</div><div class="nav-label">Hub</div></div>
+    <div class="nav-item" onclick="navTo('cityMap',this)"><div class="nav-icon">🏙️</div><div class="nav-label">Ville</div></div>
+    <div class="nav-item" onclick="navTo('piMarket',this)"><div class="nav-icon">⭐</div><div class="nav-label">Boutique</div></div>
+    <div class="nav-item" onclick="navTo('crew',this)"><div class="nav-icon">👥</div><div class="nav-label">Crew</div></div>
+    <div class="nav-item active" onclick="navTo('profile',this)"><div class="nav-icon">👤</div><div class="nav-label">Profil</div></div>
+  </div>
+</div>
+
+<!-- BUILD MODAL -->
+<div class="modal-overlay" id="buildModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">🏗️ Construire</div>
+      <button class="modal-close" onclick="closeModal('buildModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="filter-tabs" id="buildFilters"></div>
+      <div class="building-list" id="buildingListModal"></div>
+    </div>
+  </div>
+</div>
+
+<!-- BUILDING DETAIL MODAL -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title" id="detailTitle">Détail</div>
+      <button class="modal-close" onclick="closeModal('detailModal')">✕</button>
+    </div>
+    <div class="modal-body" id="detailBody"></div>
+    <div class="modal-footer" id="detailFooter"></div>
+  </div>
+</div>
+
+<!-- PAYMENT MODAL -->
+<div class="modal-overlay" id="paymentModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">💰 Achat Pi</div>
+      <button class="modal-close" onclick="closeModal('paymentModal')">✕</button>
+    </div>
+    <div class="modal-body" id="paymentBody"></div>
+    <div class="modal-footer" id="paymentFooter"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ============================================================
+// DATA DEFINITIONS
+// ============================================================
+const CHARACTERS = [
+  {id:'zay',num:'#23',name:'ZAY',role:'Street Leader',desc:'Maîtrise les rues et les réseaux commerciaux underground.',bonus:'+20% revenus commerce',color:'#FF6B1A',glow:'rgba(255,107,26,.4)'},
+  {id:'nova',num:'#07',name:'NOVA',role:'Architecte',desc:'Conceptualise et construit les structures les plus ambitieuses.',bonus:'-15% coût construction',color:'#2F9BFF',glow:'rgba(47,155,255,.4)'},
+  {id:'brick',num:'#44',name:'BRICK',role:'Constructeur',desc:'Renforce chaque structure pour qu\'elle dure une éternité.',bonus:'+30% durabilité bâtiments',color:'#4ADE80',glow:'rgba(74,222,128,.4)'},
+  {id:'raven',num:'#11',name:'RAVEN',role:'Hacker',desc:'Manipule les marchés et les informations depuis les ombres.',bonus:'-20% coût marché noir',color:'#9B2FFF',glow:'rgba(155,47,255,.4)'},
+  {id:'kayo',num:'#99',name:'KAYO',role:'Guerrier',desc:'Conquiert les zones les plus dangereuses et défend le territoire.',bonus:'+25% zones dangereuses',color:'#FF2D78',glow:'rgba(255,45,120,.4)'}
+];
+
+const DISTRICTS = [
+  {id:'lowside',name:'LOWSIDE',icon:'🏚️',vibe:'Underground street vibes',slots:9,grid:'grid-3x3',req:0,color:'#FF6B1A',featured:true},
+  {id:'neon_market',name:'NEON MARKET',icon:'🌃',vibe:'Centre économique holographique',slots:12,grid:'grid-3x4',req:500,color:'#2F9BFF',featured:false},
+  {id:'sky_district',name:'SKY DISTRICT',icon:'🏙️',vibe:'Skyline de luxe futuriste',slots:16,grid:'grid-4x4',req:2000,color:'#9B2FFF',featured:false},
+  {id:'underblock',name:'UNDERBLOCK',icon:'🌑',vibe:'Tunnels, clubs et marchés noirs',slots:9,grid:'grid-3x3',req:1000,color:'#FF2D78',featured:false},
+  {id:'the_edge',name:'THE EDGE',icon:'⚡',vibe:'Territoire dangereux — Crew Wars',slots:12,grid:'grid-3x4',req:5000,color:'#FFD700',featured:false}
+];
+
+const BUILDINGS = [
+  {id:'snack',emoji:'🍔',name:'Snack Shop',cost:100,income:10,rep:5,districts:['lowside','neon_market'],rarity:'common'},
+  {id:'parking',emoji:'🚗',name:'Parking',cost:300,income:15,rep:8,districts:['lowside','neon_market','sky_district'],rarity:'common'},
+  {id:'studio',emoji:'🎵',name:'Mini Studio',cost:500,income:25,rep:15,districts:['lowside','neon_market','underblock'],rarity:'rare'},
+  {id:'club',emoji:'🎉',name:'Club Neon',cost:2000,income:80,rep:40,districts:['lowside','neon_market','underblock'],rarity:'rare'},
+  {id:'apartment',emoji:'🏢',name:'Luxury Apartment',cost:8000,income:200,rep:100,districts:['sky_district','neon_market'],rarity:'epic'},
+  {id:'blackmarket',emoji:'🕵️',name:'Black Market',cost:20000,income:500,rep:200,districts:['underblock','the_edge'],rarity:'legendary'},
+  {id:'gallery',emoji:'🖼️',name:'Neon Gallery',cost:12000,income:350,rep:150,districts:['sky_district','neon_market'],rarity:'epic'},
+  {id:'helipad',emoji:'🚁',name:'Hélipad Privé',cost:50000,income:1000,rep:500,districts:['sky_district','the_edge'],rarity:'mythic'}
+];
+
+const REP_TITLES = [
+  {min:0,title:'Street Rookie'},
+  {min:100,title:'Block Hustler'},
+  {min:500,title:'District Boss'},
+  {min:2000,title:'City Legend'},
+  {min:5000,title:'Underground King'},
+  {min:15000,title:'BLOCKSIDE GOD'}
+];
+
+const PREMIUM_ITEMS = [
+  {id:'vip',emoji:'💎',name:'VIP Pass',desc:'Multiplie tes revenus par ×2 de façon permanente. L\'investissement ultime.',price:1,effect:'x2_income'},
+  {id:'skin',emoji:'👑',name:'Legendary Skin',desc:'Skin exclusif cosmétique pour ton personnage. Affiche ton statut légendaire.',price:3,effect:'legendary_skin'},
+  {id:'battle',emoji:'⚔️',name:'Battle Pass',desc:'Missions hebdomadaires + récompenses exclusives. Nouveau contenu chaque semaine.',price:5,effect:'battle_pass'},
+  {id:'key',emoji:'🗝️',name:'District Key',desc:'Débloque un slot de construction supplémentaire dans n\'importe quel district.',price:2,effect:'extra_slot'}
+];
+
+const FACTIONS = [
+  {id:'rebel',name:'REBEL CITY',emoji:'🔥',color:'#FF6B1A',bg:'rgba(255,107,26,.2)',vibe:'Vibes street, liberté totale',members:1247},
+  {id:'crow',name:'BLACK CROW',emoji:'🐦‍⬛',color:'#9B2FFF',bg:'rgba(155,47,255,.2)',vibe:'Hackers, ombres et manipulation',members:892},
+  {id:'purple',name:'PURPLE NATION',emoji:'💜',color:'#CC77FF',bg:'rgba(155,47,255,.15)',vibe:'Luxe, prestige et domination',members:634}
+];
+
+const ACHIEVEMENTS = [
+  {id:'first_build',icon:'🏗️',name:'Premier\nBâtiment',cond:s=>s.totalBuildings>=1},
+  {id:'five_build',icon:'🏘️',name:'5\nBâtiments',cond:s=>s.totalBuildings>=5},
+  {id:'earn1k',icon:'💰',name:'1000\nGagnés',cond:s=>s.totalEarned>=1000},
+  {id:'earn100k',icon:'💵',name:'100K\nGagnés',cond:s=>s.totalEarned>=100000},
+  {id:'rep100',icon:'⭐',name:'Rep 100',cond:s=>s.rep>=100},
+  {id:'rep500',icon:'🌟',name:'Rep 500',cond:s=>s.rep>=500},
+  {id:'crew_join',icon:'👥',name:'Crew\nRejoint',cond:s=>s.crew!==null},
+  {id:'pi_buy',icon:'🌐',name:'Achat\nPi',cond:s=>s.premiumOwned.length>0}
+];
+
+// ============================================================
+// GAME STATE
+// ============================================================
+let state = {
+  username: 'Player',
+  character: null,
+  money: 500,
+  rep: 0,
+  crew: null,
+  premiumOwned: [],
+  buildings: {},      // districtId -> [{buildingId, level, lastCollect, slotIndex}]
+  districts: {},      // districtId -> {unlocked: bool}
+  totalEarned: 0,
+  totalBuildings: 0,
+  clickCount: 0,
+  activities: [],
+  piAuthenticated: false,
+  lastSave: Date.now()
+};
+
+let currentScreen = 'splash';
+let prevScreen = 'hub';
+let selectedCharIndex = null;
+let currentDistrictId = null;
+let buildModalSlotIndex = null;
+let detailModalBuilding = null;
+let detailModalDistrictId = null;
+let paymentItem = null;
+let gameTickInterval = null;
+
+// ============================================================
+// SAVE / LOAD
+// ============================================================
+function saveGame() {
+  try { localStorage.setItem('blockside_save', JSON.stringify(state)); } catch(e){}
+}
+function loadGame() {
+  try {
+    const s = localStorage.getItem('blockside_save');
+    if (s) { state = {...state, ...JSON.parse(s)}; return true; }
+  } catch(e){}
+  return false;
+}
+function initDistricts() {
+  DISTRICTS.forEach(d => {
+    if (!state.districts[d.id]) state.districts[d.id] = {unlocked: d.req===0};
+    if (!state.buildings[d.id]) state.buildings[d.id] = [];
+  });
+}
+
+// ============================================================
+// PI SDK
+// ============================================================
+function isPiAvailable() { return typeof window.Pi !== 'undefined'; }
+
+async function loginWithPi() {
+  if (isPiAvailable()) {
+    try {
+      const scopes = ['username','payments'];
+      Pi.authenticate(scopes, onIncompletePayment).then(auth => {
+        state.username = auth.user.username || 'PiUser';
+        state.piAuthenticated = true;
+        saveGame();
+        goToCharSelect();
+      }).catch(e => { showToast('Erreur Pi: ' + e.message, 'error'); loginDemo(); });
+    } catch(e) { loginDemo(); }
+  } else {
+    loginDemo();
+  }
+}
+
+function onIncompletePayment(payment) {
+  if (isPiAvailable()) {
+    Pi.completePayment(payment.identifier, { txid: payment.transaction?.txid || 'demo' });
+  }
+}
+
+function loginDemo() {
+  state.username = 'BlockPlayer_' + Math.floor(Math.random()*9000+1000);
+  state.piAuthenticated = false;
+  goToCharSelect();
+}
+
+// ============================================================
+// ECONOMY
+// ============================================================
+function getCharacterBonus(type) {
+  if (!state.character) return 1;
+  const char = CHARACTERS.find(c=>c.id===state.character);
+  if (!char) return 1;
+  switch(state.character) {
+    case 'zay': return type==='income'?1.2:1;
+    case 'nova': return type==='cost'?0.85:1;
+    case 'brick': return type==='income'?1:1;
+    case 'raven': return type==='blackmarket'?0.8:1;
+    case 'kayo': return type==='dangerous'?1.25:1;
+  }
+  return 1;
+}
+
+function getBuildingCost(building) {
+  let cost = building.cost;
+  if (state.character==='nova') cost = Math.floor(cost * 0.85);
+  return cost;
+}
+
+function calcPendingIncome(b) {
+  const def = BUILDINGS.find(x=>x.id===b.buildingId);
+  if (!def) return 0;
+  const now = Date.now();
+  const elapsed = Math.min((now - b.lastCollect) / 60000, 60); // max 60 min
+  let income = elapsed * def.income * b.level;
+  if (state.premiumOwned.includes('vip')) income *= 2;
+  if (state.character==='zay') income *= 1.2;
+  return Math.floor(income);
+}
+
+function getTotalPendingIncome() {
+  let total = 0;
+  DISTRICTS.forEach(d => {
+    (state.buildings[d.id]||[]).forEach(b => { total += calcPendingIncome(b); });
+  });
+  return total;
+}
+
+function getDistrictIncome(districtId) {
+  let perMin = 0;
+  (state.buildings[districtId]||[]).forEach(b => {
+    const def = BUILDINGS.find(x=>x.id===b.buildingId);
+    if (def) {
+      let inc = def.income * b.level;
+      if (state.premiumOwned.includes('vip')) inc *= 2;
+      if (state.character==='zay') inc *= 1.2;
+      perMin += inc;
+    }
+  });
+  return Math.floor(perMin);
+}
+
+function collectDistrict(districtId) {
+  let total = 0;
+  const list = state.buildings[districtId]||[];
+  list.forEach(b => {
+    const earned = calcPendingIncome(b);
+    total += earned;
+    b.lastCollect = Date.now();
+  });
+  if (total > 0) {
+    state.money += total;
+    state.totalEarned += total;
+    addActivity('💰 Collecte ' + districtId.replace('_',' ').toUpperCase() + ': +' + fmt(total));
+    checkAchievements();
+    saveGame();
+  }
+  return total;
+}
+
+function collectCurrentDistrict() {
+  if (!currentDistrictId) return;
+  const total = collectDistrict(currentDistrictId);
+  if (total > 0) {
+    showToast('💰 +' + fmt(total) + ' collectés!', 'success');
+    renderDistrictView(currentDistrictId);
+    updateHUDStats();
+  } else {
+    showToast('Rien à collecter pour l\'instant', 'info');
+  }
+}
+
+function buyBuilding(districtId, buildingId, slotIndex) {
+  const def = BUILDINGS.find(b=>b.id===buildingId);
+  if (!def) return;
+  const cost = getBuildingCost(def);
+  if (state.money < cost) { showToast('Pas assez d\'argent!', 'error'); return; }
+  state.money -= cost;
+  state.rep += def.rep;
+  const b = {buildingId, level:1, lastCollect:Date.now(), slotIndex};
+  state.buildings[districtId] = state.buildings[districtId]||[];
+  state.buildings[districtId].push(b);
+  state.totalBuildings++;
+  addActivity('🏗️ Construit ' + def.name + ' dans ' + districtId.replace('_',' ').toUpperCase());
+  checkDistrictUnlocks();
+  checkAchievements();
+  saveGame();
+  closeModal('buildModal');
+  renderDistrictView(districtId);
+  updateHUDStats();
+  showToast('✅ ' + def.name + ' construit!', 'success');
+}
+
+function upgradeBuilding(districtId, slotIndex) {
+  const list = state.buildings[districtId]||[];
+  const b = list.find(x=>x.slotIndex===slotIndex);
+  if (!b) return;
+  if (b.level >= 5) { showToast('Niveau maximum atteint!', 'info'); return; }
+  const def = BUILDINGS.find(x=>x.id===b.buildingId);
+  if (!def) return;
+  const upgradeCost = Math.floor(def.cost * b.level * 2);
+  if (state.money < upgradeCost) { showToast('Pas assez d\'argent!', 'error'); return; }
+  state.money -= upgradeCost;
+  b.level++;
+  addActivity('⬆️ Amélioré ' + def.name + ' → Niveau ' + b.level);
+  checkAchievements();
+  saveGame();
+  closeModal('detailModal');
+  renderDistrictView(districtId);
+  updateHUDStats();
+  showToast('⬆️ Niveau ' + b.level + '!', 'success');
+}
+
+function checkDistrictUnlocks() {
+  DISTRICTS.forEach(d => {
+    if (!state.districts[d.id].unlocked && state.rep >= d.req) {
+      state.districts[d.id].unlocked = true;
+      state.buildings[d.id] = state.buildings[d.id]||[];
+      showToast('🔓 ' + d.name + ' débloqué!', 'success');
+      addActivity('🔓 District ' + d.name + ' débloqué!');
+    }
+  });
+}
+
+// ============================================================
+// REPUTATION
+// ============================================================
+function getRepTitle(rep) {
+  let title = REP_TITLES[0].title;
+  for (const r of REP_TITLES) { if (rep >= r.min) title = r.title; }
+  return title;
+}
+function getNextRepTitle() {
+  for (let i=REP_TITLES.length-1;i>=0;i--) {
+    if (state.rep >= REP_TITLES[i].min) {
+      if (i+1 < REP_TITLES.length) return REP_TITLES[i+1];
+      return null;
+    }
+  }
+  return REP_TITLES[1];
+}
+function getRepProgress() {
+  for (let i=REP_TITLES.length-1;i>=0;i--) {
+    if (state.rep >= REP_TITLES[i].min) {
+      const next = i+1<REP_TITLES.length?REP_TITLES[i+1]:null;
+      if (!next) return 1;
+      const start = REP_TITLES[i].min;
+      const end = next.min;
+      return Math.min((state.rep-start)/(end-start),1);
+    }
+  }
+  return 0;
+}
+
+// ============================================================
+// ACHIEVEMENTS
+// ============================================================
+function checkAchievements() {
+  state.achievements = state.achievements||{};
+  ACHIEVEMENTS.forEach(a => {
+    if (!state.achievements[a.id] && a.cond(state)) {
+      state.achievements[a.id] = true;
+      setTimeout(()=>showToast('🏆 Succès: ' + a.name.replace('\n',' '),'success'),500);
+    }
+  });
+}
+
+// ============================================================
+// NAVIGATION & SCREENS
+// ============================================================
+function showScreen(id) {
+  prevScreen = currentScreen;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+  currentScreen = id;
+  if (id==='hub') { updateHUDStats(); renderActivity(); }
+  if (id==='cityMap') renderCityMap();
+  if (id==='crew') renderCrew();
+  if (id==='piMarket') renderMarket();
+  if (id==='profile') renderProfile();
+}
+
+function goBack() { showScreen(prevScreen==='districtView'?'cityMap':prevScreen); }
+
+function navTo(screenId, el) {
+  showScreen(screenId);
+  document.querySelectorAll('.bottom-nav .nav-item').forEach(n=>n.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+function openFirstDistrict() {
+  currentDistrictId = 'lowside';
+  renderDistrictView('lowside');
+  showScreen('districtView');
+}
+
+// ============================================================
+// CHAR SELECT
+// ============================================================
+function goToCharSelect() {
+  if (loadGame() && state.character) {
+    initDistricts();
+    updateHUDStats();
+    renderActivity();
+    showScreen('hub');
+    startGameTick();
+    return;
+  }
+  initDistricts();
+  renderCharSelect();
+  showScreen('charSelect');
+}
+
+function renderCharSelect() {
+  const scroll = document.getElementById('charsScroll');
+  const dots = document.getElementById('charDots');
+  scroll.innerHTML = '';
+  dots.innerHTML = '';
+  CHARACTERS.forEach((c,i) => {
+    const card = document.createElement('div');
+    card.className = 'char-card';
+    card.style.setProperty('--char-color', c.color);
+    card.style.setProperty('--char-glow', c.glow);
+    card.innerHTML = `
+      <div class="char-select-indicator">✓</div>
+      <div class="char-number">${c.num}</div>
+      <div class="char-name">${c.name}</div>
+      <div class="char-role">${c.role}</div>
+      <div class="char-desc">${c.desc}</div>
+      <div class="char-bonus">✦ ${c.bonus}</div>`;
+    card.onclick = () => selectCharacter(i);
+    scroll.appendChild(card);
+    const dot = document.createElement('div');
+    dot.className = 'char-dot' + (i===0?' active':'');
+    dots.appendChild(dot);
+  });
+  scroll.addEventListener('scroll', () => {
+    const idx = Math.round(scroll.scrollLeft / 212);
+    document.querySelectorAll('.char-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+  });
+}
+
+function selectCharacter(i) {
+  selectedCharIndex = i;
+  document.querySelectorAll('.char-card').forEach((c,j)=>c.classList.toggle('selected',j===i));
+  const btn = document.getElementById('startBtn');
+  btn.disabled = false;
+  btn.textContent = 'Jouer avec ' + CHARACTERS[i].name;
+}
+
+function startGame() {
+  if (selectedCharIndex===null) return;
+  const c = CHARACTERS[selectedCharIndex];
+  state.character = c.id;
+  state.username = state.username||('Player_'+c.name);
+  initDistricts();
+  addActivity('🎮 Début du jeu avec ' + c.name);
+  saveGame();
+  updateHUDStats();
+  renderActivity();
+  showScreen('hub');
+  startGameTick();
+}
+
+// ============================================================
+// HUD
+// ============================================================
+function fmt(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1)+'M';
+  if (n >= 1000) return (n/1000).toFixed(1)+'K';
+  return Math.floor(n).toString();
+}
+
+function updateHUDStats() {
+  const char = CHARACTERS.find(c=>c.id===state.character)||CHARACTERS[0];
+  const avatar = document.getElementById('hubAvatar');
+  if (avatar) {
+    avatar.textContent = char.name[0];
+    avatar.style.background = char.color+'33';
+    avatar.style.color = char.color;
+    avatar.style.borderColor = char.color+'66';
+  }
+  const el = id => document.getElementById(id);
+  if(el('hubUsername')) el('hubUsername').textContent = state.username;
+  if(el('hubRepTitle')) { el('hubRepTitle').textContent = getRepTitle(state.rep); el('hubRepTitle').style.color = char.color; }
+  if(el('hubMoney')) el('hubMoney').textContent = fmt(state.money);
+  if(el('hubRep')) el('hubRep').textContent = fmt(state.rep);
+  if(el('hubBuildings')) el('hubBuildings').textContent = state.totalBuildings;
+  if(el('hubPendingIncome')) el('hubPendingIncome').textContent = fmt(getTotalPendingIncome());
+}
+
+function addActivity(text) {
+  state.activities.unshift({text, time: Date.now()});
+  if (state.activities.length > 20) state.activities.pop();
+}
+
+function renderActivity() {
+  const el = document.getElementById('activityList');
+  if (!el) return;
+  if (!state.activities.length) {
+    el.innerHTML = '<div class="activity-item"><div class="activity-text text-muted">Aucune activité pour l\'instant</div></div>';
+    return;
+  }
+  el.innerHTML = state.activities.slice(0,8).map(a => {
+    const diff = Math.floor((Date.now()-a.time)/60000);
+    const timeStr = diff < 1 ? 'À l\'instant' : diff + ' min';
+    return `<div class="activity-item"><div class="activity-text">${a.text}</div><div class="activity-time">${timeStr}</div></div>`;
+  }).join('');
+}
+
+// ============================================================
+// CITY MAP
+// ============================================================
+function renderCityMap() {
+  const grid = document.getElementById('cityGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  DISTRICTS.forEach(d => {
+    const unlocked = state.districts[d.id]?.unlocked;
+    const bCount = (state.buildings[d.id]||[]).length;
+    const incomePerMin = getDistrictIncome(d.id);
+    const card = document.createElement('div');
+    card.className = 'district-card' + (unlocked?' unlocked':' locked') + (d.featured?' featured':'');
+    card.style.setProperty('--district-color', d.color);
+    card.innerHTML = `
+      <div class="district-glow" style="background:radial-gradient(circle at top right,${d.color},transparent)"></div>
+      <div>
+        <div class="district-icon">${d.icon}</div>
+        <div class="district-name" style="color:${d.color}">${d.name}</div>
+        <div class="district-vibe">${d.vibe}</div>
+        <div class="district-stats">
+          <div class="district-stat">🏗️ ${bCount}/${d.slots}</div>
+          <div class="district-stat">💰 ${fmt(incomePerMin)}/min</div>
+        </div>
+      </div>
+      ${!unlocked ? `<div class="lock-overlay"><div class="lock-icon">🔒</div><div class="lock-req">⭐ ${d.req} rep requise</div></div>` : ''}`;
+    if (unlocked) card.onclick = () => openDistrict(d.id);
+    grid.appendChild(card);
+  });
+}
+
+// ============================================================
+// DISTRICT VIEW
+// ============================================================
+function openDistrict(districtId) {
+  currentDistrictId = districtId;
+  renderDistrictView(districtId);
+  prevScreen = 'cityMap';
+  showScreen('districtView');
+}
+
+function renderDistrictView(districtId) {
+  const d = DISTRICTS.find(x=>x.id===districtId);
+  if (!d) return;
+  const el = id => document.getElementById(id);
+  el('dvName').textContent = d.icon + ' ' + d.name;
+  el('dvVibe').textContent = d.vibe;
+  const incPerMin = getDistrictIncome(districtId);
+  el('dvIncome').textContent = fmt(incPerMin) + '/min';
+  const pending = (state.buildings[districtId]||[]).reduce((s,b)=>s+calcPendingIncome(b),0);
+  el('dvCollectBtn').disabled = pending === 0;
+  const grid = el('buildingGrid');
+  grid.className = 'building-grid scrollable ' + d.grid;
+  grid.innerHTML = '';
+  let extraSlots = state.premiumOwned.includes('key') ? 1 : 0;
+  const totalSlots = d.slots + extraSlots;
+  for (let i=0; i<totalSlots; i++) {
+    const b = (state.buildings[districtId]||[]).find(x=>x.slotIndex===i);
+    const slot = document.createElement('div');
+    if (b) {
+      const def = BUILDINGS.find(x=>x.id===b.buildingId);
+      const pend = calcPendingIncome(b);
+      slot.className = 'slot occupied';
+      slot.innerHTML = `
+        ${pend>0?'<div class="slot-income-dot"></div>':''}
+        <div class="slot-emoji">${def?def.emoji:'🏗️'}</div>
+        <div class="slot-name">${def?def.name:''}</div>
+        <div class="slot-level">Niv.${b.level}</div>`;
+      slot.onclick = () => openBuildingDetail(districtId, i);
+    } else {
+      slot.className = 'slot empty';
+      slot.innerHTML = '<div class="slot-plus">+</div><div class="slot-add-text">Construire</div>';
+      slot.onclick = () => openBuildModal(districtId, i);
+    }
+    grid.appendChild(slot);
+  }
+}
+
+// ============================================================
+// BUILD MODAL
+// ============================================================
+function openBuildModal(districtId, slotIndex) {
+  buildModalSlotIndex = slotIndex;
+  const filters = document.getElementById('buildFilters');
+  filters.innerHTML = ['Tous','common','rare','epic','legendary','mythic'].map((f,i) =>
+    `<button class="filter-tab${i===0?' active':''}" onclick="filterBuildings('${districtId}','${f}',this)">${i===0?'Tous':f.charAt(0).toUpperCase()+f.slice(1)}</button>`
+  ).join('');
+  renderBuildingList(districtId, 'Tous');
+  openModal('buildModal');
+}
+
+function filterBuildings(districtId, rarity, btn) {
+  document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderBuildingList(districtId, rarity);
+}
+
+function renderBuildingList(districtId, rarity) {
+  const list = document.getElementById('buildingListModal');
+  const available = BUILDINGS.filter(b => b.districts.includes(districtId) && (rarity==='Tous'||b.rarity===rarity));
+  if (!available.length) { list.innerHTML = '<div class="text-muted fs13" style="text-align:center;padding:20px">Aucun bâtiment disponible</div>'; return; }
+  list.innerHTML = available.map(b => {
+    const cost = getBuildingCost(b);
+    const canBuy = state.money >= cost;
+    return `<div class="building-item">
+      <div class="building-emoji">${b.emoji}</div>
+      <div class="building-info">
+        <div class="building-name">${b.name}</div>
+        <div style="margin:4px 0"><span class="badge badge-${b.rarity}">${b.rarity.toUpperCase()}</span></div>
+        <div class="building-stats">
+          <span class="building-stat">💰 +${b.income}/min</span>
+          <span class="building-stat">⭐ +${b.rep} rep</span>
+        </div>
+      </div>
+      <div class="building-buy">
+        <div class="building-cost ${canBuy?'':'unaffordable'}">$${fmt(cost)}</div>
+        <button class="buy-btn" ${canBuy?'':'disabled'} onclick="buyBuilding('${currentDistrictId}','${b.id}',${buildModalSlotIndex})">Acheter</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// BUILDING DETAIL MODAL
+// ============================================================
+function openBuildingDetail(districtId, slotIndex) {
+  const b = (state.buildings[districtId]||[]).find(x=>x.slotIndex===slotIndex);
+  if (!b) return;
+  const def = BUILDINGS.find(x=>x.id===b.buildingId);
+  if (!def) return;
+  detailModalBuilding = {b, slotIndex};
+  detailModalDistrictId = districtId;
+  document.getElementById('detailTitle').textContent = def.emoji + ' ' + def.name;
+  const pending = calcPendingIncome(b);
+  const upgradeCost = b.level<5 ? Math.floor(def.cost * b.level * 2) : null;
+  document.getElementById('detailBody').innerHTML = `
+    <div class="detail-hero">
+      <span class="detail-emoji">${def.emoji}</span>
+      <div class="detail-name">${def.name}</div>
+      <div class="detail-district"><span class="badge badge-${def.rarity}">${def.rarity.toUpperCase()}</span></div>
+    </div>
+    <div class="pending-income-box">
+      <div class="pending-income-val">+$${fmt(pending)}</div>
+      <div class="pending-income-label">Revenus en attente</div>
+    </div>
+    <div class="detail-stats-grid">
+      <div class="detail-stat"><div class="detail-stat-val">${def.income*b.level}/min</div><div class="detail-stat-label">💰 Revenus</div></div>
+      <div class="detail-stat"><div class="detail-stat-val">${def.rep}</div><div class="detail-stat-label">⭐ Réputation</div></div>
+    </div>
+    <div class="upgrade-info">
+      <div class="upgrade-level">
+        <span class="fs13 fw7">Niveau ${b.level}/5</span>
+        <div class="level-dots">${[1,2,3,4,5].map(n=>`<div class="level-dot${n<=b.level?' filled':''}"></div>`).join('')}</div>
+      </div>
+      ${upgradeCost ? `<div class="fs12 text-muted">Amélioration : $${fmt(upgradeCost)}</div>` : '<div class="fs12 text-green">Niveau maximum!</div>'}
+    </div>`;
+  document.getElementById('detailFooter').innerHTML = `
+    <div class="flex gap8">
+      <button class="btn btn-primary" style="flex:1" onclick="collectSingleBuilding('${districtId}',${slotIndex})" ${pending===0?'disabled':''}>💰 Collecter</button>
+      ${upgradeCost ? `<button class="btn btn-purple" style="flex:1" onclick="upgradeBuilding('${districtId}',${slotIndex})" ${state.money<upgradeCost?'disabled':''}>⬆️ Améliorer</button>` : ''}
+    </div>`;
+  openModal('detailModal');
+}
+
+function collectSingleBuilding(districtId, slotIndex) {
+  const list = state.buildings[districtId]||[];
+  const b = list.find(x=>x.slotIndex===slotIndex);
+  if (!b) return;
+  const earned = calcPendingIncome(b);
+  if (earned > 0) {
+    state.money += earned;
+    state.totalEarned += earned;
+    b.lastCollect = Date.now();
+    addActivity('💰 Collecte: +' + fmt(earned));
+    checkAchievements();
+    saveGame();
+    closeModal('detailModal');
+    renderDistrictView(districtId);
+    updateHUDStats();
+    showToast('💰 +' + fmt(earned) + ' collectés!', 'success');
+  } else {
+    showToast('Rien à collecter encore', 'info');
+  }
+}
+
+// ============================================================
+// CREW
+// ============================================================
+function renderCrew() {
+  const el = document.getElementById('crewContent');
+  if (!el) return;
+  if (!state.crew) {
+    el.innerHTML = `
+      <div class="fs14 fw7 mb12">Rejoins une faction</div>
+      <div class="faction-cards">
+        ${FACTIONS.map(f=>`
+        <div class="faction-card" onclick="joinFaction('${f.id}')">
+          <div class="faction-logo" style="background:${f.bg};color:${f.color}">${f.emoji}</div>
+          <div class="faction-info">
+            <div class="faction-name" style="color:${f.color}">${f.name}</div>
+            <div class="faction-vibe">${f.vibe}</div>
+            <div class="faction-members" style="color:${f.color}">👥 ${f.members.toLocaleString()} membres</div>
+          </div>
+          <button class="join-btn" style="background:${f.color}22;color:${f.color};border:1px solid ${f.color}44">Rejoindre</button>
+        </div>`).join('')}
+      </div>`;
+  } else {
+    const f = FACTIONS.find(x=>x.id===state.crew);
+    const ranks = [
+      {pos:1,name:'ALPHA_WOLF',score:45820},
+      {pos:2,name:'NightHunter',score:38240},
+      {pos:3,name:'CityLegend',score:29150},
+      {pos:4,name:state.username,score:Math.floor(state.rep+state.totalEarned/100)},
+      {pos:5,name:'BlockMaster',score:8920}
+    ].sort((a,b)=>b.score-a.score).map((r,i)=>({...r,pos:i+1}));
+    const msgs = [
+      {author:'ALPHA_WOLF',text:'On tient le district ce soir 🔥'},
+      {author:'NightHunter',text:'Nouveau record de revenus!'},
+      {author:state.username,text:'En route pour UNDERBLOCK 👊'},
+      {author:'CityLegend',text:'Qui construit le Black Market?'}
+    ];
+    el.innerHTML = `
+      <div class="crew-info-card mb12">
+        <div class="flex center gap12">
+          <div class="faction-logo" style="background:${f.bg};color:${f.color};width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px">${f.emoji}</div>
+          <div>
+            <div class="fs18 fw7" style="color:${f.color}">${f.name}</div>
+            <div class="fs12 text-muted">${f.vibe}</div>
+            <div class="fs12 mt4" style="color:${f.color}">👥 ${f.members.toLocaleString()} membres actifs</div>
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-full mt12 fs12" onclick="leaveFaction()">Quitter la faction</button>
+      </div>
+      <div class="fs13 fw7 mb8">🏆 Classement</div>
+      <div class="crew-rank-list mb12">
+        ${ranks.map(r=>`<div class="rank-item">
+          <div class="rank-pos ${r.pos<=3?'top':(r.name===state.username?'text-orange':'')}">${r.pos<=3?['🥇','🥈','🥉'][r.pos-1]:'#'+r.pos}</div>
+          <div class="rank-name ${r.name===state.username?'text-orange':''}">${r.name}</div>
+          <div class="rank-score">${fmt(r.score)} pts</div>
+        </div>`).join('')}
+      </div>
+      <div class="crew-chat">
+        <div class="chat-title">💬 Chat Crew</div>
+        <div class="chat-messages">
+          ${msgs.map(m=>`<div class="chat-msg"><span class="chat-author" style="color:${f.color}">${m.author}</span> : ${m.text}</div>`).join('')}
+        </div>
+      </div>
+      <div class="fs13 fw7 mt12 mb8">📋 Missions Crew</div>
+      <div class="card mb16">
+        <div class="fs13 fw6">Construire 3 bâtiments</div>
+        <div class="fs12 text-muted mt4">Progression : ${Math.min(state.totalBuildings,3)}/3</div>
+        <div style="height:6px;background:var(--border);border-radius:3px;margin-top:8px"><div style="height:100%;width:${Math.min(state.totalBuildings/3,1)*100}%;background:var(--orange);border-radius:3px"></div></div>
+        <div class="fs12 text-orange mt4">Récompense : +200 rep</div>
+      </div>`;
+  }
+}
+
+function joinFaction(id) {
+  state.crew = id;
+  const f = FACTIONS.find(x=>x.id===id);
+  addActivity('👥 Rejoint ' + f.name);
+  checkAchievements();
+  saveGame();
+  renderCrew();
+  showToast('👥 Bienvenue dans ' + f.name + '!', 'success');
+}
+
+function leaveFaction() {
+  state.crew = null;
+  saveGame();
+  renderCrew();
+  showToast('Faction quittée', 'info');
+}
+
+// ============================================================
+// PI MARKET
+// ============================================================
+function renderMarket() {
+  const el = document.getElementById('marketItems');
+  if (!el) return;
+  const glowColors = ['#9B2FFF','#FFD700','#FF2D78','#2F9BFF'];
+  el.innerHTML = PREMIUM_ITEMS.map((item,i) => {
+    const owned = state.premiumOwned.includes(item.id);
+    return `<div class="market-item ${owned?'owned':''}">
+      <div class="market-item-glow" style="background:radial-gradient(circle,${glowColors[i]},transparent)"></div>
+      <div class="market-item-top">
+        <div class="market-item-emoji">${item.emoji}</div>
+        <div class="market-item-info">
+          <div class="market-item-name">${item.name}</div>
+          <div class="market-item-desc">${item.desc}</div>
+        </div>
+      </div>
+      <div class="market-item-price">
+        <div class="pi-price"><span class="pi-symbol">π</span>${item.price}</div>
+        ${owned
+          ? '<div class="owned-badge">✓ Actif</div>'
+          : `<button class="buy-pi-btn" onclick="buyPiItem('${item.id}')">Acheter avec Pi</button>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function buyPiItem(itemId) {
+  paymentItem = PREMIUM_ITEMS.find(x=>x.id===itemId);
+  if (!paymentItem) return;
+  showPaymentModal('confirm');
+  openModal('paymentModal');
+}
+
+function showPaymentModal(state_name) {
+  const body = document.getElementById('paymentBody');
+  const footer = document.getElementById('paymentFooter');
+  if (state_name==='confirm') {
+    body.innerHTML = `<div class="payment-states">
+      <span class="payment-icon">${paymentItem.emoji}</span>
+      <div class="payment-title">${paymentItem.name}</div>
+      <div class="payment-desc">Confirmer l'achat de <strong>${paymentItem.name}</strong> pour <strong>π${paymentItem.price}</strong> ?</div>
+    </div>`;
+    footer.innerHTML = `<div class="flex gap8">
+      <button class="btn btn-secondary" style="flex:1" onclick="closeModal('paymentModal')">Annuler</button>
+      <button class="btn btn-gold" style="flex:1" onclick="processPiPayment()">Confirmer π${paymentItem.price}</button>
+    </div>`;
+  } else if (state_name==='processing') {
+    body.innerHTML = `<div class="payment-states"><div class="payment-spinner"></div><div class="payment-title">Traitement...</div><div class="payment-desc">Connexion Pi Network en cours</div></div>`;
+    footer.innerHTML = '';
+  } else if (state_name==='success') {
+    body.innerHTML = `<div class="payment-states"><span class="payment-icon">✅</span><div class="payment-title" style="color:var(--green)">Achat réussi!</div><div class="payment-desc">${paymentItem.name} est maintenant actif!</div></div>`;
+    footer.innerHTML = `<button class="btn btn-primary btn-full" onclick="closeModal('paymentModal');renderMarket()">Fermer</button>`;
+  } else if (state_name==='error') {
+    body.innerHTML = `<div class="payment-states"><span class="payment-icon">❌</span><div class="payment-title" style="color:var(--pink)">Erreur de paiement</div><div class="payment-desc">Le paiement n'a pas pu être traité.</div></div>`;
+    footer.innerHTML = `<div class="flex gap8">
+      <button class="btn btn-secondary" style="flex:1" onclick="closeModal('paymentModal')">Fermer</button>
+      <button class="btn btn-primary" style="flex:1" onclick="processPiPayment()">Réessayer</button>
+    </div>`;
+  }
+}
+
+async function processPiPayment() {
+  if (!paymentItem) return;
+  showPaymentModal('processing');
+  if (isPiAvailable()) {
+    try {
+      const payment = await Pi.createPayment({
+        amount: paymentItem.price,
+        memo: 'BLOCKSIDE - ' + paymentItem.name,
+        metadata: { itemId: paymentItem.id }
+      }, {
+        onReadyForServerApproval: (pid) => { /* Server approve */ },
+        onReadyForServerCompletion: (pid, txid) => {
+          if (!state.premiumOwned.includes(paymentItem.id)) state.premiumOwned.push(paymentItem.id);
+          checkAchievements();
+          saveGame();
+          showPaymentModal('success');
+        },
+        onCancel: () => showPaymentModal('error'),
+        onError: () => showPaymentModal('error')
+      });
+    } catch(e) { showPaymentModal('error'); }
+  } else {
+    // Demo fallback
+    setTimeout(() => {
+      if (!state.premiumOwned.includes(paymentItem.id)) state.premiumOwned.push(paymentItem.id);
+      checkAchievements();
+      saveGame();
+      showPaymentModal('success');
+    }, 2000);
+  }
+}
+
+// ============================================================
+// PROFILE
+// ============================================================
+function renderProfile() {
+  const el = document.getElementById('profileContent');
+  if (!el) return;
+  const char = CHARACTERS.find(c=>c.id===state.character)||CHARACTERS[0];
+  const title = getRepTitle(state.rep);
+  const next = getNextRepTitle();
+  const progress = getRepProgress();
+  const factionName = state.crew ? (FACTIONS.find(x=>x.id===state.crew)?.name||'Aucune') : 'Aucune';
+  state.achievements = state.achievements||{};
+  el.innerHTML = `
+    <div class="profile-hero">
+      <div class="profile-avatar" style="background:${char.color}22;color:${char.color};border-color:${char.color}">${char.name[0]}</div>
+      <div class="profile-username">${state.username}</div>
+      <div class="profile-title" style="color:${char.color}">${char.name} — ${char.role}</div>
+      <div class="mt8"><span class="badge badge-rare">${title}</span></div>
+    </div>
+    <div class="rep-bar-wrap">
+      <div class="rep-bar-label">
+        <span>⭐ ${fmt(state.rep)} rep</span>
+        <span>${next ? next.title + ' (' + fmt(next.min) + ')' : 'MAX'}</span>
+      </div>
+      <div class="rep-bar"><div class="rep-bar-fill" style="width:${progress*100}%"></div></div>
+    </div>
+    <div class="profile-stats">
+      <div class="profile-stat"><div class="profile-stat-val">$${fmt(state.totalEarned)}</div><div class="profile-stat-label">Total gagné</div></div>
+      <div class="profile-stat"><div class="profile-stat-val">${state.totalBuildings}</div><div class="profile-stat-label">Bâtiments</div></div>
+      <div class="profile-stat"><div class="profile-stat-val">${state.clickCount}</div><div class="profile-stat-label">Interactions</div></div>
+      <div class="profile-stat"><div class="profile-stat-val">${factionName.split(' ')[0]}</div><div class="profile-stat-label">Faction</div></div>
+    </div>
+    <div class="achievements-title">🏆 Succès</div>
+    <div class="achievements-grid">
+      ${ACHIEVEMENTS.map(a=>{
+        const unlocked = state.achievements[a.id]||a.cond(state);
+        return `<div class="achievement ${unlocked?'unlocked':''}">
+          <span class="ach-icon">${a.icon}</span>
+          <div class="ach-name">${a.name}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+// ============================================================
+// MODALS
+// ============================================================
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); });
+});
+
+// ============================================================
+// TOAST
+// ============================================================
+let toastTimeout;
+function showToast(msg, type='info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => t.className='', 3000);
+}
+
+// ============================================================
+// PARTICLES (canvas)
+// ============================================================
+function initParticles() {
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  const particles = [];
+  const colors = ['#FF6B1A','#9B2FFF','#FF2D78','#2F9BFF','#FFD700'];
+  function resize() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+  for (let i=0;i<50;i++) {
+    particles.push({
+      x: Math.random()*window.innerWidth,
+      y: Math.random()*window.innerHeight,
+      r: Math.random()*2+.5,
+      speed: Math.random()*.5+.2,
+      color: colors[Math.floor(Math.random()*colors.length)],
+      opacity: Math.random()*.6+.2
+    });
+  }
+  function draw() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p => {
+      p.y -= p.speed;
+      if (p.y < -5) { p.y=canvas.height+5; p.x=Math.random()*canvas.width; }
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle = p.color + Math.floor(p.opacity*255).toString(16).padStart(2,'0');
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ============================================================
+// GAME TICK
+// ============================================================
+function startGameTick() {
+  if (gameTickInterval) clearInterval(gameTickInterval);
+  gameTickInterval = setInterval(() => {
+    checkDistrictUnlocks();
+    if (currentScreen==='districtView' && currentDistrictId) {
+      const el = document.getElementById('dvCollectBtn');
+      const pending = (state.buildings[currentDistrictId]||[]).reduce((s,b)=>s+calcPendingIncome(b),0);
+      if (el) el.disabled = pending===0;
+    }
+    if (currentScreen==='hub') {
+      const el = document.getElementById('hubPendingIncome');
+      if (el) el.textContent = fmt(getTotalPendingIncome());
+    }
+    state.clickCount++;
+  }, 10000);
+  // Auto-save
+  setInterval(() => { saveGame(); }, 30000);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('load', () => {
+  initParticles();
+  // Check for existing save
+  const saved = loadGame();
+  if (saved && state.character) {
+    initDistricts();
+    updateHUDStats();
+    renderActivity();
+    showScreen('hub');
+    startGameTick();
+  }
+});
+
+window.addEventListener('beforeunload', () => { saveGame(); });
+
+// Track clicks for stats
+document.addEventListener('click', () => { state.clickCount++; });
+</script>
+</body>
+</html>
