@@ -34,8 +34,8 @@ nav{
   background:rgba(7,7,15,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);
   transition:all .3s
 }
-.nav-logo{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;
-  background:linear-gradient(135deg,var(--orange),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav-logo{display:flex;align-items:center;text-decoration:none}
+.nav-logo img{height:36px;width:auto;filter:drop-shadow(0 0 8px rgba(255,107,26,.5))}
 .nav-links{display:flex;gap:32px;list-style:none}
 .nav-links a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:600;transition:color .2s}
 .nav-links a:hover{color:var(--text)}
@@ -56,8 +56,7 @@ nav{
 .orb3{width:300px;height:300px;background:rgba(255,45,120,.1);top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:1.5s}
 @keyframes pulse-orb{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
 .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(155,47,255,.2);border:1px solid rgba(155,47,255,.4);color:#CC77FF;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:24px;font-family:'Space Mono',monospace;animation:fade-up .8s ease both}
-.hero-title{font-size:clamp(64px,12vw,140px);font-weight:900;letter-spacing:-4px;line-height:.9;margin-bottom:8px;animation:fade-up .8s .1s ease both}
-.hero-title-sub{display:block;font-family:'Space Mono',monospace;font-size:clamp(20px,4vw,36px);letter-spacing:12px;color:var(--muted);margin-top:8px;font-weight:400;animation:fade-up .8s .2s ease both}
+.hero-logo{max-width:min(480px,80vw);width:100%;margin-bottom:8px;animation:fade-up .8s .1s ease both;filter:drop-shadow(0 0 40px rgba(255,107,26,.35)) drop-shadow(0 0 80px rgba(155,47,255,.25))}
 .hero-slogan{font-size:clamp(14px,2vw,18px);color:var(--muted);letter-spacing:4px;text-transform:uppercase;margin:32px 0 48px;animation:fade-up .8s .3s ease both}
 .hero-btns{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;animation:fade-up .8s .4s ease both}
 .btn-hero-primary{
@@ -261,7 +260,7 @@ nav{
 footer{background:var(--card);border-top:1px solid var(--border);padding:60px 40px 40px}
 .footer-inner{max-width:1200px;margin:0 auto}
 .footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:48px}
-.footer-brand .fb-logo{font-family:'Space Mono',monospace;font-size:28px;font-weight:700;background:linear-gradient(135deg,var(--orange),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px}
+.footer-brand .fb-logo img{height:44px;width:auto;filter:drop-shadow(0 0 8px rgba(255,107,26,.4));margin-bottom:12px}
 .footer-brand .fb-desc{font-size:14px;color:var(--muted);line-height:1.7;max-width:280px}
 .footer-col h4{font-size:12px;font-weight:800;letter-spacing:2px;color:var(--orange);text-transform:uppercase;margin-bottom:16px;font-family:'Space Mono',monospace}
 .footer-col ul{list-style:none;display:flex;flex-direction:column;gap:10px}
@@ -309,7 +308,7 @@ footer{background:var(--card);border-top:1px solid var(--border);padding:60px 40
 
 <!-- ── NAV ──────────────────────────────────────────────── -->
 <nav>
-  <div class="nav-logo">BLOCKSIDE</div>
+  <a class="nav-logo" href="#"><img src="logo.png" alt="BLOCKSIDE"></a>
   <ul class="nav-links">
     <li><a href="#features">Features</a></li>
     <li><a href="#districts">Ville</a></li>
@@ -329,7 +328,7 @@ footer{background:var(--card);border-top:1px solid var(--border);padding:60px 40
     <div class="orb orb3"></div>
   </div>
   <div class="hero-badge">✨ Intégré à Pi Network · Season 2 Active</div>
-  <h1 class="hero-title gradient-text">BLOCK<span class="hero-title-sub">SIDE</span></h1>
+  <img class="hero-logo" src="logo.png" alt="BLOCKSIDE">
   <p class="hero-slogan">Build · Fight · Own</p>
   <div class="hero-btns">
     <a href="../game/index.html" class="btn-hero-primary">🎮 Jouer gratuitement</a>
@@ -566,7 +565,7 @@ footer{background:var(--card);border-top:1px solid var(--border);padding:60px 40
   <div class="footer-inner">
     <div class="footer-top">
       <div class="footer-brand">
-        <div class="fb-logo">BLOCKSIDE</div>
+        <div class="fb-logo"><img src="logo.png" alt="BLOCKSIDE"></div>
         <p class="fb-desc">Le jeu urbain sandbox de nouvelle génération. Construit sur Pi Network. Fait pour les créateurs d'empires.</p>
       </div>
       <div class="footer-col">

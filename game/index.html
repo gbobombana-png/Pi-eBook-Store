@@ -63,12 +63,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
 @keyframes pulse-orb{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 .splash-content{position:relative;z-index:2;text-align:center;padding:40px 24px}
 .splash-logo{margin-bottom:12px}
-.logo-block{font-family:'Space Mono',monospace;font-size:52px;font-weight:700;letter-spacing:-2px;
-  background:linear-gradient(135deg,var(--orange),var(--pink),var(--purple));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  animation:logo-glow 3s ease-in-out infinite}
+.splash-logo img{width:min(280px,70vw);height:auto;animation:logo-glow 3s ease-in-out infinite}
 @keyframes logo-glow{0%,100%{filter:drop-shadow(0 0 20px rgba(255,107,26,.5))}50%{filter:drop-shadow(0 0 40px rgba(255,45,120,.8))}}
-.logo-side{display:block;font-family:'Space Mono',monospace;font-size:18px;letter-spacing:8px;color:var(--muted);margin-top:-8px}
 .splash-slogan{font-size:16px;color:var(--muted);letter-spacing:3px;margin:16px 0 48px;text-transform:uppercase}
 .pi-login-btn{background:linear-gradient(135deg,var(--orange),var(--pink));border:none;color:#fff;
   padding:18px 48px;border-radius:16px;font-family:'Sora',sans-serif;font-weight:800;font-size:18px;
@@ -557,8 +553,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
   </div>
   <div class="splash-content">
     <div class="splash-logo">
-      <div class="logo-block">BLOCK</div>
-      <span class="logo-side">SIDE</span>
+      <img src="logo.png" alt="BLOCKSIDE">
     </div>
     <div class="splash-slogan">Build. Fight. Own.</div>
     <button class="pi-login-btn" onclick="loginWithPi()">🌐 Connexion Pi Network</button>
