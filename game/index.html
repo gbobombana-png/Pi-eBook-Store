@@ -467,6 +467,81 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
 
 /* ===== SOUND BTN ===== */
 .sound-btn{position:fixed;bottom:80px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;z-index:150;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+
+/* ===== LEADERBOARD (Phase 4) ===== */
+.lb-header{padding:16px;flex-shrink:0}
+.lb-tabs{display:flex;gap:8px;padding:0 16px 12px;flex-shrink:0}
+.lb-tab{flex:1;padding:8px;border-radius:10px;font-size:12px;font-weight:700;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;text-align:center;transition:all .2s}
+.lb-tab.active{background:var(--orange);color:#fff;border-color:var(--orange)}
+.lb-content{flex:1;padding:0 16px 80px;overflow-y:auto}
+.lb-entry{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:8px}
+.lb-entry.mine{border-color:var(--orange);background:rgba(255,107,26,.07)}
+.lb-rank{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;width:36px;text-align:center;flex-shrink:0}
+.lb-avatar{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;flex-shrink:0}
+.lb-info{flex:1;min-width:0}
+.lb-name{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.lb-score{text-align:right;flex-shrink:0}
+.lb-score-val{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--gold)}
+.lb-score-label{font-size:10px;color:var(--muted)}
+.lb-prestige-pip{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--gold);margin-left:3px;vertical-align:middle}
+.lb-faction-entry{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:8px}
+.lb-faction-logo{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.lb-faction-bar{height:6px;border-radius:3px;margin-top:8px}
+
+/* ===== PRESTIGE (Phase 6) ===== */
+.prestige-overlay{position:fixed;inset:0;background:rgba(7,7,15,.92);z-index:300;display:none;align-items:center;justify-content:center;padding:20px}
+.prestige-overlay.open{display:flex}
+.prestige-box{background:var(--card);border:2px solid var(--gold);border-radius:24px;padding:24px;width:100%;max-width:380px;position:relative;overflow:hidden;max-height:85vh;overflow-y:auto}
+.prestige-glow{position:absolute;top:0;left:0;right:0;height:200px;background:radial-gradient(circle at 50% 0%,rgba(255,215,0,.15),transparent 60%);pointer-events:none}
+.prestige-title{font-size:22px;font-weight:800;text-align:center;background:linear-gradient(135deg,var(--gold),#FF9500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px}
+.prestige-sub{font-size:12px;color:var(--muted);text-align:center;margin-bottom:16px;line-height:1.4}
+.prestige-tier{display:flex;align-items:center;gap:12px;border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .2s;border:1px solid rgba(255,215,0,.3);background:rgba(255,215,0,.06)}
+.prestige-tier:active{transform:scale(.98)}
+.prestige-tier.done{border-color:var(--green);background:rgba(74,222,128,.06);cursor:default}
+.prestige-tier-icon{font-size:28px;width:40px;text-align:center;flex-shrink:0}
+.prestige-tier-info{flex:1}
+.prestige-tier-name{font-size:14px;font-weight:700}
+.prestige-tier-bonus{font-size:12px;color:var(--gold);margin-top:2px}
+.prestige-tier-cost{font-size:11px;color:var(--muted);margin-top:4px}
+.prestige-tier-status{font-size:11px;font-weight:700;color:var(--green)}
+.prestige-tier.next-up{border-color:var(--orange);background:rgba(255,107,26,.07)}
+.prestige-tier.next-up .prestige-tier-status{color:var(--orange)}
+.prestige-warning{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;margin:12px 0;padding:10px;background:rgba(255,45,120,.1);border-radius:10px;border:1px solid rgba(255,45,120,.2)}
+.prestige-warning strong{color:var(--pink)}
+.prestige-star{display:inline-flex;align-items:center;gap:2px;background:linear-gradient(135deg,var(--gold),#FF9500);color:#000;padding:2px 7px;border-radius:6px;font-size:10px;font-weight:800;letter-spacing:.3px}
+
+/* ===== SKINS (Phase 5) ===== */
+.skins-section{margin-top:16px}
+.skins-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0}
+.skin-card{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .3s;position:relative}
+.skin-card.active{border-color:var(--orange);box-shadow:0 0 18px rgba(255,107,26,.35)}
+.skin-card.locked{opacity:.55;cursor:default}
+.skin-emoji{font-size:30px;margin-bottom:5px}
+.skin-name{font-size:10px;font-weight:700}
+.skin-cost{font-size:10px;color:var(--muted);margin-top:2px}
+.skin-active-dot{position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:50%;background:var(--green)}
+
+/* ===== SEASON 2 ===== */
+.season-banner{background:linear-gradient(135deg,rgba(155,47,255,.18),rgba(255,45,120,.15));border:1px solid rgba(155,47,255,.45);border-radius:16px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden}
+.season-banner-bg{position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(155,47,255,.04) 0,rgba(155,47,255,.04) 2px,transparent 2px,transparent 18px)}
+.season-banner-content{position:relative;z-index:1}
+.season-tag{font-size:9px;font-weight:800;letter-spacing:2px;color:#CC77FF;font-family:'Space Mono',monospace;margin-bottom:3px;text-transform:uppercase}
+.season-title{font-size:17px;font-weight:800}
+.season-desc{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4}
+
+/* ===== FLASH SALE ===== */
+.flash-badge{display:inline-flex;align-items:center;gap:4px;background:var(--pink);color:#fff;padding:2px 7px;border-radius:6px;font-size:10px;font-weight:800;letter-spacing:.5px;animation:flash-pulse .9s ease-in-out infinite}
+@keyframes flash-pulse{0%,100%{opacity:1}50%{opacity:.65}}
+.market-seasonal{background:linear-gradient(135deg,rgba(155,47,255,.12),rgba(255,45,120,.12));border-color:rgba(155,47,255,.4)!important}
+
+/* ===== CITY WEATHER ===== */
+.weather-bar{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:10px;flex-shrink:0}
+.weather-icon{font-size:20px}
+.weather-info{flex:1}
+.weather-name{font-size:13px;font-weight:700}
+.weather-effect{font-size:11px;color:var(--muted);margin-top:1px}
+.weather-timer{font-size:11px;font-family:'Space Mono',monospace;color:var(--orange)}
 </style>
 </head>
 <body>
@@ -563,6 +638,25 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
         <div class="quick-btn-label">Garage</div>
         <div class="quick-btn-sub">Tes véhicules</div>
       </div>
+      <div class="quick-btn" onclick="showScreen('leaderboard')">
+        <div class="quick-btn-icon">🏆</div>
+        <div class="quick-btn-label">Classement</div>
+        <div class="quick-btn-sub">Top joueurs</div>
+      </div>
+      <div class="quick-btn" onclick="openPrestige()">
+        <div class="quick-btn-icon">✨</div>
+        <div class="quick-btn-label">Prestige</div>
+        <div class="quick-btn-sub" id="prestigeQuickSub">Bonus permanents</div>
+      </div>
+    </div>
+    <!-- City Weather -->
+    <div class="weather-bar" id="hubWeatherBar">
+      <div class="weather-icon" id="hubWeatherIcon">☀️</div>
+      <div class="weather-info">
+        <div class="weather-name" id="hubWeatherName">Ciel Dégagé</div>
+        <div class="weather-effect" id="hubWeatherEffect">Revenus normaux</div>
+      </div>
+      <div class="weather-timer" id="hubWeatherTimer">45min</div>
     </div>
     <div class="section-title mb8">Activité récente</div>
     <div class="activity-list" id="activityList"></div>
@@ -702,6 +796,40 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
   </div>
 </div>
 
+<!-- LEADERBOARD (Phase 4) -->
+<div id="leaderboard" class="screen">
+  <div class="lb-header">
+    <div class="back-btn" onclick="goBack()">← Hub</div>
+    <div class="district-header-name">🏆 Classement Mondial</div>
+    <div class="district-header-vibe">Top joueurs de BLOCKSIDE City</div>
+  </div>
+  <div class="lb-tabs">
+    <button class="lb-tab active" id="lbTab0" onclick="switchLbTab(0,this)">🌍 Global</button>
+    <button class="lb-tab" id="lbTab1" onclick="switchLbTab(1,this)">👥 Factions</button>
+    <button class="lb-tab" id="lbTab2" onclick="switchLbTab(2,this)">🏙️ Districts</button>
+  </div>
+  <div class="lb-content" id="lbContent"></div>
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="navTo('hub',this)"><div class="nav-icon">🏠</div><div class="nav-label">Hub</div></div>
+    <div class="nav-item" onclick="navTo('cityMap',this)"><div class="nav-icon">🏙️</div><div class="nav-label">Ville</div></div>
+    <div class="nav-item" onclick="navTo('piMarket',this)"><div class="nav-icon">⭐</div><div class="nav-label">Boutique</div></div>
+    <div class="nav-item" onclick="navTo('crew',this)"><div class="nav-icon">👥</div><div class="nav-label">Crew</div></div>
+    <div class="nav-item" onclick="navTo('profile',this)"><div class="nav-icon">👤</div><div class="nav-label">Profil</div></div>
+  </div>
+</div>
+
+<!-- PRESTIGE OVERLAY (Phase 6) -->
+<div class="prestige-overlay" id="prestigeOverlay">
+  <div class="prestige-box">
+    <div class="prestige-glow"></div>
+    <div class="prestige-title">✨ PRESTIGE</div>
+    <div class="prestige-sub">Réinitialise ta progression en échange de bonus permanents cumulables</div>
+    <div id="prestigeTiers"></div>
+    <div class="prestige-warning"><strong>⚠️ ATTENTION</strong><br>Le Prestige réinitialise argent, bâtiments et réputation.<br>Les bonus et la faction sont conservés.</div>
+    <button class="btn btn-secondary btn-full mt4" onclick="closePrestige()">Fermer</button>
+  </div>
+</div>
+
 <!-- DAILY REWARD MODAL -->
 <div id="dailyModal">
   <div class="daily-box">
@@ -828,7 +956,11 @@ const BUILDINGS = [
   {id:'apartment',emoji:'🏢',name:'Luxury Apartment',cost:8000,income:200,rep:100,districts:['sky_district','neon_market'],rarity:'epic'},
   {id:'blackmarket',emoji:'🕵️',name:'Black Market',cost:20000,income:500,rep:200,districts:['underblock','the_edge'],rarity:'legendary'},
   {id:'gallery',emoji:'🖼️',name:'Neon Gallery',cost:12000,income:350,rep:150,districts:['sky_district','neon_market'],rarity:'epic'},
-  {id:'helipad',emoji:'🚁',name:'Hélipad Privé',cost:50000,income:1000,rep:500,districts:['sky_district','the_edge'],rarity:'mythic'}
+  {id:'helipad',emoji:'🚁',name:'Hélipad Privé',cost:50000,income:1000,rep:500,districts:['sky_district','the_edge'],rarity:'mythic'},
+  {id:'tattoo',emoji:'🎨',name:'Tattoo Studio',cost:3000,income:50,rep:25,districts:['lowside','underblock'],rarity:'rare'},
+  {id:'gym',emoji:'💪',name:'Street Gym',cost:5000,income:75,rep:35,districts:['lowside','neon_market'],rarity:'rare'},
+  {id:'casino',emoji:'🎰',name:'Underground Casino',cost:35000,income:700,rep:300,districts:['underblock','the_edge'],rarity:'legendary'},
+  {id:'skyscraper',emoji:'🏗️',name:'Skyscraper Corp',cost:100000,income:2000,rep:800,districts:['sky_district'],rarity:'mythic'}
 ];
 
 const REP_TITLES = [
@@ -899,6 +1031,72 @@ const LIVE_EVENTS = [
   {emoji:'🔥',title:'BLACK MARKET NIGHT',desc:'Revenus ×3 dans Underblock',timer:'1h 42min',color:'#FF2D78'},
   {emoji:'⚔️',title:'DISTRICT WARS',desc:'Crew Wars — contrôle de The Edge',timer:'23h 15min',color:'#FF6B1A'},
   {emoji:'🎵',title:'NEON CONCERT',desc:'Snack Shop rapporte ×5 ce soir',timer:'3h 08min',color:'#9B2FFF'},
+  {emoji:'🌩️',title:'CITY BLACKOUT',desc:'Revenus doublés dans tous les districts',timer:'45min',color:'#2F9BFF'},
+  {emoji:'🎃',title:'UNDERBLOCK INVASION',desc:'Bâtiments rares drop ×2 cet événement',timer:'5h 20min',color:'#4ADE80'},
+];
+
+// Phase 4 — Social
+const GLOBAL_LEADERBOARD = [
+  {name:'ALPHA_GOD',faction:'rebel',rep:245820,buildings:67,prestige:3,char:'Z',color:'#FF6B1A'},
+  {name:'NeonKing',faction:'purple',rep:198340,buildings:54,prestige:2,char:'N',color:'#CC77FF'},
+  {name:'ShadowBoss',faction:'crow',rep:156720,buildings:49,prestige:2,char:'R',color:'#9B2FFF'},
+  {name:'StreetLord',faction:'rebel',rep:98450,buildings:38,prestige:1,char:'K',color:'#FF6B1A'},
+  {name:'CityMaster',faction:'purple',rep:76230,buildings:31,prestige:1,char:'B',color:'#CC77FF'},
+  {name:'BlockKing',faction:'crow',rep:54180,buildings:27,prestige:0,char:'Z',color:'#9B2FFF'},
+  {name:'NightRunner',faction:'rebel',rep:38920,buildings:22,prestige:0,char:'N',color:'#FF6B1A'},
+  {name:'UrbanLord',faction:'purple',rep:25640,buildings:18,prestige:0,char:'R',color:'#CC77FF'},
+  {name:'EdgeWalker',faction:'crow',rep:18930,buildings:14,prestige:0,char:'K',color:'#9B2FFF'},
+];
+
+const FACTION_LEADERBOARD = [
+  {name:'REBEL CITY',emoji:'🔥',color:'#FF6B1A',bg:'rgba(255,107,26,.2)',members:1247,totalRep:2847520,dominance:52},
+  {name:'BLACK CROW',emoji:'🐦‍⬛',color:'#9B2FFF',bg:'rgba(155,47,255,.2)',members:892,totalRep:1984320,dominance:33},
+  {name:'PURPLE NATION',emoji:'💜',color:'#CC77FF',bg:'rgba(155,47,255,.15)',members:634,totalRep:1256840,dominance:15},
+];
+
+const DISTRICT_LEADERBOARD = [
+  {district:'LOWSIDE',icon:'🏚️',color:'#FF6B1A',leader:'ALPHA_GOD',buildings:67,income:128400},
+  {district:'NEON MARKET',icon:'🌃',color:'#2F9BFF',leader:'NeonKing',buildings:54,income:342800},
+  {district:'SKY DISTRICT',icon:'🏙️',color:'#9B2FFF',leader:'ShadowBoss',buildings:38,income:865000},
+  {district:'UNDERBLOCK',icon:'🌑',color:'#FF2D78',leader:'StreetLord',buildings:29,income:210500},
+  {district:'THE EDGE',icon:'⚡',color:'#FFD700',leader:'CityMaster',buildings:21,income:480000},
+];
+
+// Phase 5 — Cosmetics & Pi expansion
+const CHARACTER_SKINS = [
+  {id:'default',name:'Default',emoji:'😎',locked:false,piCost:0,color:'default'},
+  {id:'neon',name:'Néon',emoji:'🌟',locked:true,piCost:2,color:'#00DDFF'},
+  {id:'void',name:'Void',emoji:'🌑',locked:true,piCost:2,color:'#6B2FFF'},
+  {id:'gold',name:'Gold',emoji:'👑',locked:true,piCost:3,color:'#FFD700'},
+  {id:'fire',name:'Inferno',emoji:'🔥',locked:true,piCost:3,color:'#FF4400'},
+  {id:'ghost',name:'Ghost',emoji:'👻',locked:true,piCost:5,color:'#CCCCFF'},
+];
+
+const SEASONAL_PI_ITEMS = [
+  {id:'s2_pass',emoji:'🌟',name:'Season 2 Pass',desc:'Missions exclusives + skin Season 2 GRATUIT. Durée : 30 jours.',price:5,effect:'s2_pass',limited:true,timer:'6j 14h'},
+  {id:'gold_boost',emoji:'💎',name:'Gold Boost ×5',desc:'Multiplicateur de revenus ×5 pendant 24h. Offre flash !',price:3,effect:'gold_boost',limited:true,timer:'2j 08h'},
+];
+
+// Phase 6 — World expansion
+const PRESTIGE_TIERS = [
+  {level:1,name:'Prestige I',bonus:'+15% tous les revenus',icon:'⭐',costRep:10000,costMoney:250000},
+  {level:2,name:'Prestige II',bonus:'+35% tous revenus + titre Prestige II',icon:'🌟',costRep:30000,costMoney:1000000},
+  {level:3,name:'Prestige III',bonus:'+60% revenus + skin Gold offert',icon:'💫',costRep:75000,costMoney:5000000},
+];
+
+const CITY_WEATHER = [
+  {id:'clear',name:'Ciel Dégagé',icon:'☀️',desc:'Revenus normaux',mult:1},
+  {id:'rain',name:'Pluie Neon',icon:'🌧️',desc:'Clubs +30% revenus',mult:1.3,affects:'club'},
+  {id:'storm',name:'Tempête Électrique',icon:'⚡',desc:'Tous revenus +20% (énergie chaotique)',mult:1.2},
+  {id:'fog',name:'Brouillard Urbain',icon:'🌫️',desc:'Black Market +50% revenus',mult:1.5,affects:'blackmarket'},
+  {id:'heat',name:'Vague de Chaleur',icon:'🌡️',desc:'Snack Shops +40% revenus',mult:1.4,affects:'snack'},
+];
+
+const EXTRA_BUILDINGS = [
+  {id:'tattoo',emoji:'🎨',name:'Tattoo Studio',cost:3000,income:50,rep:25,districts:['lowside','underblock'],rarity:'rare'},
+  {id:'gym',emoji:'💪',name:'Street Gym',cost:5000,income:75,rep:35,districts:['lowside','neon_market'],rarity:'rare'},
+  {id:'casino',emoji:'🎰',name:'Underground Casino',cost:35000,income:700,rep:300,districts:['underblock','the_edge'],rarity:'legendary'},
+  {id:'skyscraper',emoji:'🏗️',name:'Skyscraper Corp',cost:100000,income:2000,rep:800,districts:['sky_district'],rarity:'mythic'},
 ];
 
 // ============================================================
@@ -932,6 +1130,17 @@ let state = {
   vehicles: { owned: [], active: null },
   // Tutorial
   tutorialDone: false,
+  // Phase 4 — Social
+  lbTab: 0,
+  // Phase 5 — Cosmetics
+  ownedSkins: ['default'],
+  activeSkin: 'default',
+  seasonPass: false,
+  // Phase 6 — Prestige
+  prestigeLevel: 0,
+  prestigeBonus: 1.0,
+  currentWeather: 'clear',
+  weatherChangedAt: 0,
 };
 
 let currentScreen = 'splash';
@@ -1029,6 +1238,12 @@ function calcPendingIncome(b, districtId) {
   if (state.premiumOwned.includes('vip')) income *= 2;
   if (state.character==='zay') income *= 1.2;
   if (districtId) income *= getVehicleBonus(districtId);
+  if (state.prestigeBonus && state.prestigeBonus > 1) income *= state.prestigeBonus;
+  // Weather bonus
+  const w = CITY_WEATHER.find(x=>x.id===state.currentWeather);
+  if (w && w.mult > 1) {
+    if (!w.affects || w.affects === b.buildingId) income *= w.mult;
+  }
   return Math.floor(income);
 }
 
@@ -1203,6 +1418,7 @@ function showScreen(id) {
   if (id==='profile') renderProfile();
   if (id==='missions') { initMissions(); renderMissions(); }
   if (id==='garage') renderGarage();
+  if (id==='leaderboard') { currentLbTab=0; document.querySelectorAll('.lb-tab').forEach((t,i)=>t.classList.toggle('active',i===0)); renderLeaderboard(); }
   if (id==='battlePass') renderBattlePass();
   Sound.play('click');
 }
@@ -1292,6 +1508,7 @@ function startGame() {
   startEventCarousel();
   showScreen('hub');
   startGameTick();
+  initWeather();
   if (!state.tutorialDone) setTimeout(startTutorial, 1200);
 }
 
@@ -1629,25 +1846,62 @@ function renderMarket() {
   const el = document.getElementById('marketItems');
   if (!el) return;
   const glowColors = ['#9B2FFF','#FFD700','#FF2D78','#2F9BFF'];
-  el.innerHTML = PREMIUM_ITEMS.map((item,i) => {
-    const owned = state.premiumOwned.includes(item.id);
-    return `<div class="market-item ${owned?'owned':''}">
-      <div class="market-item-glow" style="background:radial-gradient(circle,${glowColors[i]},transparent)"></div>
-      <div class="market-item-top">
-        <div class="market-item-emoji">${item.emoji}</div>
-        <div class="market-item-info">
-          <div class="market-item-name">${item.name}</div>
-          <div class="market-item-desc">${item.desc}</div>
+
+  // Season 2 Banner
+  const s2Banner = `<div class="season-banner">
+    <div class="season-banner-bg"></div>
+    <div class="season-banner-content">
+      <div class="season-tag">✨ SEASON 2 — NEON UPRISING</div>
+      <div class="season-title">L'Empire Néon</div>
+      <div class="season-desc">Nouvelles missions · Skins exclusifs · Events légendaires<br>Débloque des récompenses inédites cette saison.</div>
+    </div>
+  </div>`;
+
+  // Seasonal limited items
+  const seasonalHTML = `<div class="section-title mb8">🔥 Offres Limitées <span class="flash-badge">FLASH</span></div>` +
+    SEASONAL_PI_ITEMS.map(item => {
+      const owned = state.premiumOwned.includes(item.id);
+      return `<div class="market-item market-seasonal ${owned?'owned':''}">
+        <div class="market-item-glow" style="background:radial-gradient(circle,#9B2FFF,transparent)"></div>
+        <div class="market-item-top">
+          <div class="market-item-emoji">${item.emoji}</div>
+          <div class="market-item-info">
+            <div class="market-item-name">${item.name}${item.limited?` <span class="flash-badge">${item.timer}</span>`:''}</div>
+            <div class="market-item-desc">${item.desc}</div>
+          </div>
         </div>
-      </div>
-      <div class="market-item-price">
-        <div class="pi-price"><span class="pi-symbol">π</span>${item.price}</div>
-        ${owned
-          ? '<div class="owned-badge">✓ Actif</div>'
-          : `<button class="buy-pi-btn" onclick="buyPiItem('${item.id}')">Acheter avec Pi</button>`}
-      </div>
-    </div>`;
-  }).join('');
+        <div class="market-item-price">
+          <div class="pi-price"><span class="pi-symbol">π</span>${item.price}</div>
+          ${owned
+            ? '<div class="owned-badge">✓ Actif</div>'
+            : `<button class="buy-pi-btn" onclick="buyPiItem('${item.id}')">Acheter</button>`}
+        </div>
+      </div>`;
+    }).join('');
+
+  // Standard items
+  const standardHTML = `<div class="section-title mb8 mt4">💎 Items Premium</div>` +
+    PREMIUM_ITEMS.map((item,i) => {
+      const owned = state.premiumOwned.includes(item.id);
+      return `<div class="market-item ${owned?'owned':''}">
+        <div class="market-item-glow" style="background:radial-gradient(circle,${glowColors[i]},transparent)"></div>
+        <div class="market-item-top">
+          <div class="market-item-emoji">${item.emoji}</div>
+          <div class="market-item-info">
+            <div class="market-item-name">${item.name}</div>
+            <div class="market-item-desc">${item.desc}</div>
+          </div>
+        </div>
+        <div class="market-item-price">
+          <div class="pi-price"><span class="pi-symbol">π</span>${item.price}</div>
+          ${owned
+            ? '<div class="owned-badge">✓ Actif</div>'
+            : `<button class="buy-pi-btn" onclick="buyPiItem('${item.id}')">Acheter avec Pi</button>`}
+        </div>
+      </div>`;
+    }).join('');
+
+  el.innerHTML = s2Banner + seasonalHTML + standardHTML;
 }
 
 function buyPiItem(itemId) {
@@ -1698,6 +1952,7 @@ async function processPiPayment() {
         onReadyForServerApproval: (pid) => { /* Server approve */ },
         onReadyForServerCompletion: (pid, txid) => {
           if (!state.premiumOwned.includes(paymentItem.id)) state.premiumOwned.push(paymentItem.id);
+          applyPaymentEffect(paymentItem);
           checkAchievements();
           saveGame();
           showPaymentModal('success');
@@ -1710,10 +1965,33 @@ async function processPiPayment() {
     // Demo fallback
     setTimeout(() => {
       if (!state.premiumOwned.includes(paymentItem.id)) state.premiumOwned.push(paymentItem.id);
+      applyPaymentEffect(paymentItem);
       checkAchievements();
       saveGame();
       showPaymentModal('success');
     }, 2000);
+  }
+}
+
+function applyPaymentEffect(item) {
+  if (!item) return;
+  if (item.effect && item.effect.startsWith('skin_')) {
+    const skinId = item.effect.replace('skin_','');
+    if (!state.ownedSkins) state.ownedSkins = ['default'];
+    if (!state.ownedSkins.includes(skinId)) state.ownedSkins.push(skinId);
+    state.activeSkin = skinId;
+  }
+  if (item.effect === 's2_pass') {
+    state.seasonPass = true;
+    if (!state.ownedSkins) state.ownedSkins = ['default'];
+    if (!state.ownedSkins.includes('neon')) state.ownedSkins.push('neon');
+  }
+  if (item.effect === 'neon_skin_pack') {
+    if (!state.ownedSkins) state.ownedSkins = ['default'];
+    ['neon','void','fire'].forEach(id => { if (!state.ownedSkins.includes(id)) state.ownedSkins.push(id); });
+  }
+  if (item.effect === 'city_key') {
+    DISTRICTS.forEach(d => { if (state.districts[d.id]) state.districts[d.id].unlocked = true; });
   }
 }
 
@@ -1758,7 +2036,214 @@ function renderProfile() {
           <div class="ach-name">${a.name}</div>
         </div>`;
       }).join('')}
+    </div>
+    ${state.prestigeLevel > 0 ? `<div class="flex center gap8 mt12 mb8"><span class="prestige-star">✨ Prestige ${state.prestigeLevel}</span><span class="fs12 text-muted">+${Math.round((state.prestigeBonus-1)*100)}% revenus</span></div>` : ''}
+    <div class="skins-section">
+      <div class="section-title mb8">🎨 Skins Personnage</div>
+      <div class="skins-grid">
+        ${CHARACTER_SKINS.map(sk => {
+          const owned = state.ownedSkins&&state.ownedSkins.includes(sk.id);
+          const active = state.activeSkin===sk.id;
+          return `<div class="skin-card ${active?'active':''} ${!owned?'locked':''}" onclick="${owned?'activateSkin(\''+sk.id+'\')':'buySkinPi(\''+sk.id+'\')'}" title="${sk.name}">
+            ${active?'<div class="skin-active-dot"></div>':''}
+            <div class="skin-emoji">${sk.emoji}</div>
+            <div class="skin-name">${sk.name}</div>
+            <div class="skin-cost">${owned?'<span style="color:var(--green)">✓ Possédé</span>':(sk.piCost?'π'+sk.piCost:'Gratuit')}</div>
+          </div>`;
+        }).join('')}
+      </div>
     </div>`;
+}
+
+// ============================================================
+// LEADERBOARD (Phase 4)
+// ============================================================
+let currentLbTab = 0;
+
+function switchLbTab(idx, el) {
+  currentLbTab = idx;
+  document.querySelectorAll('.lb-tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
+  renderLeaderboard();
+}
+
+function renderLeaderboard() {
+  const el = document.getElementById('lbContent');
+  if (!el) return;
+  if (currentLbTab === 0) {
+    // Insert player's entry at correct rank position
+    const allEntries = [...GLOBAL_LEADERBOARD];
+    const playerScore = state.rep + Math.floor(state.totalEarned/100);
+    const playerEntry = {name:state.username, faction:state.crew||'rebel', rep:state.rep, buildings:state.totalBuildings, prestige:state.prestigeLevel, char:state.username[0].toUpperCase(), color:'#FF6B1A', isMe:true};
+    allEntries.push(playerEntry);
+    allEntries.sort((a,b)=>(b.rep+Math.floor((b.totalEarned||0)/100))-(a.rep+Math.floor((a.totalEarned||0)/100)));
+    const fColors = {rebel:'#FF6B1A',crow:'#9B2FFF',purple:'#CC77FF'};
+    el.innerHTML = `<div class="fs13 fw7 mb8 text-muted">🌍 Classement Global — ${allEntries.length} joueurs</div>` +
+      allEntries.map((e,i) => {
+        const rankEmoji = i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
+        const fcolor = fColors[e.faction]||'#FF6B1A';
+        return `<div class="lb-entry ${e.isMe?'mine':''}">
+          <div class="lb-rank" style="${i<3?'font-size:18px':''}">${rankEmoji}</div>
+          <div class="lb-avatar" style="background:${fcolor}22;color:${fcolor}">${e.char||e.name[0]}</div>
+          <div class="lb-info">
+            <div class="lb-name">${e.name}${e.isMe?' <span style="color:var(--orange);font-size:10px">(Toi)</span>':''}${'⭐'.repeat(Math.min(e.prestige||0,3))}</div>
+            <div class="lb-sub">🏗️ ${e.buildings} bâtiments · ${FACTIONS.find(f=>f.id===e.faction)?.name||'Indépendant'}</div>
+          </div>
+          <div class="lb-score">
+            <div class="lb-score-val">${fmt(e.rep)}</div>
+            <div class="lb-score-label">rep</div>
+          </div>
+        </div>`;
+      }).join('');
+  } else if (currentLbTab === 1) {
+    el.innerHTML = `<div class="fs13 fw7 mb8 text-muted">👥 Classement Factions</div>` +
+      FACTION_LEADERBOARD.map((f,i) => {
+        const rankEmoji = i===0?'🥇':i===1?'🥈':'🥉';
+        return `<div class="lb-faction-entry">
+          <div style="font-size:14px;font-weight:700;width:30px;text-align:center">${rankEmoji}</div>
+          <div class="lb-faction-logo" style="background:${f.bg||f.color+'22'}">${f.emoji}</div>
+          <div style="flex:1;min-width:0">
+            <div class="lb-name" style="color:${f.color}">${f.name}</div>
+            <div class="lb-sub">👥 ${fmt(f.members)} membres · ⭐ ${fmt(f.totalRep)} rep total</div>
+            <div class="lb-faction-bar" style="background:${f.color};width:${f.dominance}%;margin-top:6px"></div>
+            <div class="fs10 text-muted mt4">${f.dominance}% domination</div>
+          </div>
+        </div>`;
+      }).join('');
+  } else {
+    el.innerHTML = `<div class="fs13 fw7 mb8 text-muted">🏙️ Classement Districts</div>` +
+      DISTRICT_LEADERBOARD.map((d,i) => {
+        const rankEmoji = i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
+        return `<div class="lb-entry">
+          <div class="lb-rank" style="${i<3?'font-size:18px':''}">${rankEmoji}</div>
+          <div class="lb-avatar" style="background:${d.color}22;font-size:20px">${d.icon}</div>
+          <div class="lb-info">
+            <div class="lb-name" style="color:${d.color}">${d.district}</div>
+            <div class="lb-sub">Leader : ${d.leader} · 🏗️ ${d.buildings} bâtiments</div>
+          </div>
+          <div class="lb-score">
+            <div class="lb-score-val">$${fmt(d.income)}</div>
+            <div class="lb-score-label">/ jour</div>
+          </div>
+        </div>`;
+      }).join('');
+  }
+}
+
+// ============================================================
+// PRESTIGE SYSTEM (Phase 6)
+// ============================================================
+function openPrestige() {
+  Sound.play('click');
+  const el = document.getElementById('prestigeTiers');
+  if (el) {
+    el.innerHTML = PRESTIGE_TIERS.map(t => {
+      const done = state.prestigeLevel >= t.level;
+      const isNext = state.prestigeLevel === t.level - 1;
+      const canAfford = state.rep >= t.costRep && state.money >= t.costMoney;
+      return `<div class="prestige-tier ${done?'done':''} ${isNext?'next-up':''}">
+        <div class="prestige-tier-icon">${t.icon}</div>
+        <div class="prestige-tier-info">
+          <div class="prestige-tier-name">${t.name}</div>
+          <div class="prestige-tier-bonus">${t.bonus}</div>
+          <div class="prestige-tier-cost">Requis : ⭐${fmt(t.costRep)} rep · $${fmt(t.costMoney)}</div>
+        </div>
+        <div class="prestige-tier-status">${done ? '✅ Obtenu' : isNext ? (canAfford ? '→ Disponible' : '🔒 Insuffisant') : '🔒'}</div>
+        ${isNext && canAfford ? `<button class="btn btn-gold" style="margin-top:8px;font-size:12px;width:100%" onclick="activatePrestige(${t.level})">✨ Activer</button>` : ''}
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('prestigeOverlay').classList.add('open');
+}
+
+function closePrestige() {
+  document.getElementById('prestigeOverlay').classList.remove('open');
+}
+
+function activatePrestige(level) {
+  const tier = PRESTIGE_TIERS.find(t => t.level === level);
+  if (!tier) return;
+  if (state.rep < tier.costRep || state.money < tier.costMoney) {
+    showToast('Ressources insuffisantes!', 'error');
+    return;
+  }
+  // Apply prestige
+  state.prestigeLevel = level;
+  state.prestigeBonus = 1 + level * 0.15 + (level >= 2 ? 0.05 : 0) + (level >= 3 ? 0.1 : 0);
+  // Reset (keep crew and premium)
+  state.money = 500;
+  state.rep = 0;
+  state.buildings = {};
+  state.totalBuildings = 0;
+  state.totalEarned = 0;
+  state.districts = {};
+  initDistricts();
+  if (level === 3 && !state.ownedSkins.includes('gold')) {
+    state.ownedSkins.push('gold');
+    showToast('🎁 Skin Gold débloqué!', 'success');
+  }
+  closePrestige();
+  saveGame();
+  updateHUDStats();
+  const sub = document.getElementById('prestigeQuickSub');
+  if (sub) sub.textContent = `✨ Prestige ${level} actif`;
+  showToast(`✨ Prestige ${level} activé! +${Math.round((state.prestigeBonus-1)*100)}% revenus`, 'success');
+  addActivity(`✨ Prestige ${level} activé!`);
+  renderActivity();
+}
+
+// ============================================================
+// SKIN SYSTEM (Phase 5)
+// ============================================================
+function activateSkin(id) {
+  state.activeSkin = id;
+  saveGame();
+  renderProfile();
+  showToast('🎨 Skin activé : ' + CHARACTER_SKINS.find(s=>s.id===id)?.name, 'success');
+}
+
+function buySkinPi(id) {
+  const skin = CHARACTER_SKINS.find(s=>s.id===id);
+  if (!skin) return;
+  paymentItem = {id:skin.id, emoji:skin.emoji, name:skin.name+' Skin', price:skin.piCost, effect:'skin_'+skin.id};
+  openModal('paymentModal');
+  showPaymentModal('confirm');
+}
+
+// ============================================================
+// CITY WEATHER (Phase 6)
+// ============================================================
+let weatherTimerInterval = null;
+let weatherSecondsLeft = 2700; // 45 min
+
+function initWeather() {
+  const saved = state.currentWeather||'clear';
+  const w = CITY_WEATHER.find(x=>x.id===saved)||CITY_WEATHER[0];
+  updateWeatherUI(w);
+  if (weatherTimerInterval) clearInterval(weatherTimerInterval);
+  weatherTimerInterval = setInterval(() => {
+    weatherSecondsLeft--;
+    if (weatherSecondsLeft <= 0) {
+      const next = CITY_WEATHER[Math.floor(Math.random()*CITY_WEATHER.length)];
+      state.currentWeather = next.id;
+      weatherSecondsLeft = 1800 + Math.floor(Math.random()*1800);
+      saveGame();
+      updateWeatherUI(next);
+      addNotification('🌤️ Météo urbaine', next.name + ' — ' + next.desc);
+    }
+    const min = Math.floor(weatherSecondsLeft/60);
+    const sec = weatherSecondsLeft%60;
+    const el = document.getElementById('hubWeatherTimer');
+    if (el) el.textContent = min+'min '+sec+'s';
+  }, 1000);
+}
+
+function updateWeatherUI(w) {
+  const icon = document.getElementById('hubWeatherIcon');
+  const name = document.getElementById('hubWeatherName');
+  const effect = document.getElementById('hubWeatherEffect');
+  if (icon) icon.textContent = w.icon;
+  if (name) name.textContent = w.name;
+  if (effect) effect.textContent = w.desc;
 }
 
 // ============================================================
@@ -2535,6 +3020,10 @@ window.addEventListener('load', () => {
     renderActivity();
     showScreen('hub');
     startGameTick();
+    initWeather();
+    // Update prestige quick sub if applicable
+    const sub = document.getElementById('prestigeQuickSub');
+    if (sub && state.prestigeLevel > 0) sub.textContent = `✨ Prestige ${state.prestigeLevel} actif`;
   }
 });
 
