@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: blockside-api
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    rootDir: backend
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: PI_API_BASE
+        value: https://api.minepi.com/v2
+      - key: PI_API_KEY
+        sync: false          # à saisir dans le dashboard Render
+      - key: JWT_SECRET
+        generateValue: true  # Render génère automatiquement
+      - key: ALLOWED_ORIGINS
+        value: https://gbobombana-png.github.io
+    healthCheckPath: /health

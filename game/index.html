@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>BLOCKSIDE — Build. Fight. Own.</title>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://sdk.minepi.com/pi-runtime.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
@@ -1097,7 +1098,16 @@ const EXTRA_BUILDINGS = [
 // ============================================================
 // API CLIENT — Backend BLOCKSIDE
 // ============================================================
-const API_BASE = 'http://localhost:3001/api'; // à changer en prod
+// Détecte automatiquement l'environnement (local vs production)
+const IS_LOCAL = ['localhost','127.0.0.1'].includes(location.hostname);
+const API_BASE = IS_LOCAL
+  ? 'http://localhost:3001/api'
+  : 'https://blockside-api.onrender.com/api';
+
+// Pi SDK init — sandbox en dev, production sur Pi Browser
+if (typeof window.Pi !== 'undefined') {
+  Pi.init({ version: '2.0', sandbox: IS_LOCAL });
+}
 
 let _piAccessToken = null;  // token Pi SDK stocké après login
 let _piUid = null;          // uid Pi du joueur connecté

@@ -16,7 +16,8 @@ const PORT = process.env.PORT || 3001;
 // ── Sécurité de base ──────────────────────────────────────────
 app.use(helmet());
 
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173').split(',');
+const defaultOrigins = 'http://localhost:3000,http://localhost:5173,http://127.0.0.1:5500,https://gbobombana-png.github.io';
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || defaultOrigins).split(',').map(o => o.trim());
 app.use(cors({
   origin: (origin, cb) => {
     if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
