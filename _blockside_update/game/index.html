@@ -1034,6 +1034,20 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
 <!-- TOAST -->
 <div id="toast"></div>
 
+<!-- COMBO DISPLAY -->
+<div id="comboDisplay"><div class="combo-text">×3</div><div class="combo-sub">COMBO!</div></div>
+
+<!-- LEVEL UP OVERLAY -->
+<div id="levelupOverlay">
+  <div class="levelup-card">
+    <div class="levelup-stars">⭐⭐⭐</div>
+    <div class="levelup-title">DISTRICT BOSS</div>
+    <div class="levelup-subtitle">Nouveau rang débloqué !</div>
+    <div class="levelup-reward">🏆 Nouveau statut</div>
+    <button class="btn btn-primary btn-full" onclick="document.getElementById('levelupOverlay').classList.remove('active')">Continuer →</button>
+  </div>
+</div>
+
 <script>
 // ============================================================
 // DATA DEFINITIONS
@@ -1593,6 +1607,14 @@ function collectDistrict(districtId) {
     state.money += total;
     state.totalEarned += total;
     state.collectCount = (state.collectCount||0) + 1;
+    SFX.play(total > 1000 ? 'bigcollect' : 'collect');
+    vib(15);
+    spawnFloat('+$' + total.toLocaleString('fr-FR'), total > 500 ? '#FFD700' : '#4ADE80');
+    triggerCombo();
+    checkLevelUp();
+    // Pulse income display
+    const incEl = document.getElementById('hubPendingIncome');
+    if (incEl) { incEl.classList.remove('pulsing'); void incEl.offsetWidth; incEl.classList.add('pulsing'); setTimeout(()=>incEl.classList.remove('pulsing'),500); }
     addActivity('💰 Collecte ' + districtId.replace('_',' ').toUpperCase() + ': +' + fmt(total));
     trackMission('collect', 1);
     checkAchievements();
@@ -1754,6 +1776,13 @@ function openFirstDistrict() {
 // ============================================================
 function goToCharSelect() {
   if (loadGame() && state.character) {
+    // Apply saved character color theme
+    const savedChar = CHARACTERS.find(c => c.id === state.character);
+    if (savedChar) {
+      document.documentElement.style.setProperty('--cc', savedChar.color);
+      document.documentElement.style.setProperty('--cc-glow', savedChar.glow);
+      document.documentElement.style.setProperty('--cc-bg', savedChar.accentBg||savedChar.glow.replace('.4)','.12)'));
+    }
     initDistricts();
     initMissions();
     updateHUDStats();
@@ -2332,60 +2361,72 @@ function applyPaymentEffect(item) {
 // PROFILE
 // ============================================================
 function renderProfile() {
-  const el = document.getElementById('profileContent');
-  if (!el) return;
-  const char = CHARACTERS.find(c=>c.id===state.character)||CHARACTERS[0];
-  const title = getRepTitle(state.rep);
-  const next = getNextRepTitle();
-  const progress = getRepProgress();
-  const factionName = state.crew ? (FACTIONS.find(x=>x.id===state.crew)?.name||'Aucune') : 'Aucune';
-  state.achievements = state.achievements||{};
-  el.innerHTML = `
-    <div class="profile-hero">
-      <div class="profile-avatar" style="background:${char.color}22;color:${char.color};border-color:${char.color}">${char.name[0]}</div>
-      <div class="profile-username">${state.username}</div>
-      <div class="profile-title" style="color:${char.color}">${char.name} — ${char.role}</div>
-      <div class="mt8"><span class="badge badge-rare">${title}</span></div>
-    </div>
-    <div class="rep-bar-wrap">
-      <div class="rep-bar-label">
-        <span>⭐ ${fmt(state.rep)} rep</span>
-        <span>${next ? next.title + ' (' + fmt(next.min) + ')' : 'MAX'}</span>
+  const char = CHARACTERS.find(c => c.id === state.character) || CHARACTERS[0];
+  const px = char.col * 25, py = char.row * 100;
+  const prestigeStars = '⭐'.repeat(state.prestigeLevel || 0) || '';
+  const container = document.getElementById('profileContent');
+  if (!container) return;
+  container.innerHTML = `
+    <div class="profile-card-flex" style="--cc:${char.color};--cc-glow:${char.glow};--cc-bg:${char.accentBg||char.glow.replace('.4)','.12)')}">
+      <div class="profile-char-photo" style="background-position:${px}% ${py}%;border-color:${char.color}"></div>
+      <div style="flex:1">
+        <div style="font-size:22px;font-weight:900;letter-spacing:1px">${state.username||char.name}</div>
+        <div class="profile-role-badge" style="margin-top:4px">
+          ${char.icon} ${char.role}${state.prestigeLevel ? ' · ' + prestigeStars + ' Prestige ' + state.prestigeLevel : ''}
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:6px;font-family:'Space Mono',monospace">${getRepTitle(state.rep)}</div>
       </div>
-      <div class="rep-bar"><div class="rep-bar-fill" style="width:${progress*100}%"></div></div>
     </div>
-    <div class="profile-stats">
-      <div class="profile-stat"><div class="profile-stat-val">$${fmt(state.totalEarned)}</div><div class="profile-stat-label">Total gagné</div></div>
-      <div class="profile-stat"><div class="profile-stat-val">${state.totalBuildings}</div><div class="profile-stat-label">Bâtiments</div></div>
-      <div class="profile-stat"><div class="profile-stat-val">${state.clickCount}</div><div class="profile-stat-label">Interactions</div></div>
-      <div class="profile-stat"><div class="profile-stat-val">${factionName.split(' ')[0]}</div><div class="profile-stat-label">Faction</div></div>
+    <blockquote class="profile-quote">${char.quote||''}</blockquote>
+    <div class="profile-stat-row" style="margin:0 16px">
+      <div class="profile-stat-item"><div class="profile-stat-val" style="color:${char.color}">$${formatMoney(state.money)}</div><div class="profile-stat-lbl">Balance</div></div>
+      <div class="profile-stat-item"><div class="profile-stat-val" style="color:var(--purple)">${(state.rep||0).toLocaleString('fr-FR')}</div><div class="profile-stat-lbl">Réputation</div></div>
+      <div class="profile-stat-item"><div class="profile-stat-val" style="color:var(--green)">${state.totalBuildings||0}</div><div class="profile-stat-lbl">Bâtiments</div></div>
     </div>
-    <div class="achievements-title">🏆 Succès</div>
-    <div class="achievements-grid">
-      ${ACHIEVEMENTS.map(a=>{
-        const unlocked = state.achievements[a.id]||a.cond(state);
-        return `<div class="achievement ${unlocked?'unlocked':''}">
-          <span class="ach-icon">${a.icon}</span>
-          <div class="ach-name">${a.name}</div>
-        </div>`;
-      }).join('')}
+    <div style="margin:12px 16px;background:var(--card);border-radius:16px;padding:16px;border:1px solid var(--border)">
+      <div style="font-size:13px;font-weight:700;color:${char.color};margin-bottom:10px">⚡ ${char.ability?.name||'Capacité'}</div>
+      <div style="font-size:12px;color:var(--text)">${char.ability?.desc||char.bonus}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;font-style:italic">${char.personality||''}</div>
     </div>
-    ${state.prestigeLevel > 0 ? `<div class="flex center gap8 mt12 mb8"><span class="prestige-star">✨ Prestige ${state.prestigeLevel}</span><span class="fs12 text-muted">+${Math.round((state.prestigeBonus-1)*100)}% revenus</span></div>` : ''}
-    <div class="skins-section">
-      <div class="section-title mb8">🎨 Skins Personnage</div>
-      <div class="skins-grid">
-        ${CHARACTER_SKINS.map(sk => {
-          const owned = state.ownedSkins&&state.ownedSkins.includes(sk.id);
-          const active = state.activeSkin===sk.id;
-          return `<div class="skin-card ${active?'active':''} ${!owned?'locked':''}" onclick="${owned?'activateSkin(\''+sk.id+'\')':'buySkinPi(\''+sk.id+'\')'}" title="${sk.name}">
-            ${active?'<div class="skin-active-dot"></div>':''}
-            <div class="skin-emoji">${sk.emoji}</div>
-            <div class="skin-name">${sk.name}</div>
-            <div class="skin-cost">${owned?'<span style="color:var(--green)">✓ Possédé</span>':(sk.piCost?'π'+sk.piCost:'Gratuit')}</div>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>`;
+    <div style="margin:0 16px;background:var(--card);border-radius:16px;padding:16px;border:1px solid var(--border)">
+      <div style="font-size:13px;font-weight:700;margin-bottom:12px">📊 Stats du personnage</div>
+      ${Object.entries(char.stats||{}).map(([k,v])=>`
+        <div class="stat-bar-row" style="margin-bottom:8px">
+          <span class="stat-bar-label">${k.toUpperCase()}</span>
+          <div class="stat-bar-track" style="height:6px"><div class="stat-bar-fill" style="width:${v*10}%;background:linear-gradient(90deg,${char.color},var(--pink))"></div></div>
+          <span style="font-size:10px;color:var(--text);font-family:'Space Mono',monospace;width:16px;text-align:right">${v}</span>
+        </div>`).join('')}
+    </div>
+    <div style="margin:12px 16px;background:var(--card);border-radius:16px;padding:16px;border:1px solid var(--border)">
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px">🎨 Skins (${state.ownedSkins?.length||1}/${CHARACTER_SKINS.length})</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">${renderSkinsCompact(char.color)}</div>
+    </div>
+    <button class="share-btn" style="--cc:${char.color}" onclick="shareProfile()">📤 Partager mon profil</button>
+  `;
+}
+
+function formatMoney(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1)+'M';
+  if (n >= 1000) return (n/1000).toFixed(1)+'K';
+  return Math.floor(n).toString();
+}
+
+function renderSkinsCompact(color) {
+  return (CHARACTER_SKINS||[]).map(s => {
+    const owned = state.ownedSkins?.includes(s.id);
+    return `<div onclick="${owned?'activateSkin(\''+s.id+'\')':''}" style="width:44px;height:44px;border-radius:10px;background:${owned?color+'22':'var(--border)'};border:2px solid ${owned&&state.activeSkin===s.id?color:owned?color+'44':'var(--border)'};display:flex;align-items:center;justify-content:center;font-size:20px;cursor:${owned?'pointer':'default'};opacity:${owned?1:.4}">${s.emoji||'👤'}</div>`;
+  }).join('');
+}
+
+function shareProfile() {
+  const char = CHARACTERS.find(c => c.id === state.character)||CHARACTERS[0];
+  const text = `🏙️ BLOCKSIDE — ${state.username||char.name}\n${char.icon} ${char.role} · ${getRepTitle(state.rep)}\n💰 $${formatMoney(state.money)} · ⭐ ${(state.rep||0).toLocaleString()} REP\n🎮 play.blockside.io`;
+  if (navigator.share) {
+    navigator.share({title:'BLOCKSIDE Profile',text}).catch(()=>{});
+  } else {
+    navigator.clipboard?.writeText(text).then(()=>showToast('Profil copié!','success'));
+  }
+  SFX.play('click');
 }
 
 // ============================================================
@@ -3032,45 +3073,111 @@ function collectAllDistricts() {
   }
 }
 
-// ============================================================
-// SOUND SYSTEM (Web Audio API)
-// ============================================================
-const Sound = {
-  ctx: null, muted: false,
+// ── SOUND SYSTEM (Web Audio API) ──────────────────────────────
+const SFX = {
+  _ctx: null, _enabled: true,
   init() {
-    try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
-  },
-  tone(freq, dur, vol=0.08, type='sine') {
-    if (this.muted || !this.ctx) return;
-    try {
-      const o = this.ctx.createOscillator();
-      const g = this.ctx.createGain();
-      o.connect(g); g.connect(this.ctx.destination);
-      o.type = type; o.frequency.value = freq;
-      g.gain.setValueAtTime(vol, this.ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + dur);
-      o.start(this.ctx.currentTime); o.stop(this.ctx.currentTime + dur);
-    } catch(e) {}
+    try { this._ctx = new (window.AudioContext||window.webkitAudioContext)(); } catch(e){}
   },
   play(type) {
-    if (!this.ctx) this.init();
-    if (this.muted) return;
-    switch(type) {
-      case 'click':   this.tone(600, 0.06, 0.05); break;
-      case 'collect': this.tone(523, 0.08, 0.08); setTimeout(()=>this.tone(659, 0.08, 0.08), 80); setTimeout(()=>this.tone(784, 0.12, 0.08), 160); break;
-      case 'build':   this.tone(200, 0.15, 0.1, 'sawtooth'); setTimeout(()=>this.tone(400, 0.1, 0.06), 120); break;
-      case 'upgrade': this.tone(440, 0.06, 0.07); setTimeout(()=>this.tone(550, 0.06, 0.07), 80); setTimeout(()=>this.tone(660, 0.15, 0.09), 160); break;
-      case 'unlock':  [0,80,160,240].forEach((d,i)=>setTimeout(()=>this.tone([523,659,784,1047][i],0.18,0.08),d)); break;
-      case 'error':   this.tone(220, 0.2, 0.08, 'sawtooth'); break;
-      case 'reward':  [0,100,200].forEach((d,i)=>setTimeout(()=>this.tone([440,554,659][i],0.15,0.07),d)); break;
-    }
+    if (!this._enabled || !this._ctx) return;
+    const C = {
+      collect:  {f1:800, f2:1400, dur:.12, type:'square',  vol:.15},
+      bigcollect:{f1:400,f2:1200, dur:.25, type:'sine',    vol:.2},
+      buy:      {f1:350, f2:700,  dur:.2,  type:'sawtooth',vol:.15},
+      levelup:  {f1:523, f2:1568, dur:.5,  type:'sine',    vol:.2},
+      prestige: {f1:261, f2:1046, dur:.8,  type:'sine',    vol:.25},
+      click:    {f1:1200,f2:1000, dur:.05, type:'sine',    vol:.08},
+      error:    {f1:200, f2:150,  dur:.2,  type:'square',  vol:.15},
+      war:      {f1:80,  f2:200,  dur:.4,  type:'sawtooth',vol:.2},
+      unlock:   {f1:600, f2:1800, dur:.35, type:'sine',    vol:.2},
+    };
+    const c = C[type]||C.click;
+    try {
+      const o = this._ctx.createOscillator();
+      const g = this._ctx.createGain();
+      o.connect(g); g.connect(this._ctx.destination);
+      o.type = c.type;
+      o.frequency.setValueAtTime(c.f1, this._ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(c.f2, this._ctx.currentTime + c.dur);
+      g.gain.setValueAtTime(c.vol, this._ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(.001, this._ctx.currentTime + c.dur + .05);
+      o.start(this._ctx.currentTime);
+      o.stop(this._ctx.currentTime + c.dur + .1);
+    } catch(e) {}
+  },
+  toggle() {
+    this._enabled = !this._enabled;
+    document.getElementById('soundBtn').textContent = this._enabled ? '🔊' : '🔇';
+    localStorage.setItem('sfx', this._enabled ? '1' : '0');
   }
 };
 
-function toggleSound() {
-  Sound.muted = !Sound.muted;
-  document.getElementById('soundBtn').textContent = Sound.muted ? '🔇' : '🔊';
-  if (!Sound.muted) Sound.play('click');
+// Keep Sound as alias for backward compatibility
+const Sound = {
+  ctx: null, muted: false,
+  init() { SFX.init(); },
+  play(type) {
+    const map = {click:'click',collect:'collect',build:'buy',upgrade:'buy',unlock:'unlock',error:'error',reward:'levelup'};
+    SFX.play(map[type]||'click');
+  }
+};
+
+function toggleSound() { SFX.toggle(); }
+
+// ── VIBRATION ─────────────────────────────────────────────────
+function vib(ms=20) { if (navigator.vibrate) navigator.vibrate(ms); }
+
+// ── FLOAT TEXT ────────────────────────────────────────────────
+let _comboCount = 0, _comboTimer = null;
+function spawnFloat(text, color='#FFD700') {
+  const el = document.createElement('div');
+  el.className = 'income-float';
+  el.textContent = text;
+  el.style.cssText = `left:${30+Math.random()*40}%;top:${40+Math.random()*20}%;color:${color}`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 950);
+}
+function triggerCombo() {
+  _comboCount++;
+  clearTimeout(_comboTimer);
+  if (_comboCount >= 3) {
+    const el = document.getElementById('comboDisplay');
+    if (el) {
+      el.classList.remove('fadeout');
+      el.querySelector('.combo-text').textContent = `\xD7${_comboCount}`;
+      el.querySelector('.combo-sub').textContent = 'COMBO!';
+      el.classList.add('active');
+      SFX.play('bigcollect');
+      vib([20,10,20]);
+      _comboTimer = setTimeout(() => {
+        el.classList.remove('active'); el.classList.add('fadeout');
+        setTimeout(() => { el.classList.remove('fadeout'); _comboCount = 0; }, 400);
+      }, 1200);
+    }
+  }
+  _comboTimer = setTimeout(() => { _comboCount = 0; }, 2000);
+}
+
+// ── LEVEL UP OVERLAY ─────────────────────────────────────────
+let _lastRepTitle = '';
+function checkLevelUp() {
+  const newTitle = getRepTitle(state.rep);
+  if (newTitle !== _lastRepTitle && _lastRepTitle !== '') {
+    showLevelUp(newTitle);
+  }
+  _lastRepTitle = newTitle;
+}
+function showLevelUp(title) {
+  const overlay = document.getElementById('levelupOverlay');
+  if (!overlay) return;
+  overlay.querySelector('.levelup-title').textContent = title;
+  overlay.querySelector('.levelup-subtitle').textContent = 'Nouveau rang débloqué !';
+  overlay.querySelector('.levelup-reward').textContent = '🏆 Ton statut dans la ville a changé';
+  overlay.classList.add('active');
+  SFX.play('levelup');
+  vib([30,20,30,20,50]);
+  setTimeout(() => { overlay.classList.remove('active'); }, 2800);
 }
 
 // ============================================================
@@ -3362,10 +3469,21 @@ function startGameTick() {
 window.addEventListener('load', () => {
   initParticles();
   Sound.init();
+  SFX.init();
+  // Restore SFX state from localStorage
+  const sfxPref = localStorage.getItem('sfx');
+  if (sfxPref === '0') SFX._enabled = false;
   loadWarLog();
   // Check for existing save
   const saved = loadGame();
   if (saved && state.character) {
+    // Apply character color theme from saved state
+    const loadedChar = CHARACTERS.find(c => c.id === state.character);
+    if (loadedChar) {
+      document.documentElement.style.setProperty('--cc', loadedChar.color);
+      document.documentElement.style.setProperty('--cc-glow', loadedChar.glow);
+      document.documentElement.style.setProperty('--cc-bg', loadedChar.accentBg||loadedChar.glow.replace('.4)','.12)'));
+    }
     initDistricts();
     updateHUDStats();
     renderActivity();
