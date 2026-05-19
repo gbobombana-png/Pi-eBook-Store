@@ -89,7 +89,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
 .char-card.selected{border-color:var(--char-color, var(--orange));box-shadow:0 0 30px var(--char-glow, rgba(255,107,26,.3))}
 .char-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at top right,var(--char-color,var(--orange)) 0%,transparent 60%);opacity:0;transition:opacity .3s;z-index:1}
 .char-card.selected::before{opacity:.08}
-.char-photo{width:100%;height:200px;background-image:url('chars.png');background-size:500% 200%;background-repeat:no-repeat;border-radius:18px 18px 0 0}
+.char-photo{width:100%;height:200px;background-size:cover;background-position:top center;background-repeat:no-repeat;border-radius:18px 18px 0 0}
 .char-info{padding:10px 14px 0;position:relative;z-index:2}
 .char-name{font-size:22px;font-weight:800;margin:4px 0 2px;letter-spacing:1px}
 .char-role{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:1px}
@@ -540,7 +540,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
 
 /* ── SOCIAL PROFILE ──────────────────────────────────────────── */
 .profile-card-flex{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:20px;padding:20px;margin:16px;border:1px solid var(--border);position:relative;overflow:hidden}
-.profile-char-photo{width:72px;height:72px;background-image:url('chars.png');background-size:500% 200%;border-radius:50%;border:3px solid var(--cc);flex-shrink:0}
+.profile-char-photo{width:72px;height:72px;background-size:cover;background-position:top center;border-radius:50%;border:3px solid var(--cc);flex-shrink:0}
 .profile-role-badge{display:inline-flex;align-items:center;gap:4px;background:var(--cc-bg,rgba(255,107,26,.12));border:1px solid var(--cc,var(--orange))40;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;color:var(--cc,var(--orange))}
 .profile-stat-row{display:flex;gap:12px;margin-top:12px}
 .profile-stat-item{flex:1;background:rgba(255,255,255,.04);border-radius:12px;padding:10px;text-align:center}
@@ -1134,6 +1134,15 @@ const CHARACTERS = [
    ability:{name:'Iron Grip',desc:'+40% défense territoire + dégâts en Crew Wars',multiplier:1.4,trigger:'defense'},
    bonus:'+40% défense territoire',
    desc:'Protège le territoire et écrase les rivaux sans pitié.'},
+  {id:'rico',  name:'RICO',  role:'Dealer', icon:'💰', col:5, row:0,
+   color:'#00D4AA', glow:'rgba(0,212,170,.4)', accentBg:'rgba(0,212,170,.12)',
+   tagline:'Les bonnes affaires ne tombent pas du ciel, on les crée.',
+   quote:'"Je contrôle le marché. Le marché ne me contrôle pas."',
+   personality:'Rusé, ambitieux, maître de la négociation underground.',
+   stats:{street:6,build:4,hack:5,trade:9,fight:4},
+   ability:{name:'Market King',desc:'+15% profits trading + +10% revenus Black Market',multiplier:1.15,trigger:'trade'},
+   bonus:'+10% Pi Coins sur toutes les transactions',
+   desc:'Contrôle le marché souterrain. Il achète bas, vend haut, toujours.'},
   {id:'shadow',name:'SHADOW',role:'Unknown', icon:'❓', col:4, row:1,
    color:'#9B2FFF', glow:'rgba(155,47,255,.4)', accentBg:'rgba(155,47,255,.12)',
    tagline:'You don\'t find SHADOW. SHADOW finds you.',
@@ -1808,7 +1817,6 @@ function renderCharSelect() {
     card.className = 'char-card';
     card.style.setProperty('--char-color', c.color);
     card.style.setProperty('--char-glow', c.glow);
-    const px = c.col * 25, py = c.row * 100;
     const statsHtml = Object.entries(c.stats||{}).map(([k,v])=>`
       <div class="stat-bar-row">
         <span class="stat-bar-label">${k}</span>
@@ -1816,7 +1824,7 @@ function renderCharSelect() {
         <span style="font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;width:12px">${v}</span>
       </div>`).join('');
     card.innerHTML = `
-      <div class="char-photo" style="background-position:${px}% ${py}%"></div>
+      <div class="char-photo" style="background-image:url('char-${c.id}.png')"></div>
       <div class="char-select-indicator" style="position:absolute;top:12px;right:12px;z-index:3">✓</div>
       <div class="char-info">
         <div class="char-name">${c.name}</div>
@@ -2362,13 +2370,12 @@ function applyPaymentEffect(item) {
 // ============================================================
 function renderProfile() {
   const char = CHARACTERS.find(c => c.id === state.character) || CHARACTERS[0];
-  const px = char.col * 25, py = char.row * 100;
   const prestigeStars = '⭐'.repeat(state.prestigeLevel || 0) || '';
   const container = document.getElementById('profileContent');
   if (!container) return;
   container.innerHTML = `
     <div class="profile-card-flex" style="--cc:${char.color};--cc-glow:${char.glow};--cc-bg:${char.accentBg||char.glow.replace('.4)','.12)')}">
-      <div class="profile-char-photo" style="background-position:${px}% ${py}%;border-color:${char.color}"></div>
+      <div class="profile-char-photo" style="background-image:url('char-${char.id}.png');border-color:${char.color}"></div>
       <div style="flex:1">
         <div style="font-size:22px;font-weight:900;letter-spacing:1px">${state.username||char.name}</div>
         <div class="profile-role-badge" style="margin-top:4px">
