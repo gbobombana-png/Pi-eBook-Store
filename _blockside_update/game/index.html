@@ -1352,13 +1352,23 @@ const API_BASE = IS_LOCAL
   ? 'http://localhost:3001/api'
   : 'https://blockside-api.onrender.com/api';
 
-// Pi SDK init — sandbox en dev, production sur Pi Browser
-if (typeof window.Pi !== 'undefined') {
-  Pi.init({ version: '2.0', sandbox: IS_LOCAL });
-}
+// Pi SDK — état global
+let _piInitialized = false;
+let _piAccessToken = null;
+let _piUid = null;
 
-let _piAccessToken = null;  // token Pi SDK stocké après login
-let _piUid = null;          // uid Pi du joueur connecté
+function isPiAvailable() { return typeof window.Pi !== 'undefined'; }
+
+async function initPiSDK() {
+  if (!isPiAvailable() || _piInitialized) return _piInitialized;
+  try {
+    await Pi.init({ version: '2.0', sandbox: IS_LOCAL });
+    _piInitialized = true;
+  } catch(e) {
+    console.error('[Pi] init failed:', e.message);
+  }
+  return _piInitialized;
+}
 
 const API = {
   _headers() {
@@ -1496,30 +1506,50 @@ function initDistricts() {
 // ============================================================
 // PI SDK
 // ============================================================
-function isPiAvailable() { return typeof window.Pi !== 'undefined'; }
-
 async function loginWithPi() {
-  if (isPiAvailable()) {
-    try {
-      const scopes = ['username','payments'];
-      Pi.authenticate(scopes, onIncompletePayment).then(async auth => {
-        state.username = auth.user.username || 'PiUser';
-        state.piAuthenticated = true;
-        _piAccessToken = auth.accessToken;
-        _piUid = auth.user.uid;
-        // Connexion backend + chargement sauvegarde cloud
-        await API.login();
-        const cloudSave = await API.pullSave();
-        if (cloudSave && cloudSave.character) {
-          state = { ...state, ...cloudSave };
-          showToast('☁️ Sauvegarde cloud chargée!', 'success');
-        }
-        saveGame();
-        goToCharSelect();
-      }).catch(e => { showToast('Erreur Pi: ' + e.message, 'error'); loginDemo(); });
-    } catch(e) { loginDemo(); }
-  } else {
-    loginDemo();
+  if (!isPiAvailable()) { loginDemo(); return; }
+
+  // Show loading state on button
+  const btn = document.querySelector('.pi-login-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Connexion…'; }
+
+  try {
+    await initPiSDK();
+    const auth = await Pi.authenticate(['username'], onIncompletePayment);
+
+    state.username = auth.user.username || 'PiUser';
+    state.piAuthenticated = true;
+    _piAccessToken = auth.accessToken;
+    _piUid = auth.user.uid;
+
+    // Validate token backend → GET /v2/me via authMiddleware
+    await API.login();
+
+    // Pull cloud save if exists
+    const cloudSave = await API.pullSave();
+    if (cloudSave && cloudSave.character) {
+      state = { ...state, ...cloudSave };
+      showToast('☁️ Sauvegarde cloud chargée!', 'success');
+      const loadedChar = CHARACTERS.find(c => c.id === state.character);
+      if (loadedChar) {
+        document.documentElement.style.setProperty('--cc', loadedChar.color);
+        document.documentElement.style.setProperty('--cc-glow', loadedChar.glow);
+        document.documentElement.style.setProperty('--cc-bg', loadedChar.accentBg || loadedChar.glow.replace('.4)','.12)'));
+      }
+      initDistricts();
+      updateHUDStats();
+      renderActivity();
+      showScreen('hub');
+      startGameTick();
+      initWeather();
+    } else {
+      saveGame();
+      goToCharSelect();
+    }
+  } catch(e) {
+    console.warn('[Pi] auth cancelled:', e.message);
+    if (btn) { btn.disabled = false; btn.textContent = '🌐 Connexion Pi Network'; }
+    showToast('Connexion Pi annulée — réessaie ou joue en démo', 'info');
   }
 }
 
@@ -3473,23 +3503,22 @@ function startGameTick() {
 // ============================================================
 // INIT
 // ============================================================
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
   initParticles();
   Sound.init();
   SFX.init();
-  // Restore SFX state from localStorage
   const sfxPref = localStorage.getItem('sfx');
   if (sfxPref === '0') SFX._enabled = false;
   loadWarLog();
-  // Check for existing save
+
   const saved = loadGame();
   if (saved && state.character) {
-    // Apply character color theme from saved state
+    // Restore existing session
     const loadedChar = CHARACTERS.find(c => c.id === state.character);
     if (loadedChar) {
       document.documentElement.style.setProperty('--cc', loadedChar.color);
       document.documentElement.style.setProperty('--cc-glow', loadedChar.glow);
-      document.documentElement.style.setProperty('--cc-bg', loadedChar.accentBg||loadedChar.glow.replace('.4)','.12)'));
+      document.documentElement.style.setProperty('--cc-bg', loadedChar.accentBg || loadedChar.glow.replace('.4)','.12)'));
     }
     initDistricts();
     updateHUDStats();
@@ -3497,9 +3526,30 @@ window.addEventListener('load', () => {
     showScreen('hub');
     startGameTick();
     initWeather();
-    // Update prestige quick sub if applicable
     const sub = document.getElementById('prestigeQuickSub');
     if (sub && state.prestigeLevel > 0) sub.textContent = `✨ Prestige ${state.prestigeLevel} actif`;
+
+    // Silently refresh Pi token in background for existing sessions
+    if (isPiAvailable()) {
+      initPiSDK().then(() =>
+        Pi.authenticate(['username'], onIncompletePayment)
+      ).then(auth => {
+        _piAccessToken = auth.accessToken;
+        _piUid = auth.user.uid;
+        state.username = auth.user.username || state.username;
+        state.piAuthenticated = true;
+        if (document.getElementById('hubUsername')) {
+          document.getElementById('hubUsername').textContent = state.username;
+        }
+        API.login(); // re-validate token with backend
+      }).catch(() => {});
+    }
+  } else {
+    // No save — auto-trigger Pi auth if in Pi Browser
+    if (isPiAvailable()) {
+      loginWithPi();
+    }
+    // If not in Pi Browser, user stays on splash and clicks manually
   }
 });
 
