@@ -694,7 +694,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
       <div class="username" id="hubUsername">Player</div>
       <div class="rep-title" id="hubRepTitle">Street Rookie</div>
     </div>
-    <div class="notif-btn" onclick="openNotifPanel()" style="position:relative">🔔<div id="notifBadge" style="display:none">0</div></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div id="piAuthBadge" style="display:none;font-size:10px;background:rgba(155,47,255,.2);color:#CC77FF;border:1px solid rgba(155,47,255,.4);padding:2px 8px;border-radius:20px;font-weight:700">π connecté</div>
+      <div class="notif-btn" onclick="openNotifPanel()" style="position:relative">🔔<div id="notifBadge" style="display:none">0</div></div>
+    </div>
   </div>
   <div class="stats-bar">
     <div class="stat-item">
@@ -1929,6 +1932,7 @@ function updateHUDStats() {
   const el = id => document.getElementById(id);
   if(el('hubUsername')) el('hubUsername').textContent = state.username;
   if(el('hubRepTitle')) { el('hubRepTitle').textContent = getRepTitle(state.rep); el('hubRepTitle').style.color = char.color; }
+  updatePiAuthBadge();
   if(el('hubMoney')) el('hubMoney').textContent = fmt(state.money);
   if(el('hubRep')) el('hubRep').textContent = fmt(state.rep);
   if(el('hubBuildings')) el('hubBuildings').textContent = state.totalBuildings;
@@ -2439,7 +2443,26 @@ function renderProfile() {
       <div style="display:flex;gap:8px;flex-wrap:wrap">${renderSkinsCompact(char.color)}</div>
     </div>
     <button class="share-btn" style="--cc:${char.color}" onclick="shareProfile()">📤 Partager mon profil</button>
+    ${!state.piAuthenticated ? `
+    <button onclick="loginWithPi()" style="width:calc(100% - 32px);margin:0 16px 8px;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#9B2FFF,#FF2D78);color:#fff;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+      🌐 Se connecter avec Pi Network
+    </button>` : ''}
+    <button onclick="confirmReset()" style="width:calc(100% - 32px);margin:0 16px 16px;padding:10px;border-radius:12px;border:1px solid rgba(255,45,120,.3);background:rgba(255,45,120,.08);color:rgba(255,255,255,.5);font-size:12px;cursor:pointer">
+      🗑️ Réinitialiser la partie
+    </button>
   `;
+}
+
+function confirmReset() {
+  if (confirm('⚠️ Réinitialiser toute la partie ? Cette action est irréversible.')) {
+    localStorage.removeItem('blocksideState');
+    location.reload();
+  }
+}
+
+function updatePiAuthBadge() {
+  const badge = document.getElementById('piAuthBadge');
+  if (badge) badge.style.display = state.piAuthenticated ? 'block' : 'none';
 }
 
 function formatMoney(n) {
