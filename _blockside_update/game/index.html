@@ -1365,7 +1365,7 @@ function isPiAvailable() { return typeof window.Pi !== 'undefined'; }
 async function initPiSDK() {
   if (!isPiAvailable() || _piInitialized) return _piInitialized;
   try {
-    await Pi.init({ version: '2.0', sandbox: IS_LOCAL });
+    await Pi.init({ version: '2.0', sandbox: true });
     _piInitialized = true;
   } catch(e) {
     console.error('[Pi] init failed:', e.message);
@@ -1524,12 +1524,14 @@ async function loginWithPi() {
     state.piAuthenticated = true;
     _piAccessToken = auth.accessToken;
     _piUid = auth.user.uid;
+    updatePiAuthBadge();
+    showToast('✅ Connecté en tant que ' + state.username, 'success');
 
-    // Validate token backend → GET /v2/me via authMiddleware
-    await API.login();
+    // API calls isolées — une erreur backend ne bloque pas le flux Pi
+    try { await API.login(); } catch(_) {}
+    let cloudSave = null;
+    try { cloudSave = await API.pullSave(); } catch(_) {}
 
-    // Pull cloud save if exists
-    const cloudSave = await API.pullSave();
     if (cloudSave && cloudSave.character) {
       state = { ...state, ...cloudSave };
       showToast('☁️ Sauvegarde cloud chargée!', 'success');
@@ -1550,9 +1552,9 @@ async function loginWithPi() {
       goToCharSelect();
     }
   } catch(e) {
-    console.warn('[Pi] auth cancelled:', e.message);
+    console.warn('[Pi] auth error:', e);
     if (btn) { btn.disabled = false; btn.textContent = '🌐 Connexion Pi Network'; }
-    showToast('Connexion Pi annulée — réessaie ou joue en démo', 'info');
+    showToast('Connexion Pi échouée : ' + (e.message || 'erreur inconnue'), 'error');
   }
 }
 
