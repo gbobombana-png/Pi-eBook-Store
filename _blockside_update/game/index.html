@@ -669,6 +669,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
     <div class="splash-slogan">Build. Fight. Own.</div>
     <button class="pi-login-btn" onclick="loginWithPi()">🌐 Connexion Pi Network</button>
     <div class="splash-demo" onclick="loginDemo()">Jouer en mode démo →</div>
+    <div id="piDebugMsg" style="margin-top:12px;font-size:11px;color:rgba(255,255,255,.5);min-height:16px;text-align:center;padding:0 16px"></div>
+    <div id="piErrorBox" style="display:none;margin-top:8px;font-size:12px;color:#ff6b6b;background:rgba(255,0,0,.1);border:1px solid rgba(255,0,0,.3);border-radius:10px;padding:10px 14px;text-align:center;word-break:break-word;max-width:300px;margin-left:auto;margin-right:auto"></div>
   </div>
   <div class="splash-version mono">v1.0.0 — Pi Network</div>
 </div>
@@ -1509,25 +1511,37 @@ function initDistricts() {
 // ============================================================
 // PI SDK
 // ============================================================
-async function loginWithPi() {
-  if (!isPiAvailable()) { loginDemo(); return; }
+function _piDebug(msg) {
+  const el = document.getElementById('piDebugMsg');
+  if (el) el.textContent = msg;
+  console.log('[Pi DEBUG]', msg);
+}
 
-  // Show loading state on button
+async function loginWithPi() {
+  if (!isPiAvailable()) {
+    _piDebug('window.Pi non disponible — mode démo');
+    loginDemo();
+    return;
+  }
+
   const btn = document.querySelector('.pi-login-btn');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Connexion…'; }
+  _piDebug('Pi SDK détecté — initialisation…');
 
   try {
-    await initPiSDK();
+    const inited = await initPiSDK();
+    _piDebug(inited ? 'Pi.init() OK — authentification…' : 'Pi.init() échoué — tentative auth…');
+
     const auth = await Pi.authenticate(['username'], onIncompletePayment);
+    _piDebug('Auth OK — user: ' + (auth?.user?.username || '?'));
 
     state.username = auth.user.username || 'PiUser';
     state.piAuthenticated = true;
     _piAccessToken = auth.accessToken;
     _piUid = auth.user.uid;
     updatePiAuthBadge();
-    showToast('✅ Connecté en tant que ' + state.username, 'success');
+    showToast('✅ Connecté : ' + state.username, 'success');
 
-    // API calls isolées — une erreur backend ne bloque pas le flux Pi
     try { await API.login(); } catch(_) {}
     let cloudSave = null;
     try { cloudSave = await API.pullSave(); } catch(_) {}
@@ -1541,20 +1555,21 @@ async function loginWithPi() {
         document.documentElement.style.setProperty('--cc-glow', loadedChar.glow);
         document.documentElement.style.setProperty('--cc-bg', loadedChar.accentBg || loadedChar.glow.replace('.4)','.12)'));
       }
-      initDistricts();
-      updateHUDStats();
-      renderActivity();
-      showScreen('hub');
-      startGameTick();
-      initWeather();
+      initDistricts(); updateHUDStats(); renderActivity();
+      showScreen('hub'); startGameTick(); initWeather();
     } else {
       saveGame();
       goToCharSelect();
     }
   } catch(e) {
-    console.warn('[Pi] auth error:', e);
+    const msg = e?.message || JSON.stringify(e) || 'erreur inconnue';
+    _piDebug('ERREUR: ' + msg);
+    console.error('[Pi] auth error:', e);
     if (btn) { btn.disabled = false; btn.textContent = '🌐 Connexion Pi Network'; }
-    showToast('Connexion Pi échouée : ' + (e.message || 'erreur inconnue'), 'error');
+    // Afficher l'erreur dans un overlay visible
+    const errBox = document.getElementById('piErrorBox');
+    if (errBox) { errBox.textContent = '⚠️ ' + msg; errBox.style.display = 'block'; }
+    showToast('Erreur Pi : ' + msg, 'error');
   }
 }
 
