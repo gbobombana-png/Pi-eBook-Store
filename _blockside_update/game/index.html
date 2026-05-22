@@ -2485,6 +2485,7 @@ function confirmReset() {
     state.prestigeLevel = 0; state.prestigeBonus = 1.0; state.lbTab = 0;
     _piAccessToken = null; _piUid = null; _piInitialized = false;
     showScreen('splash');
+    if (isPiAvailable()) setTimeout(() => loginWithPi(), 400);
   });
   btnRow.appendChild(btnCancel);
   btnRow.appendChild(btnConfirm);
