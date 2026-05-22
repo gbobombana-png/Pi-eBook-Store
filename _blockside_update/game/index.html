@@ -2459,16 +2459,37 @@ function confirmReset() {
   const overlay = document.createElement('div');
   overlay.id = 'resetModal';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px';
-  overlay.innerHTML = `
-    <div style="background:#1a1a2e;border:1px solid rgba(255,45,120,.4);border-radius:20px;padding:28px;max-width:320px;width:100%;text-align:center">
-      <div style="font-size:36px;margin-bottom:12px">⚠️</div>
-      <div style="font-size:17px;font-weight:700;color:#fff;margin-bottom:8px">Réinitialiser la partie ?</div>
-      <div style="font-size:13px;color:rgba(255,255,255,.55);margin-bottom:24px;line-height:1.5">Toute ta progression sera perdue.<br>Cette action est irréversible.</div>
-      <div style="display:flex;gap:12px">
-        <button onclick="document.getElementById('resetModal').remove()" style="flex:1;padding:13px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.7);font-size:14px;cursor:pointer;font-family:inherit">Annuler</button>
-        <button onclick="localStorage.removeItem('blockside_save');window.location.assign(window.location.pathname+'?r='+Date.now())" style="flex:1;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#ff2d78,#c41d58);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Réinitialiser</button>
-      </div>
-    </div>`;
+  const box = document.createElement('div');
+  box.style.cssText = 'background:#1a1a2e;border:1px solid rgba(255,45,120,.4);border-radius:20px;padding:28px;max-width:320px;width:100%;text-align:center';
+  box.innerHTML = '<div style="font-size:36px;margin-bottom:12px">⚠️</div><div style="font-size:17px;font-weight:700;color:#fff;margin-bottom:8px">Réinitialiser la partie ?</div><div style="font-size:13px;color:rgba(255,255,255,.55);margin-bottom:24px;line-height:1.5">Toute ta progression sera perdue.<br>Cette action est irréversible.</div>';
+  const btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;gap:12px';
+  const btnCancel = document.createElement('button');
+  btnCancel.textContent = 'Annuler';
+  btnCancel.style.cssText = 'flex:1;padding:13px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.7);font-size:14px;cursor:pointer;font-family:inherit';
+  const btnConfirm = document.createElement('button');
+  btnConfirm.textContent = 'Réinitialiser';
+  btnConfirm.style.cssText = 'flex:1;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#ff2d78,#c41d58);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit';
+  btnCancel.addEventListener('click', function() { overlay.remove(); });
+  btnConfirm.addEventListener('click', function() {
+    localStorage.removeItem('blockside_save');
+    overlay.remove();
+    state.username = 'Player'; state.character = null; state.money = 500; state.rep = 0;
+    state.crew = null; state.premiumOwned = []; state.buildings = {}; state.districts = {};
+    state.totalEarned = 0; state.totalBuildings = 0; state.clickCount = 0; state.collectCount = 0;
+    state.upgradeCount = 0; state.visitedDistricts = []; state.activities = [];
+    state.piAuthenticated = false; state.missions = null; state.missionsLastDailyReset = 0;
+    state.missionsLastWeeklyReset = 0; state.dailyReward = { streak:0, lastClaimed:0 };
+    state.vehicles = { owned:[], active:null }; state.tutorialDone = false;
+    state.ownedSkins = ['default']; state.activeSkin = 'default'; state.seasonPass = false;
+    state.prestigeLevel = 0; state.prestigeBonus = 1.0; state.lbTab = 0;
+    _piAccessToken = null; _piUid = null; _piInitialized = false;
+    showScreen('splash');
+  });
+  btnRow.appendChild(btnCancel);
+  btnRow.appendChild(btnConfirm);
+  box.appendChild(btnRow);
+  overlay.appendChild(box);
   document.body.appendChild(overlay);
 }
 
