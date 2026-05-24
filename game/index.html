@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>BLOCKSIDE — Build. Fight. Own.</title>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<script src="https://sdk.minepi.com/pi-runtime.js"></script>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
@@ -85,11 +85,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
 .char-sub{color:var(--muted);font-size:13px;margin-top:4px}
 .chars-scroll{display:flex;gap:12px;padding:20px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-shrink:0;scroll-snap-type:x mandatory}
 .chars-scroll::-webkit-scrollbar{display:none}
-.char-card{min-width:200px;background:var(--card);border:2px solid var(--border);border-radius:20px;padding:20px;cursor:pointer;transition:all .3s;scroll-snap-align:center;position:relative;overflow:hidden}
+.char-card{min-width:190px;background:var(--card);border:2px solid var(--border);border-radius:20px;padding:0 0 16px;cursor:pointer;transition:all .3s;scroll-snap-align:center;position:relative;overflow:hidden}
 .char-card.selected{border-color:var(--char-color, var(--orange));box-shadow:0 0 30px var(--char-glow, rgba(255,107,26,.3))}
-.char-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at top right,var(--char-color,var(--orange)) 0%,transparent 60%);opacity:0;transition:opacity .3s}
-.char-card.selected::before{opacity:.1}
-.char-number{font-family:'Space Mono',monospace;font-size:48px;font-weight:700;color:var(--char-color,var(--orange));line-height:1;opacity:.9}
+.char-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at top right,var(--char-color,var(--orange)) 0%,transparent 60%);opacity:0;transition:opacity .3s;z-index:1}
+.char-card.selected::before{opacity:.08}
+.char-photo{width:100%;height:200px;background-size:cover;background-position:top center;background-repeat:no-repeat;border-radius:18px 18px 0 0}
+.char-info{padding:10px 14px 0;position:relative;z-index:2}
 .char-name{font-size:22px;font-weight:800;margin:4px 0 2px;letter-spacing:1px}
 .char-role{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:1px}
 .char-desc{font-size:12px;color:var(--text);margin:10px 0;line-height:1.5;opacity:.8}
@@ -465,6 +466,115 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
 /* ===== SOUND BTN ===== */
 .sound-btn{position:fixed;bottom:80px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;z-index:150;box-shadow:0 2px 8px rgba(0,0,0,.3)}
 
+/* ── SCREEN TRANSITIONS ──────────────────────────────────────── */
+.screen{transition:opacity .2s ease}
+.screen.active{animation:screen-in .28s cubic-bezier(.22,1,.36,1) both}
+@keyframes screen-in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── CHARACTER THEMING ────────────────────────────────────────── */
+:root{--cc:var(--orange);--cc-glow:rgba(255,107,26,.4);--cc-bg:rgba(255,107,26,.12)}
+.btn-primary{background:linear-gradient(135deg,var(--cc),var(--pink)) !important}
+.rep-bar-fill{background:linear-gradient(90deg,var(--cc),var(--pink)) !important}
+.nav-item.active .nav-icon{color:var(--cc) !important}
+.nav-item.active .nav-label{color:var(--cc) !important}
+
+/* ── FLOAT INCOME ─────────────────────────────────────────────── */
+@keyframes float-income{0%{opacity:1;transform:translateY(0) scale(1)}60%{opacity:1;transform:translateY(-50px) scale(1.1)}100%{opacity:0;transform:translateY(-90px) scale(.8)}}
+.income-float{position:fixed;pointer-events:none;z-index:9999;font-weight:800;font-size:22px;font-family:'Space Mono',monospace;text-shadow:0 0 20px currentColor;animation:float-income .9s ease forwards}
+
+/* ── COMBO DISPLAY ────────────────────────────────────────────── */
+@keyframes combo-pop{0%{opacity:0;transform:scale(.3)}60%{transform:scale(1.2)}100%{opacity:1;transform:scale(1)}}
+@keyframes combo-out{to{opacity:0;transform:scale(.8) translateY(-20px)}}
+#comboDisplay{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9998;pointer-events:none;text-align:center;display:none}
+#comboDisplay.active{display:block;animation:combo-pop .3s ease}
+#comboDisplay.fadeout{animation:combo-out .4s ease forwards}
+.combo-text{font-size:52px;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-family:'Space Mono',monospace}
+.combo-sub{font-size:14px;color:var(--gold);font-weight:700;letter-spacing:3px;margin-top:-8px}
+
+/* ── GLOW BUTTONS ─────────────────────────────────────────────── */
+.btn-primary:active{transform:scale(.94);filter:brightness(1.2)}
+.btn-gold:active{transform:scale(.94)}
+.buy-btn:active{transform:scale(.9)}
+.collect-all-btn:active{transform:scale(.95)}
+
+/* ── PULSE INCOME ────────────────────────────────────────────── */
+@keyframes income-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08);color:var(--gold)}}
+.income-value.pulsing{animation:income-pulse .5s ease}
+
+/* ── CHARACTER CARD ENHANCED ─────────────────────────────────── */
+.char-card:hover{transform:translateY(-4px);border-color:var(--char-color,var(--orange))}
+.char-card.selected .char-photo{filter:brightness(1.1) saturate(1.2)}
+
+/* ── STATS BARS ──────────────────────────────────────────────── */
+.char-stats{margin-top:10px;display:flex;flex-direction:column;gap:4px}
+.stat-bar-row{display:flex;align-items:center;gap:6px}
+.stat-bar-label{font-size:9px;color:var(--muted);width:32px;font-family:'Space Mono',monospace;text-transform:uppercase}
+.stat-bar-track{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.stat-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--char-color,var(--orange)),var(--pink));transition:width .6s cubic-bezier(.22,1,.36,1)}
+
+/* ── ABILITY BADGE ───────────────────────────────────────────── */
+.char-ability{margin-top:8px;background:var(--char-color,var(--orange))15;border:1px solid var(--char-color,var(--orange))40;border-radius:8px;padding:7px 10px}
+.char-ability-name{font-size:11px;font-weight:800;color:var(--char-color,var(--orange));letter-spacing:.5px}
+.char-ability-desc{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.4}
+
+/* ── PRESTIGE VISUAL ─────────────────────────────────────────── */
+@keyframes prestige-aura{0%,100%{box-shadow:0 0 20px var(--gold),0 0 40px rgba(255,215,0,.3)}50%{box-shadow:0 0 40px var(--gold),0 0 80px rgba(255,215,0,.5)}}
+.prestige-avatar{animation:prestige-aura 2s ease-in-out infinite}
+@keyframes prestige-stars{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.prestige-ring{display:inline-block;animation:prestige-stars 4s linear infinite}
+
+/* ── DISTRICT CARD ENHANCED ──────────────────────────────────── */
+.city-district{transition:all .25s cubic-bezier(.22,1,.36,1)}
+.city-district:active{transform:scale(.93)}
+.city-district.unlocked:hover{transform:translateY(-3px);box-shadow:0 8px 30px var(--dist-color,var(--orange))33}
+
+/* ── CREW WAR ────────────────────────────────────────────────── */
+#crewWars{background:var(--bg)}
+.war-arena{background:linear-gradient(135deg,rgba(255,45,120,.08),rgba(255,107,26,.08));border:1px solid var(--border);border-radius:20px;padding:20px;margin:16px}
+.war-vs{font-size:32px;font-weight:900;color:var(--pink);font-family:'Space Mono',monospace;text-align:center;margin:12px 0}
+.war-faction-card{flex:1;background:var(--card);border-radius:16px;padding:16px;text-align:center}
+.war-progress-bar{height:12px;background:var(--border);border-radius:6px;overflow:hidden;margin:12px 0}
+.war-progress-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--pink));transition:width 1s cubic-bezier(.22,1,.36,1)}
+.war-attack-btn{background:linear-gradient(135deg,var(--pink),var(--orange));border:none;color:#fff;padding:14px;border-radius:14px;font-weight:800;font-size:15px;width:100%;cursor:pointer;font-family:'Sora',sans-serif;margin-top:12px;transition:all .2s}
+.war-attack-btn:active{transform:scale(.95)}
+
+/* ── SOCIAL PROFILE ──────────────────────────────────────────── */
+.profile-card-flex{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:20px;padding:20px;margin:16px;border:1px solid var(--border);position:relative;overflow:hidden}
+.profile-char-photo{width:72px;height:72px;background-size:cover;background-position:top center;border-radius:50%;border:3px solid var(--cc);flex-shrink:0}
+.profile-role-badge{display:inline-flex;align-items:center;gap:4px;background:var(--cc-bg,rgba(255,107,26,.12));border:1px solid var(--cc,var(--orange))40;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;color:var(--cc,var(--orange))}
+.profile-stat-row{display:flex;gap:12px;margin-top:12px}
+.profile-stat-item{flex:1;background:rgba(255,255,255,.04);border-radius:12px;padding:10px;text-align:center}
+.profile-stat-val{font-size:20px;font-weight:800;font-family:'Space Mono',monospace;color:var(--cc,var(--orange))}
+.profile-stat-lbl{font-size:10px;color:var(--muted);margin-top:2px;font-weight:600}
+.profile-quote{font-style:italic;color:var(--muted);font-size:13px;padding:12px 16px;border-left:2px solid var(--cc,var(--orange));margin:0 16px 16px}
+.share-btn{background:linear-gradient(135deg,var(--cc,var(--orange)),var(--pink));border:none;color:#fff;padding:12px 24px;border-radius:12px;font-weight:700;font-size:13px;cursor:pointer;font-family:'Sora',sans-serif;width:calc(100% - 32px);margin:0 16px 16px;display:flex;align-items:center;justify-content:center;gap:8px}
+
+/* ── LEVEL UP OVERLAY ────────────────────────────────────────── */
+@keyframes levelup-in{0%{opacity:0;transform:scale(.5)}70%{transform:scale(1.05)}100%{opacity:1;transform:scale(1)}}
+@keyframes levelup-out{to{opacity:0;transform:scale(1.2)}}
+#levelupOverlay{position:fixed;inset:0;z-index:9997;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.7);backdrop-filter:blur(10px);display:none}
+#levelupOverlay.active{display:flex;animation:levelup-in .4s cubic-bezier(.22,1,.36,1)}
+.levelup-card{background:var(--card);border:2px solid var(--gold);border-radius:28px;padding:40px 32px;text-align:center;max-width:320px}
+.levelup-stars{font-size:40px;margin-bottom:8px}
+.levelup-title{font-size:28px;font-weight:900;color:var(--gold);font-family:'Space Mono',monospace;margin-bottom:4px}
+.levelup-subtitle{color:var(--muted);font-size:14px;margin-bottom:20px}
+.levelup-reward{background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.3);border-radius:12px;padding:12px 20px;color:var(--gold);font-weight:700;font-size:14px;margin-bottom:20px}
+
+/* ── BATTLE PASS ENHANCED ────────────────────────────────────── */
+.bp-track{display:flex;gap:0;overflow-x:auto;padding:0 16px 16px;scrollbar-width:none}
+.bp-track::-webkit-scrollbar{display:none}
+.bp-node{flex-shrink:0;width:64px;display:flex;flex-direction:column;align-items:center;position:relative}
+.bp-node::before{content:'';position:absolute;top:22px;left:50%;width:64px;height:2px;background:var(--border);z-index:0}
+.bp-node:last-child::before{display:none}
+.bp-node-circle{width:44px;height:44px;border-radius:50%;background:var(--card);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;position:relative;z-index:1;transition:all .3s}
+.bp-node.unlocked .bp-node-circle{border-color:var(--cc,var(--orange));background:var(--cc-bg,rgba(255,107,26,.2));box-shadow:0 0 14px var(--cc-glow,rgba(255,107,26,.4))}
+.bp-node.current .bp-node-circle{border-color:var(--gold);background:rgba(255,215,0,.2);animation:prestige-aura 2s infinite}
+.bp-node-reward{font-size:9px;color:var(--muted);margin-top:4px;text-align:center;max-width:64px}
+
+/* ── SOUND BTN ENHANCED ──────────────────────────────────────── */
+.sound-btn{transition:all .2s}
+.sound-btn:active{transform:scale(.85)}
+
 /* ===== LEADERBOARD (Phase 4) ===== */
 .lb-header{padding:16px;flex-shrink:0}
 .lb-tabs{display:flex;gap:8px;padding:0 16px 12px;flex-shrink:0}
@@ -559,6 +669,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
     <div class="splash-slogan">Build. Fight. Own.</div>
     <button class="pi-login-btn" onclick="loginWithPi()">🌐 Connexion Pi Network</button>
     <div class="splash-demo" onclick="loginDemo()">Jouer en mode démo →</div>
+    <div id="piDebugMsg" style="margin-top:12px;font-size:11px;color:rgba(255,255,255,.5);min-height:16px;text-align:center;padding:0 16px"></div>
+    <div id="piErrorBox" style="display:none;margin-top:8px;font-size:12px;color:#ff6b6b;background:rgba(255,0,0,.1);border:1px solid rgba(255,0,0,.3);border-radius:10px;padding:10px 14px;text-align:center;word-break:break-word;max-width:300px;margin-left:auto;margin-right:auto"></div>
   </div>
   <div class="splash-version mono">v1.0.0 — Pi Network</div>
 </div>
@@ -584,7 +696,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
       <div class="username" id="hubUsername">Player</div>
       <div class="rep-title" id="hubRepTitle">Street Rookie</div>
     </div>
-    <div class="notif-btn" onclick="openNotifPanel()" style="position:relative">🔔<div id="notifBadge" style="display:none">0</div></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div id="piAuthBadge" style="display:none;font-size:10px;background:rgba(155,47,255,.2);color:#CC77FF;border:1px solid rgba(155,47,255,.4);padding:2px 8px;border-radius:20px;font-weight:700">π connecté</div>
+      <div class="notif-btn" onclick="openNotifPanel()" style="position:relative">🔔<div id="notifBadge" style="display:none">0</div></div>
+    </div>
   </div>
   <div class="stats-bar">
     <div class="stat-item">
@@ -598,6 +713,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
     <div class="stat-item">
       <div class="stat-val" id="hubBuildings">0</div>
       <div class="stat-label">🏗️ Bâtiments</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-val" id="hubNeon" style="color:#2F9BFF">0</div>
+      <div class="stat-label">⚡ NEON</div>
     </div>
   </div>
   <!-- Live Events Banner -->
@@ -924,24 +1043,162 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
 <!-- TOAST -->
 <div id="toast"></div>
 
+<!-- COMBO DISPLAY -->
+<div id="comboDisplay"><div class="combo-text">×3</div><div class="combo-sub">COMBO!</div></div>
+
+<!-- LEVEL UP OVERLAY -->
+<div id="levelupOverlay">
+  <div class="levelup-card">
+    <div class="levelup-stars">⭐⭐⭐</div>
+    <div class="levelup-title">DISTRICT BOSS</div>
+    <div class="levelup-subtitle">Nouveau rang débloqué !</div>
+    <div class="levelup-reward">🏆 Nouveau statut</div>
+    <button class="btn btn-primary btn-full" onclick="document.getElementById('levelupOverlay').classList.remove('active')">Continuer →</button>
+  </div>
+</div>
+
 <script>
 // ============================================================
 // DATA DEFINITIONS
 // ============================================================
 const CHARACTERS = [
-  {id:'zay',num:'#23',name:'ZAY',role:'Street Leader',desc:'Maîtrise les rues et les réseaux commerciaux underground.',bonus:'+20% revenus commerce',color:'#FF6B1A',glow:'rgba(255,107,26,.4)'},
-  {id:'nova',num:'#07',name:'NOVA',role:'Architecte',desc:'Conceptualise et construit les structures les plus ambitieuses.',bonus:'-15% coût construction',color:'#2F9BFF',glow:'rgba(47,155,255,.4)'},
-  {id:'brick',num:'#44',name:'BRICK',role:'Constructeur',desc:'Renforce chaque structure pour qu\'elle dure une éternité.',bonus:'+30% durabilité bâtiments',color:'#4ADE80',glow:'rgba(74,222,128,.4)'},
-  {id:'raven',num:'#11',name:'RAVEN',role:'Hacker',desc:'Manipule les marchés et les informations depuis les ombres.',bonus:'-20% coût marché noir',color:'#9B2FFF',glow:'rgba(155,47,255,.4)'},
-  {id:'kayo',num:'#99',name:'KAYO',role:'Guerrier',desc:'Conquiert les zones les plus dangereuses et défend le territoire.',bonus:'+25% zones dangereuses',color:'#FF2D78',glow:'rgba(255,45,120,.4)'}
+  {id:'zay',  name:'ZAY',  role:'Street Rookie', icon:'💲', col:0, row:0,
+   color:'#FF6B1A', glow:'rgba(255,107,26,.4)', accentBg:'rgba(255,107,26,.12)',
+   tagline:'From nothing to legend.',
+   quote:'"Les rues m\'ont tout appris. Maintenant c\'est moi qui enseigne."',
+   personality:'Ambitieux, instinctif, loyal à son crew.',
+   stats:{street:9,build:5,hack:3,trade:7,fight:6},
+   ability:{name:'Street Flow',desc:'Chaque collecte consécutive augmente le multiplicateur de +5%',multiplier:1.2,trigger:'collect'},
+   bonus:'+20% revenus commerce',
+   desc:'Maîtrise les rues et les réseaux commerciaux underground.'},
+  {id:'nia',  name:'NIA',  role:'Hustler', icon:'⭐', col:1, row:0,
+   color:'#FF2D78', glow:'rgba(255,45,120,.4)', accentBg:'rgba(255,45,120,.12)',
+   tagline:'Every deal. Every corner. Every π.',
+   quote:'"Je ne dors pas. Je génère."',
+   personality:'Calculatrice, charismatique, imprévisible.',
+   stats:{street:7,build:4,hack:6,trade:9,fight:5},
+   ability:{name:'Hustle Mode',desc:'+15% sur toutes les sources de revenus actifs',multiplier:1.15,trigger:'all'},
+   bonus:'+15% toutes sources',
+   desc:'Transforme chaque opportunité en profit dans les rues.'},
+  {id:'kane', name:'KANE', role:'Builder', icon:'🔨', col:2, row:0,
+   color:'#FFD700', glow:'rgba(255,215,0,.4)', accentBg:'rgba(255,215,0,.12)',
+   tagline:'I don\'t just build blocks. I build empires.',
+   quote:'"Chaque brique posée est une promesse tenue."',
+   personality:'Méthodique, patient, visionnaire.',
+   stats:{street:4,build:10,hack:3,trade:6,fight:5},
+   ability:{name:'Master Builder',desc:'-20% coût construction + bâtiments génèrent +10% revenu',multiplier:1.1,trigger:'build'},
+   bonus:'-20% coût construction',
+   desc:'Conçoit et construit les structures les plus ambitieuses.'},
+  {id:'malik',name:'MALIK',role:'Strategist', icon:'♟️', col:3, row:0,
+   color:'#4ADE80', glow:'rgba(74,222,128,.4)', accentBg:'rgba(74,222,128,.12)',
+   tagline:'The city is just a chessboard.',
+   quote:'"Tu joues pour gagner. Moi je joue pour dominer."',
+   personality:'Froid, analytique, impitoyable.',
+   stats:{street:5,build:6,hack:7,trade:7,fight:8},
+   ability:{name:'Grand Strategy',desc:'+25% gains lors des District Wars et événements',multiplier:1.25,trigger:'war'},
+   bonus:'+25% gains district wars',
+   desc:'Anticipe chaque mouvement et domine les district wars.'},
+  {id:'vex',  name:'VEX',  role:'Hacker', icon:'💻', col:4, row:0,
+   color:'#9B2FFF', glow:'rgba(155,47,255,.4)', accentBg:'rgba(155,47,255,.12)',
+   tagline:'The system is just a game I\'ve already won.',
+   quote:'"Tout système a une faille. Moi je suis la faille."',
+   personality:'Mystérieux, brillant, solitaire.',
+   stats:{street:4,build:4,hack:10,trade:6,fight:5},
+   ability:{name:'Ghost Protocol',desc:'-25% coût marché noir + accès aux bâtiments cachés',multiplier:1.25,trigger:'market'},
+   bonus:'-25% coût marché noir',
+   desc:'Manipule les marchés et les informations depuis les ombres.'},
+  {id:'brick',name:'BRICK',role:'Trader', icon:'🤝', col:0, row:1,
+   color:'#FF6B1A', glow:'rgba(255,107,26,.4)', accentBg:'rgba(255,107,26,.12)',
+   tagline:'Everything has a price. I set the price.',
+   quote:'"Le deal parfait n\'existe pas. Jusqu\'à ce que je le crée."',
+   personality:'Pragmatique, sociable, redoutable en négociation.',
+   stats:{street:7,build:5,hack:4,trade:10,fight:6},
+   ability:{name:'Broker\'s Edge',desc:'+30% sur les revenus de commerce inter-districts',multiplier:1.3,trigger:'trade'},
+   bonus:'+30% revenus trading',
+   desc:'Négocie les meilleurs deals inter-districts de la ville.'},
+  {id:'luna', name:'LUNA', role:'Drifter', icon:'🎯', col:1, row:1,
+   color:'#2F9BFF', glow:'rgba(47,155,255,.4)', accentBg:'rgba(47,155,255,.12)',
+   tagline:'Blink and you\'ll miss her.',
+   quote:'"Je passe comme le vent. Et je prends tout au passage."',
+   personality:'Libre, intuitive, insaisissable.',
+   stats:{street:8,build:3,hack:7,trade:5,fight:7},
+   ability:{name:'Drift Mode',desc:'+20% vitesse de collecte + cooldown réduit',multiplier:1.2,trigger:'collect'},
+   bonus:'+20% vitesse collecte',
+   desc:'Se déplace comme une ombre, insaisissable et rapide.'},
+  {id:'kael', name:'KAEL', role:'Investor', icon:'📈', col:2, row:1,
+   color:'#FFD700', glow:'rgba(255,215,0,.4)', accentBg:'rgba(255,215,0,.12)',
+   tagline:'Money makes money. Pi makes empires.',
+   quote:'"Je n\'achète pas des bâtiments. J\'achète le futur."',
+   personality:'Élégant, calculateur, toujours en avance.',
+   stats:{street:3,build:7,hack:5,trade:9,fight:4},
+   ability:{name:'Compound Effect',desc:'+35% sur tous les revenus passifs automatiques',multiplier:1.35,trigger:'passive'},
+   bonus:'+35% revenus passifs',
+   desc:'Fait fructifier chaque Pi investi avec une précision redoutable.'},
+  {id:'raze', name:'RAZE', role:'Enforcer', icon:'🛡️', col:3, row:1,
+   color:'#FF2D78', glow:'rgba(255,45,120,.4)', accentBg:'rgba(255,45,120,.12)',
+   tagline:'Your territory is my territory now.',
+   quote:'"On ne négocie pas avec moi. On se soumet."',
+   personality:'Brutal, loyal à son crew, impitoyable.',
+   stats:{street:8,build:5,hack:2,trade:4,fight:10},
+   ability:{name:'Iron Grip',desc:'+40% défense territoire + dégâts en Crew Wars',multiplier:1.4,trigger:'defense'},
+   bonus:'+40% défense territoire',
+   desc:'Protège le territoire et écrase les rivaux sans pitié.'},
+  {id:'rico',  name:'RICO',  role:'Dealer', icon:'💰', col:5, row:0,
+   color:'#00D4AA', glow:'rgba(0,212,170,.4)', accentBg:'rgba(0,212,170,.12)',
+   tagline:'Les bonnes affaires ne tombent pas du ciel, on les crée.',
+   quote:'"Je contrôle le marché. Le marché ne me contrôle pas."',
+   personality:'Rusé, ambitieux, maître de la négociation underground.',
+   stats:{street:6,build:4,hack:5,trade:9,fight:4},
+   ability:{name:'Market King',desc:'+15% profits trading + +10% revenus Black Market',multiplier:1.15,trigger:'trade'},
+   bonus:'+10% Pi Coins sur toutes les transactions',
+   desc:'Contrôle le marché souterrain. Il achète bas, vend haut, toujours.'},
+  {id:'shadow',name:'SHADOW',role:'Unknown', icon:'❓', col:4, row:1,
+   color:'#9B2FFF', glow:'rgba(155,47,255,.4)', accentBg:'rgba(155,47,255,.12)',
+   tagline:'You don\'t find SHADOW. SHADOW finds you.',
+   quote:'"..."',
+   personality:'???',
+   stats:{street:7,build:7,hack:7,trade:7,fight:7},
+   ability:{name:'Dark Matter',desc:'Capacité inconnue — se débloque au Prestige 2',multiplier:1.5,trigger:'unlock'},
+   bonus:'??? capacité cachée',
+   desc:'Identité inconnue. Capacités... classifiées.'},
 ];
 
 const DISTRICTS = [
-  {id:'lowside',name:'LOWSIDE',icon:'🏚️',vibe:'Underground street vibes',slots:9,grid:'grid-3x3',req:0,color:'#FF6B1A',featured:true},
-  {id:'neon_market',name:'NEON MARKET',icon:'🌃',vibe:'Centre économique holographique',slots:12,grid:'grid-3x4',req:500,color:'#2F9BFF',featured:false},
-  {id:'sky_district',name:'SKY DISTRICT',icon:'🏙️',vibe:'Skyline de luxe futuriste',slots:16,grid:'grid-4x4',req:2000,color:'#9B2FFF',featured:false},
-  {id:'underblock',name:'UNDERBLOCK',icon:'🌑',vibe:'Tunnels, clubs et marchés noirs',slots:9,grid:'grid-3x3',req:1000,color:'#FF2D78',featured:false},
-  {id:'the_edge',name:'THE EDGE',icon:'⚡',vibe:'Territoire dangereux — Crew Wars',slots:12,grid:'grid-3x4',req:5000,color:'#FFD700',featured:false}
+  {id:'lowside',name:'LOWSIDE',icon:'🏚️',req:0,color:'#FF6B1A',slots:9,grid:'grid-3x3',featured:true,
+   vibe:'Underground street vibes',
+   atmosphere:'La rue ne dort jamais. Le béton sue. L\'argent coule sous les néons cassés.',
+   palette:['#FF6B1A','#FF2D78','#1A1A2E'],
+   music:'Trap 140 BPM · Bass lourd · Rue authentique',
+   exclusiveEvents:['BLACK MARKET NIGHT','STREET RACE','CORNER HUSTLE'],
+   rareBuilding:'Black Market',bonusDesc:'Bâtiment de départ — idéal pour le commerce'},
+  {id:'neon_market',name:'NEON MARKET',icon:'🌃',req:500,color:'#2F9BFF',slots:12,grid:'grid-3x4',featured:false,
+   vibe:'Centre économique holographique',
+   atmosphere:'Les hologrammes dansent entre les buildings. Les deals se font à la vitesse de la lumière.',
+   palette:['#2F9BFF','#9B2FFF','#07070F'],
+   music:'Electronic House 128 BPM · Futuriste · Ambiance club',
+   exclusiveEvents:['FLASH MARKET','NEON CONCERT','CRYPTO SURGE'],
+   rareBuilding:'Neon Gallery',bonusDesc:'Commerce premium — revenus x1.5'},
+  {id:'sky_district',name:'SKY DISTRICT',icon:'🏙️',req:2000,color:'#9B2FFF',slots:16,grid:'grid-4x4',featured:false,
+   vibe:'Skyline de luxe futuriste',
+   atmosphere:'Au-dessus des nuages. Les élites habitent ici. Le prestige se voit depuis les rues.',
+   palette:['#9B2FFF','#CC77FF','#0D0D1C'],
+   music:'Ambient Cinematic · Grandiose · Orchestral trap',
+   exclusiveEvents:['HELIPAD SUMMIT','VIP AUCTION','SKY WARS'],
+   rareBuilding:'Skyscraper Corp',bonusDesc:'District élite — revenus maximaux'},
+  {id:'underblock',name:'UNDERBLOCK',icon:'🌑',req:1000,color:'#FF2D78',slots:9,grid:'grid-3x3',featured:false,
+   vibe:'Tunnels, clubs et marchés noirs',
+   atmosphere:'Personne ne pose de questions ici. Les néons rouges éclairent ce que la surface veut oublier.',
+   palette:['#FF2D78','#8B0000','#0A0A0A'],
+   music:'Dark Techno 150 BPM · Industriel · Sous-sol',
+   exclusiveEvents:['UNDERGROUND RAVE','SHADOW DEAL','BLACKOUT'],
+   rareBuilding:'Underground Casino',bonusDesc:'District interdit — rewards extrêmes'},
+  {id:'the_edge',name:'THE EDGE',icon:'⚡',req:5000,color:'#FFD700',slots:12,grid:'grid-3x4',featured:false,
+   vibe:'Territoire dangereux — Crew Wars',
+   atmosphere:'La frontière entre ordre et chaos. Ici on vient pour conquérir, pas pour survivre.',
+   palette:['#FFD700','#FF6B1A','#0F0F0F'],
+   music:'War Drums · Intense · 160 BPM · Bass drop',
+   exclusiveEvents:['CREW WAR','TERRITORY CONTROL','FACTION CLASH'],
+   rareBuilding:'Faction HQ',bonusDesc:'District PvP — domination totale'},
 ];
 
 const BUILDINGS = [
@@ -969,10 +1226,12 @@ const REP_TITLES = [
 ];
 
 const PREMIUM_ITEMS = [
-  {id:'vip',emoji:'💎',name:'VIP Pass',desc:'Multiplie tes revenus par ×2 de façon permanente. L\'investissement ultime.',price:1,effect:'x2_income'},
-  {id:'skin',emoji:'👑',name:'Legendary Skin',desc:'Skin exclusif cosmétique pour ton personnage. Affiche ton statut légendaire.',price:3,effect:'legendary_skin'},
-  {id:'battle',emoji:'⚔️',name:'Battle Pass',desc:'Missions hebdomadaires + récompenses exclusives. Nouveau contenu chaque semaine.',price:5,effect:'battle_pass'},
-  {id:'key',emoji:'🗝️',name:'District Key',desc:'Débloque un slot de construction supplémentaire dans n\'importe quel district.',price:2,effect:'extra_slot'}
+  {id:'vip',emoji:'💎',name:'VIP Pass',desc:'Multiplie tes revenus par ×2 de façon permanente. L\'investissement ultime.',price:2,effect:'x2_income'},
+  {id:'skin',emoji:'👑',name:'Legendary Skin',desc:'Skin exclusif cosmétique pour ton personnage. Affiche ton statut légendaire.',price:1,effect:'legendary_skin'},
+  {id:'battle',emoji:'⚔️',name:'Battle Pass',desc:'Missions hebdomadaires + récompenses exclusives. Nouveau contenu chaque semaine.',price:1,effect:'battle_pass'},
+  {id:'key',emoji:'🗝️',name:'District Key',desc:'Débloque un slot de construction supplémentaire dans n\'importe quel district.',price:2,effect:'extra_slot'},
+  {id:'neon_skin_pack',emoji:'🎨',name:'Neon Skin Pack',desc:'3 skins exclusifs : Neon, Void & Fire. Collection complète Season 2.',price:2,effect:'neon_skin_pack'},
+  {id:'city_key',emoji:'🏙️',name:'City Key',desc:'Débloque TOUS les districts instantanément. Expansion maximale.',price:5,effect:'city_key'},
 ];
 
 const FACTIONS = [
@@ -1069,8 +1328,15 @@ const CHARACTER_SKINS = [
 ];
 
 const SEASONAL_PI_ITEMS = [
-  {id:'s2_pass',emoji:'🌟',name:'Season 2 Pass',desc:'Missions exclusives + skin Season 2 GRATUIT. Durée : 30 jours.',price:5,effect:'s2_pass',limited:true,timer:'6j 14h'},
-  {id:'gold_boost',emoji:'💎',name:'Gold Boost ×5',desc:'Multiplicateur de revenus ×5 pendant 24h. Offre flash !',price:3,effect:'gold_boost',limited:true,timer:'2j 08h'},
+  {id:'s2_pass',emoji:'🌟',name:'Season 2 Pass',desc:'Missions exclusives + skin Season 2 GRATUIT. Durée : 30 jours.',price:3,effect:'s2_pass',limited:true,timer:'6j 14h'},
+  {id:'gold_boost',emoji:'💎',name:'Gold Boost ×5',desc:'Multiplicateur de revenus ×5 pendant 24h. Offre flash !',price:0.5,effect:'gold_boost',limited:true,timer:'2j 08h'},
+];
+
+const NEON_PACKAGES = [
+  {id:'neon_100',emoji:'⚡',name:'100 NEON',desc:'100 NEON coins pour dépenser en jeu.',price:0.5,neon:100},
+  {id:'neon_500',emoji:'💜',name:'500 NEON',desc:'500 NEON coins + 10% bonus (550 au total).',price:2,neon:550},
+  {id:'neon_1500',emoji:'🔮',name:'1500 NEON',desc:'1500 NEON coins + 20% bonus (1800 au total).',price:5,neon:1800},
+  {id:'neon_5000',emoji:'🌟',name:'5000 NEON',desc:'5000 NEON coins + 50% bonus (7500 au total). Meilleur rapport!',price:15,neon:7500},
 ];
 
 // Phase 6 — World expansion
@@ -1104,13 +1370,36 @@ const API_BASE = IS_LOCAL
   ? 'http://localhost:3001/api'
   : 'https://blockside-api.onrender.com/api';
 
-// Pi SDK init — sandbox en dev, production sur Pi Browser
-if (typeof window.Pi !== 'undefined') {
-  Pi.init({ version: '2.0', sandbox: IS_LOCAL });
+// Pi SDK — état global
+let _piInitialized = false;
+let _piAccessToken = null;
+let _piUid = null;
+
+function isPiAvailable() { return typeof window.Pi !== 'undefined'; }
+
+// Attend que Pi Browser injecte window.Pi (jusqu'à 5 secondes)
+function waitForPi(ms = 5000) {
+  return new Promise(resolve => {
+    if (isPiAvailable()) { resolve(true); return; }
+    const t0 = Date.now();
+    const iv = setInterval(() => {
+      if (isPiAvailable()) { clearInterval(iv); resolve(true); }
+      else if (Date.now() - t0 > ms) { clearInterval(iv); resolve(false); }
+    }, 100);
+  });
 }
 
-let _piAccessToken = null;  // token Pi SDK stocké après login
-let _piUid = null;          // uid Pi du joueur connecté
+async function initPiSDK() {
+  if (_piInitialized) return true;
+  if (!isPiAvailable()) return false;
+  try {
+    await Pi.init({ version: '2.0', sandbox: true });
+    _piInitialized = true;
+  } catch(e) {
+    console.error('[Pi] init failed:', e.message);
+  }
+  return _piInitialized;
+}
 
 const API = {
   _headers() {
@@ -1206,6 +1495,7 @@ let state = {
   ownedSkins: ['default'],
   activeSkin: 'default',
   seasonPass: false,
+  neonBalance: 0,
   // Phase 6 — Prestige
   prestigeLevel: 0,
   prestigeBonus: 1.0,
@@ -1248,30 +1538,70 @@ function initDistricts() {
 // ============================================================
 // PI SDK
 // ============================================================
-function isPiAvailable() { return typeof window.Pi !== 'undefined'; }
+function _piDebug(msg) {
+  const el = document.getElementById('piDebugMsg');
+  if (el) el.textContent = msg;
+  console.log('[Pi DEBUG]', msg);
+}
 
 async function loginWithPi() {
-  if (isPiAvailable()) {
-    try {
-      const scopes = ['username','payments'];
-      Pi.authenticate(scopes, onIncompletePayment).then(async auth => {
-        state.username = auth.user.username || 'PiUser';
-        state.piAuthenticated = true;
-        _piAccessToken = auth.accessToken;
-        _piUid = auth.user.uid;
-        // Connexion backend + chargement sauvegarde cloud
-        await API.login();
-        const cloudSave = await API.pullSave();
-        if (cloudSave && cloudSave.character) {
-          state = { ...state, ...cloudSave };
-          showToast('☁️ Sauvegarde cloud chargée!', 'success');
-        }
-        saveGame();
-        goToCharSelect();
-      }).catch(e => { showToast('Erreur Pi: ' + e.message, 'error'); loginDemo(); });
-    } catch(e) { loginDemo(); }
-  } else {
+  const btn = document.querySelector('.pi-login-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Attente Pi…'; }
+  _piDebug('Attente de Pi Browser (max 5s)…');
+
+  const piFound = await waitForPi(5000);
+  if (!piFound) {
+    _piDebug('window.Pi absent — mode démo');
+    if (btn) { btn.disabled = false; btn.textContent = '🌐 Connexion Pi Network'; }
     loginDemo();
+    return;
+  }
+
+  if (btn) { btn.textContent = '⏳ Connexion…'; }
+  _piDebug('Pi SDK détecté — initialisation…');
+
+  try {
+    const inited = await initPiSDK();
+    _piDebug(inited ? 'Pi.init() OK — authentification…' : 'Pi.init() échoué — tentative auth…');
+
+    const auth = await Pi.authenticate(['username', 'payments'], onIncompletePayment);
+    _piDebug('Auth OK — user: ' + (auth?.user?.username || '?'));
+
+    state.username = auth.user.username || 'PiUser';
+    state.piAuthenticated = true;
+    _piAccessToken = auth.accessToken;
+    _piUid = auth.user.uid;
+    updatePiAuthBadge();
+    showToast('✅ Connecté : ' + state.username, 'success');
+
+    try { await API.login(); } catch(_) {}
+    let cloudSave = null;
+    try { cloudSave = await API.pullSave(); } catch(_) {}
+
+    if (cloudSave && cloudSave.character) {
+      state = { ...state, ...cloudSave };
+      showToast('☁️ Sauvegarde cloud chargée!', 'success');
+      const loadedChar = CHARACTERS.find(c => c.id === state.character);
+      if (loadedChar) {
+        document.documentElement.style.setProperty('--cc', loadedChar.color);
+        document.documentElement.style.setProperty('--cc-glow', loadedChar.glow);
+        document.documentElement.style.setProperty('--cc-bg', loadedChar.accentBg || loadedChar.glow.replace('.4)','.12)'));
+      }
+      initDistricts(); updateHUDStats(); renderActivity();
+      showScreen('hub'); startGameTick(); initWeather();
+    } else {
+      saveGame();
+      goToCharSelect();
+    }
+  } catch(e) {
+    const msg = e?.message || JSON.stringify(e) || 'erreur inconnue';
+    _piDebug('ERREUR: ' + msg);
+    console.error('[Pi] auth error:', e);
+    if (btn) { btn.disabled = false; btn.textContent = '🌐 Connexion Pi Network'; }
+    // Afficher l'erreur dans un overlay visible
+    const errBox = document.getElementById('piErrorBox');
+    if (errBox) { errBox.textContent = '⚠️ ' + msg; errBox.style.display = 'block'; }
+    showToast('Erreur Pi : ' + msg, 'error');
   }
 }
 
@@ -1368,6 +1698,14 @@ function collectDistrict(districtId) {
     state.money += total;
     state.totalEarned += total;
     state.collectCount = (state.collectCount||0) + 1;
+    SFX.play(total > 1000 ? 'bigcollect' : 'collect');
+    vib(15);
+    spawnFloat('+$' + total.toLocaleString('fr-FR'), total > 500 ? '#FFD700' : '#4ADE80');
+    triggerCombo();
+    checkLevelUp();
+    // Pulse income display
+    const incEl = document.getElementById('hubPendingIncome');
+    if (incEl) { incEl.classList.remove('pulsing'); void incEl.offsetWidth; incEl.classList.add('pulsing'); setTimeout(()=>incEl.classList.remove('pulsing'),500); }
     addActivity('💰 Collecte ' + districtId.replace('_',' ').toUpperCase() + ': +' + fmt(total));
     trackMission('collect', 1);
     checkAchievements();
@@ -1529,6 +1867,13 @@ function openFirstDistrict() {
 // ============================================================
 function goToCharSelect() {
   if (loadGame() && state.character) {
+    // Apply saved character color theme
+    const savedChar = CHARACTERS.find(c => c.id === state.character);
+    if (savedChar) {
+      document.documentElement.style.setProperty('--cc', savedChar.color);
+      document.documentElement.style.setProperty('--cc-glow', savedChar.glow);
+      document.documentElement.style.setProperty('--cc-bg', savedChar.accentBg||savedChar.glow.replace('.4)','.12)'));
+    }
     initDistricts();
     initMissions();
     updateHUDStats();
@@ -1554,13 +1899,25 @@ function renderCharSelect() {
     card.className = 'char-card';
     card.style.setProperty('--char-color', c.color);
     card.style.setProperty('--char-glow', c.glow);
+    const statsHtml = Object.entries(c.stats||{}).map(([k,v])=>`
+      <div class="stat-bar-row">
+        <span class="stat-bar-label">${k}</span>
+        <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${v*10}%;background:linear-gradient(90deg,${c.color},var(--pink))"></div></div>
+        <span style="font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;width:12px">${v}</span>
+      </div>`).join('');
     card.innerHTML = `
-      <div class="char-select-indicator">✓</div>
-      <div class="char-number">${c.num}</div>
-      <div class="char-name">${c.name}</div>
-      <div class="char-role">${c.role}</div>
-      <div class="char-desc">${c.desc}</div>
-      <div class="char-bonus">✦ ${c.bonus}</div>`;
+      <div class="char-photo" style="background-image:url('char-${c.id}.png')"></div>
+      <div class="char-select-indicator" style="position:absolute;top:12px;right:12px;z-index:3">✓</div>
+      <div class="char-info">
+        <div class="char-name">${c.name}</div>
+        <div class="char-role">${c.icon} ${c.role}</div>
+        <div style="font-size:11px;color:var(--muted);margin:4px 0 8px;font-style:italic">${c.tagline||''}</div>
+        <div class="char-stats">${statsHtml}</div>
+        <div class="char-ability" style="--char-color:${c.color}">
+          <div class="char-ability-name">⚡ ${c.ability?.name||''}</div>
+          <div class="char-ability-desc">${c.ability?.desc||c.bonus}</div>
+        </div>
+      </div>`;
     card.onclick = () => selectCharacter(i);
     scroll.appendChild(card);
     const dot = document.createElement('div');
@@ -1584,6 +1941,10 @@ function selectCharacter(i) {
 function startGame() {
   if (selectedCharIndex===null) return;
   const c = CHARACTERS[selectedCharIndex];
+  // Apply character color theme
+  document.documentElement.style.setProperty('--cc', c.color);
+  document.documentElement.style.setProperty('--cc-glow', c.glow);
+  document.documentElement.style.setProperty('--cc-bg', c.accentBg||c.glow.replace('.4)','.12)'));
   state.character = c.id;
   state.username = state.username||('Player_'+c.name);
   initDistricts();
@@ -1620,9 +1981,11 @@ function updateHUDStats() {
   const el = id => document.getElementById(id);
   if(el('hubUsername')) el('hubUsername').textContent = state.username;
   if(el('hubRepTitle')) { el('hubRepTitle').textContent = getRepTitle(state.rep); el('hubRepTitle').style.color = char.color; }
+  updatePiAuthBadge();
   if(el('hubMoney')) el('hubMoney').textContent = fmt(state.money);
   if(el('hubRep')) el('hubRep').textContent = fmt(state.rep);
   if(el('hubBuildings')) el('hubBuildings').textContent = state.totalBuildings;
+  if(el('hubNeon')) el('hubNeon').textContent = fmt(state.neonBalance || 0);
   if(el('hubPendingIncome')) el('hubPendingIncome').textContent = fmt(getTotalPendingIncome());
 }
 
@@ -1988,11 +2351,30 @@ function renderMarket() {
       </div>`;
     }).join('');
 
-  el.innerHTML = s2Banner + seasonalHTML + standardHTML;
+  const neonHTML = `<div class="section-title mb8 mt4">⚡ NEON Currency</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;padding:0 2px">Monnaie in-game rechargeable — Solde actuel : <strong style="color:#2F9BFF">${fmt(state.neonBalance||0)} NEON</strong></div>` +
+    NEON_PACKAGES.map(pkg => `<div class="market-item">
+      <div class="market-item-glow" style="background:radial-gradient(circle,#2F9BFF,transparent)"></div>
+      <div class="market-item-top">
+        <div class="market-item-emoji">${pkg.emoji}</div>
+        <div class="market-item-info">
+          <div class="market-item-name">${pkg.name}</div>
+          <div class="market-item-desc">${pkg.desc}</div>
+        </div>
+      </div>
+      <div class="market-item-price">
+        <div class="pi-price"><span class="pi-symbol">π</span>${pkg.price}</div>
+        <button class="buy-pi-btn" onclick="buyPiItem('${pkg.id}')">Acheter</button>
+      </div>
+    </div>`).join('');
+
+  el.innerHTML = s2Banner + seasonalHTML + standardHTML + neonHTML;
 }
 
 function buyPiItem(itemId) {
-  paymentItem = PREMIUM_ITEMS.find(x=>x.id===itemId);
+  paymentItem = PREMIUM_ITEMS.find(x=>x.id===itemId)
+    || SEASONAL_PI_ITEMS.find(x=>x.id===itemId)
+    || NEON_PACKAGES.find(x=>x.id===itemId);
   if (!paymentItem) return;
   showPaymentModal('confirm');
   openModal('paymentModal');
@@ -2015,7 +2397,10 @@ function showPaymentModal(state_name) {
     body.innerHTML = `<div class="payment-states"><div class="payment-spinner"></div><div class="payment-title">Traitement...</div><div class="payment-desc">Connexion Pi Network en cours</div></div>`;
     footer.innerHTML = '';
   } else if (state_name==='success') {
-    body.innerHTML = `<div class="payment-states"><span class="payment-icon">✅</span><div class="payment-title" style="color:var(--green)">Achat réussi!</div><div class="payment-desc">${paymentItem.name} est maintenant actif!</div></div>`;
+    const successDesc = paymentItem.neon
+      ? `+${fmt(paymentItem.neon)} NEON ajoutés ! Solde : ${fmt(state.neonBalance||0)} NEON`
+      : `${paymentItem.name} est maintenant actif !`;
+    body.innerHTML = `<div class="payment-states"><span class="payment-icon">✅</span><div class="payment-title" style="color:var(--green)">Achat réussi!</div><div class="payment-desc">${successDesc}</div></div>`;
     footer.innerHTML = `<button class="btn btn-primary btn-full" onclick="closeModal('paymentModal');renderMarket()">Fermer</button>`;
   } else if (state_name==='error') {
     body.innerHTML = `<div class="payment-states"><span class="payment-icon">❌</span><div class="payment-title" style="color:var(--pink)">Erreur de paiement</div><div class="payment-desc">Le paiement n'a pas pu être traité.</div></div>`;
@@ -2040,9 +2425,12 @@ async function processPiPayment() {
           await API.approvePayment(pid, paymentItem.id);
         },
         onReadyForServerCompletion: async (pid, txid) => {
-          const res = await API.completePayment(pid, txid);
-          // Applique les effets (venant du backend ou en local si backend KO)
-          if (!state.premiumOwned.includes(paymentItem.id)) state.premiumOwned.push(paymentItem.id);
+          await API.completePayment(pid, txid);
+          if (paymentItem.neon) {
+            state.neonBalance = (state.neonBalance || 0) + paymentItem.neon;
+          } else {
+            if (!state.premiumOwned.includes(paymentItem.id)) state.premiumOwned.push(paymentItem.id);
+          }
           applyPaymentEffect(paymentItem);
           checkAchievements();
           saveGame();
@@ -2055,7 +2443,11 @@ async function processPiPayment() {
   } else {
     // Demo fallback
     setTimeout(() => {
-      if (!state.premiumOwned.includes(paymentItem.id)) state.premiumOwned.push(paymentItem.id);
+      if (paymentItem.neon) {
+        state.neonBalance = (state.neonBalance || 0) + paymentItem.neon;
+      } else {
+        if (!state.premiumOwned.includes(paymentItem.id)) state.premiumOwned.push(paymentItem.id);
+      }
       applyPaymentEffect(paymentItem);
       checkAchievements();
       saveGame();
@@ -2066,6 +2458,11 @@ async function processPiPayment() {
 
 function applyPaymentEffect(item) {
   if (!item) return;
+  if (item.neon) {
+    // NEON currency — already added in processPiPayment before this call
+    updateHUDStats();
+    return;
+  }
   if (item.effect && item.effect.startsWith('skin_')) {
     const skinId = item.effect.replace('skin_','');
     if (!state.ownedSkins) state.ownedSkins = ['default'];
@@ -2084,66 +2481,131 @@ function applyPaymentEffect(item) {
   if (item.effect === 'city_key') {
     DISTRICTS.forEach(d => { if (state.districts[d.id]) state.districts[d.id].unlocked = true; });
   }
+  updateHUDStats();
 }
 
 // ============================================================
 // PROFILE
 // ============================================================
 function renderProfile() {
-  const el = document.getElementById('profileContent');
-  if (!el) return;
-  const char = CHARACTERS.find(c=>c.id===state.character)||CHARACTERS[0];
-  const title = getRepTitle(state.rep);
-  const next = getNextRepTitle();
-  const progress = getRepProgress();
-  const factionName = state.crew ? (FACTIONS.find(x=>x.id===state.crew)?.name||'Aucune') : 'Aucune';
-  state.achievements = state.achievements||{};
-  el.innerHTML = `
-    <div class="profile-hero">
-      <div class="profile-avatar" style="background:${char.color}22;color:${char.color};border-color:${char.color}">${char.name[0]}</div>
-      <div class="profile-username">${state.username}</div>
-      <div class="profile-title" style="color:${char.color}">${char.name} — ${char.role}</div>
-      <div class="mt8"><span class="badge badge-rare">${title}</span></div>
-    </div>
-    <div class="rep-bar-wrap">
-      <div class="rep-bar-label">
-        <span>⭐ ${fmt(state.rep)} rep</span>
-        <span>${next ? next.title + ' (' + fmt(next.min) + ')' : 'MAX'}</span>
+  const char = CHARACTERS.find(c => c.id === state.character) || CHARACTERS[0];
+  const prestigeStars = '⭐'.repeat(state.prestigeLevel || 0) || '';
+  const container = document.getElementById('profileContent');
+  if (!container) return;
+  container.innerHTML = `
+    <div class="profile-card-flex" style="--cc:${char.color};--cc-glow:${char.glow};--cc-bg:${char.accentBg||char.glow.replace('.4)','.12)')}">
+      <div class="profile-char-photo" style="background-image:url('char-${char.id}.png');border-color:${char.color}"></div>
+      <div style="flex:1">
+        <div style="font-size:22px;font-weight:900;letter-spacing:1px">${state.username||char.name}</div>
+        <div class="profile-role-badge" style="margin-top:4px">
+          ${char.icon} ${char.role}${state.prestigeLevel ? ' · ' + prestigeStars + ' Prestige ' + state.prestigeLevel : ''}
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:6px;font-family:'Space Mono',monospace">${getRepTitle(state.rep)}</div>
       </div>
-      <div class="rep-bar"><div class="rep-bar-fill" style="width:${progress*100}%"></div></div>
     </div>
-    <div class="profile-stats">
-      <div class="profile-stat"><div class="profile-stat-val">$${fmt(state.totalEarned)}</div><div class="profile-stat-label">Total gagné</div></div>
-      <div class="profile-stat"><div class="profile-stat-val">${state.totalBuildings}</div><div class="profile-stat-label">Bâtiments</div></div>
-      <div class="profile-stat"><div class="profile-stat-val">${state.clickCount}</div><div class="profile-stat-label">Interactions</div></div>
-      <div class="profile-stat"><div class="profile-stat-val">${factionName.split(' ')[0]}</div><div class="profile-stat-label">Faction</div></div>
+    <blockquote class="profile-quote">${char.quote||''}</blockquote>
+    <div class="profile-stat-row" style="margin:0 16px">
+      <div class="profile-stat-item"><div class="profile-stat-val" style="color:${char.color}">$${formatMoney(state.money)}</div><div class="profile-stat-lbl">Balance</div></div>
+      <div class="profile-stat-item"><div class="profile-stat-val" style="color:var(--purple)">${(state.rep||0).toLocaleString('fr-FR')}</div><div class="profile-stat-lbl">Réputation</div></div>
+      <div class="profile-stat-item"><div class="profile-stat-val" style="color:var(--green)">${state.totalBuildings||0}</div><div class="profile-stat-lbl">Bâtiments</div></div>
     </div>
-    <div class="achievements-title">🏆 Succès</div>
-    <div class="achievements-grid">
-      ${ACHIEVEMENTS.map(a=>{
-        const unlocked = state.achievements[a.id]||a.cond(state);
-        return `<div class="achievement ${unlocked?'unlocked':''}">
-          <span class="ach-icon">${a.icon}</span>
-          <div class="ach-name">${a.name}</div>
-        </div>`;
-      }).join('')}
+    <div style="margin:12px 16px;background:var(--card);border-radius:16px;padding:16px;border:1px solid var(--border)">
+      <div style="font-size:13px;font-weight:700;color:${char.color};margin-bottom:10px">⚡ ${char.ability?.name||'Capacité'}</div>
+      <div style="font-size:12px;color:var(--text)">${char.ability?.desc||char.bonus}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;font-style:italic">${char.personality||''}</div>
     </div>
-    ${state.prestigeLevel > 0 ? `<div class="flex center gap8 mt12 mb8"><span class="prestige-star">✨ Prestige ${state.prestigeLevel}</span><span class="fs12 text-muted">+${Math.round((state.prestigeBonus-1)*100)}% revenus</span></div>` : ''}
-    <div class="skins-section">
-      <div class="section-title mb8">🎨 Skins Personnage</div>
-      <div class="skins-grid">
-        ${CHARACTER_SKINS.map(sk => {
-          const owned = state.ownedSkins&&state.ownedSkins.includes(sk.id);
-          const active = state.activeSkin===sk.id;
-          return `<div class="skin-card ${active?'active':''} ${!owned?'locked':''}" onclick="${owned?'activateSkin(\''+sk.id+'\')':'buySkinPi(\''+sk.id+'\')'}" title="${sk.name}">
-            ${active?'<div class="skin-active-dot"></div>':''}
-            <div class="skin-emoji">${sk.emoji}</div>
-            <div class="skin-name">${sk.name}</div>
-            <div class="skin-cost">${owned?'<span style="color:var(--green)">✓ Possédé</span>':(sk.piCost?'π'+sk.piCost:'Gratuit')}</div>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>`;
+    <div style="margin:0 16px;background:var(--card);border-radius:16px;padding:16px;border:1px solid var(--border)">
+      <div style="font-size:13px;font-weight:700;margin-bottom:12px">📊 Stats du personnage</div>
+      ${Object.entries(char.stats||{}).map(([k,v])=>`
+        <div class="stat-bar-row" style="margin-bottom:8px">
+          <span class="stat-bar-label">${k.toUpperCase()}</span>
+          <div class="stat-bar-track" style="height:6px"><div class="stat-bar-fill" style="width:${v*10}%;background:linear-gradient(90deg,${char.color},var(--pink))"></div></div>
+          <span style="font-size:10px;color:var(--text);font-family:'Space Mono',monospace;width:16px;text-align:right">${v}</span>
+        </div>`).join('')}
+    </div>
+    <div style="margin:12px 16px;background:var(--card);border-radius:16px;padding:16px;border:1px solid var(--border)">
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px">🎨 Skins (${state.ownedSkins?.length||1}/${CHARACTER_SKINS.length})</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">${renderSkinsCompact(char.color)}</div>
+    </div>
+    <button class="share-btn" style="--cc:${char.color}" onclick="shareProfile()">📤 Partager mon profil</button>
+    ${!state.piAuthenticated ? `
+    <button onclick="loginWithPi()" style="width:calc(100% - 32px);margin:0 16px 8px;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#9B2FFF,#FF2D78);color:#fff;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+      🌐 Se connecter avec Pi Network
+    </button>` : ''}
+    <button onclick="confirmReset()" style="width:calc(100% - 32px);margin:0 16px 16px;padding:10px;border-radius:12px;border:1px solid rgba(255,45,120,.3);background:rgba(255,45,120,.08);color:rgba(255,255,255,.5);font-size:12px;cursor:pointer">
+      🗑️ Réinitialiser la partie
+    </button>
+  `;
+}
+
+function confirmReset() {
+  const existing = document.getElementById('resetModal');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'resetModal';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px';
+  const box = document.createElement('div');
+  box.style.cssText = 'background:#1a1a2e;border:1px solid rgba(255,45,120,.4);border-radius:20px;padding:28px;max-width:320px;width:100%;text-align:center';
+  box.innerHTML = '<div style="font-size:36px;margin-bottom:12px">⚠️</div><div style="font-size:17px;font-weight:700;color:#fff;margin-bottom:8px">Réinitialiser la partie ?</div><div style="font-size:13px;color:rgba(255,255,255,.55);margin-bottom:24px;line-height:1.5">Toute ta progression sera perdue.<br>Cette action est irréversible.</div>';
+  const btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;gap:12px';
+  const btnCancel = document.createElement('button');
+  btnCancel.textContent = 'Annuler';
+  btnCancel.style.cssText = 'flex:1;padding:13px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.7);font-size:14px;cursor:pointer;font-family:inherit';
+  const btnConfirm = document.createElement('button');
+  btnConfirm.textContent = 'Réinitialiser';
+  btnConfirm.style.cssText = 'flex:1;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#ff2d78,#c41d58);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit';
+  btnCancel.addEventListener('click', function() { overlay.remove(); });
+  btnConfirm.addEventListener('click', function() {
+    localStorage.removeItem('blockside_save');
+    overlay.remove();
+    state.username = 'Player'; state.character = null; state.money = 500; state.rep = 0;
+    state.crew = null; state.premiumOwned = []; state.buildings = {}; state.districts = {};
+    state.totalEarned = 0; state.totalBuildings = 0; state.clickCount = 0; state.collectCount = 0;
+    state.upgradeCount = 0; state.visitedDistricts = []; state.activities = [];
+    state.piAuthenticated = false; state.missions = null; state.missionsLastDailyReset = 0;
+    state.missionsLastWeeklyReset = 0; state.dailyReward = { streak:0, lastClaimed:0 };
+    state.vehicles = { owned:[], active:null }; state.tutorialDone = false;
+    state.ownedSkins = ['default']; state.activeSkin = 'default'; state.seasonPass = false;
+    state.prestigeLevel = 0; state.prestigeBonus = 1.0; state.lbTab = 0;
+    _piAccessToken = null; _piUid = null;
+    showScreen('splash');
+    if (isPiAvailable()) setTimeout(() => loginWithPi(), 400);
+  });
+  btnRow.appendChild(btnCancel);
+  btnRow.appendChild(btnConfirm);
+  box.appendChild(btnRow);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+
+function updatePiAuthBadge() {
+  const badge = document.getElementById('piAuthBadge');
+  if (badge) badge.style.display = state.piAuthenticated ? 'block' : 'none';
+}
+
+function formatMoney(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1)+'M';
+  if (n >= 1000) return (n/1000).toFixed(1)+'K';
+  return Math.floor(n).toString();
+}
+
+function renderSkinsCompact(color) {
+  return (CHARACTER_SKINS||[]).map(s => {
+    const owned = state.ownedSkins?.includes(s.id);
+    return `<div onclick="${owned?'activateSkin(\''+s.id+'\')':''}" style="width:44px;height:44px;border-radius:10px;background:${owned?color+'22':'var(--border)'};border:2px solid ${owned&&state.activeSkin===s.id?color:owned?color+'44':'var(--border)'};display:flex;align-items:center;justify-content:center;font-size:20px;cursor:${owned?'pointer':'default'};opacity:${owned?1:.4}">${s.emoji||'👤'}</div>`;
+  }).join('');
+}
+
+function shareProfile() {
+  const char = CHARACTERS.find(c => c.id === state.character)||CHARACTERS[0];
+  const text = `🏙️ BLOCKSIDE — ${state.username||char.name}\n${char.icon} ${char.role} · ${getRepTitle(state.rep)}\n💰 $${formatMoney(state.money)} · ⭐ ${(state.rep||0).toLocaleString()} REP\n🎮 play.blockside.io`;
+  if (navigator.share) {
+    navigator.share({title:'BLOCKSIDE Profile',text}).catch(()=>{});
+  } else {
+    navigator.clipboard?.writeText(text).then(()=>showToast('Profil copié!','success'));
+  }
+  SFX.play('click');
 }
 
 // ============================================================
@@ -2790,45 +3252,111 @@ function collectAllDistricts() {
   }
 }
 
-// ============================================================
-// SOUND SYSTEM (Web Audio API)
-// ============================================================
-const Sound = {
-  ctx: null, muted: false,
+// ── SOUND SYSTEM (Web Audio API) ──────────────────────────────
+const SFX = {
+  _ctx: null, _enabled: true,
   init() {
-    try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
-  },
-  tone(freq, dur, vol=0.08, type='sine') {
-    if (this.muted || !this.ctx) return;
-    try {
-      const o = this.ctx.createOscillator();
-      const g = this.ctx.createGain();
-      o.connect(g); g.connect(this.ctx.destination);
-      o.type = type; o.frequency.value = freq;
-      g.gain.setValueAtTime(vol, this.ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + dur);
-      o.start(this.ctx.currentTime); o.stop(this.ctx.currentTime + dur);
-    } catch(e) {}
+    try { this._ctx = new (window.AudioContext||window.webkitAudioContext)(); } catch(e){}
   },
   play(type) {
-    if (!this.ctx) this.init();
-    if (this.muted) return;
-    switch(type) {
-      case 'click':   this.tone(600, 0.06, 0.05); break;
-      case 'collect': this.tone(523, 0.08, 0.08); setTimeout(()=>this.tone(659, 0.08, 0.08), 80); setTimeout(()=>this.tone(784, 0.12, 0.08), 160); break;
-      case 'build':   this.tone(200, 0.15, 0.1, 'sawtooth'); setTimeout(()=>this.tone(400, 0.1, 0.06), 120); break;
-      case 'upgrade': this.tone(440, 0.06, 0.07); setTimeout(()=>this.tone(550, 0.06, 0.07), 80); setTimeout(()=>this.tone(660, 0.15, 0.09), 160); break;
-      case 'unlock':  [0,80,160,240].forEach((d,i)=>setTimeout(()=>this.tone([523,659,784,1047][i],0.18,0.08),d)); break;
-      case 'error':   this.tone(220, 0.2, 0.08, 'sawtooth'); break;
-      case 'reward':  [0,100,200].forEach((d,i)=>setTimeout(()=>this.tone([440,554,659][i],0.15,0.07),d)); break;
-    }
+    if (!this._enabled || !this._ctx) return;
+    const C = {
+      collect:  {f1:800, f2:1400, dur:.12, type:'square',  vol:.15},
+      bigcollect:{f1:400,f2:1200, dur:.25, type:'sine',    vol:.2},
+      buy:      {f1:350, f2:700,  dur:.2,  type:'sawtooth',vol:.15},
+      levelup:  {f1:523, f2:1568, dur:.5,  type:'sine',    vol:.2},
+      prestige: {f1:261, f2:1046, dur:.8,  type:'sine',    vol:.25},
+      click:    {f1:1200,f2:1000, dur:.05, type:'sine',    vol:.08},
+      error:    {f1:200, f2:150,  dur:.2,  type:'square',  vol:.15},
+      war:      {f1:80,  f2:200,  dur:.4,  type:'sawtooth',vol:.2},
+      unlock:   {f1:600, f2:1800, dur:.35, type:'sine',    vol:.2},
+    };
+    const c = C[type]||C.click;
+    try {
+      const o = this._ctx.createOscillator();
+      const g = this._ctx.createGain();
+      o.connect(g); g.connect(this._ctx.destination);
+      o.type = c.type;
+      o.frequency.setValueAtTime(c.f1, this._ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(c.f2, this._ctx.currentTime + c.dur);
+      g.gain.setValueAtTime(c.vol, this._ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(.001, this._ctx.currentTime + c.dur + .05);
+      o.start(this._ctx.currentTime);
+      o.stop(this._ctx.currentTime + c.dur + .1);
+    } catch(e) {}
+  },
+  toggle() {
+    this._enabled = !this._enabled;
+    document.getElementById('soundBtn').textContent = this._enabled ? '🔊' : '🔇';
+    localStorage.setItem('sfx', this._enabled ? '1' : '0');
   }
 };
 
-function toggleSound() {
-  Sound.muted = !Sound.muted;
-  document.getElementById('soundBtn').textContent = Sound.muted ? '🔇' : '🔊';
-  if (!Sound.muted) Sound.play('click');
+// Keep Sound as alias for backward compatibility
+const Sound = {
+  ctx: null, muted: false,
+  init() { SFX.init(); },
+  play(type) {
+    const map = {click:'click',collect:'collect',build:'buy',upgrade:'buy',unlock:'unlock',error:'error',reward:'levelup'};
+    SFX.play(map[type]||'click');
+  }
+};
+
+function toggleSound() { SFX.toggle(); }
+
+// ── VIBRATION ─────────────────────────────────────────────────
+function vib(ms=20) { if (navigator.vibrate) navigator.vibrate(ms); }
+
+// ── FLOAT TEXT ────────────────────────────────────────────────
+let _comboCount = 0, _comboTimer = null;
+function spawnFloat(text, color='#FFD700') {
+  const el = document.createElement('div');
+  el.className = 'income-float';
+  el.textContent = text;
+  el.style.cssText = `left:${30+Math.random()*40}%;top:${40+Math.random()*20}%;color:${color}`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 950);
+}
+function triggerCombo() {
+  _comboCount++;
+  clearTimeout(_comboTimer);
+  if (_comboCount >= 3) {
+    const el = document.getElementById('comboDisplay');
+    if (el) {
+      el.classList.remove('fadeout');
+      el.querySelector('.combo-text').textContent = `\xD7${_comboCount}`;
+      el.querySelector('.combo-sub').textContent = 'COMBO!';
+      el.classList.add('active');
+      SFX.play('bigcollect');
+      vib([20,10,20]);
+      _comboTimer = setTimeout(() => {
+        el.classList.remove('active'); el.classList.add('fadeout');
+        setTimeout(() => { el.classList.remove('fadeout'); _comboCount = 0; }, 400);
+      }, 1200);
+    }
+  }
+  _comboTimer = setTimeout(() => { _comboCount = 0; }, 2000);
+}
+
+// ── LEVEL UP OVERLAY ─────────────────────────────────────────
+let _lastRepTitle = '';
+function checkLevelUp() {
+  const newTitle = getRepTitle(state.rep);
+  if (newTitle !== _lastRepTitle && _lastRepTitle !== '') {
+    showLevelUp(newTitle);
+  }
+  _lastRepTitle = newTitle;
+}
+function showLevelUp(title) {
+  const overlay = document.getElementById('levelupOverlay');
+  if (!overlay) return;
+  overlay.querySelector('.levelup-title').textContent = title;
+  overlay.querySelector('.levelup-subtitle').textContent = 'Nouveau rang débloqué !';
+  overlay.querySelector('.levelup-reward').textContent = '🏆 Ton statut dans la ville a changé';
+  overlay.classList.add('active');
+  SFX.play('levelup');
+  vib([30,20,30,20,50]);
+  setTimeout(() => { overlay.classList.remove('active'); }, 2800);
 }
 
 // ============================================================
@@ -2933,7 +3461,7 @@ function renderBattlePass() {
         <div class="fw7 fs14">Pass Premium</div>
         <div class="fs12 text-muted mt4">Double les récompenses + items exclusifs</div>
       </div>
-      <button class="btn btn-gold" style="padding:8px 14px;font-size:12px" onclick="buyPiItem('battle')">π5</button>
+      <button class="btn btn-gold" style="padding:8px 14px;font-size:12px" onclick="buyPiItem('battle')">π1</button>
     </div>`;
   }
 
@@ -3117,22 +3645,53 @@ function startGameTick() {
 // ============================================================
 // INIT
 // ============================================================
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
   initParticles();
   Sound.init();
+  SFX.init();
+  const sfxPref = localStorage.getItem('sfx');
+  if (sfxPref === '0') SFX._enabled = false;
   loadWarLog();
-  // Check for existing save
+
   const saved = loadGame();
   if (saved && state.character) {
+    // Restore existing session
+    const loadedChar = CHARACTERS.find(c => c.id === state.character);
+    if (loadedChar) {
+      document.documentElement.style.setProperty('--cc', loadedChar.color);
+      document.documentElement.style.setProperty('--cc-glow', loadedChar.glow);
+      document.documentElement.style.setProperty('--cc-bg', loadedChar.accentBg || loadedChar.glow.replace('.4)','.12)'));
+    }
     initDistricts();
     updateHUDStats();
     renderActivity();
     showScreen('hub');
     startGameTick();
     initWeather();
-    // Update prestige quick sub if applicable
     const sub = document.getElementById('prestigeQuickSub');
     if (sub && state.prestigeLevel > 0) sub.textContent = `✨ Prestige ${state.prestigeLevel} actif`;
+
+    // Silently refresh Pi token in background for existing sessions
+    if (isPiAvailable()) {
+      initPiSDK().then(() =>
+        Pi.authenticate(['username', 'payments'], onIncompletePayment)
+      ).then(auth => {
+        _piAccessToken = auth.accessToken;
+        _piUid = auth.user.uid;
+        state.username = auth.user.username || state.username;
+        state.piAuthenticated = true;
+        if (document.getElementById('hubUsername')) {
+          document.getElementById('hubUsername').textContent = state.username;
+        }
+        API.login(); // re-validate token with backend
+      }).catch(() => {});
+    }
+  } else {
+    // No save — auto-trigger Pi auth if in Pi Browser
+    if (isPiAvailable()) {
+      loginWithPi();
+    }
+    // If not in Pi Browser, user stays on splash and clicks manually
   }
 });
 

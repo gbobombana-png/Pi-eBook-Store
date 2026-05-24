@@ -26,6 +26,10 @@ const ITEM_EFFECTS = {
   neon_skin_pack: (save) => {
     save.ownedSkins = [...new Set([...(save.ownedSkins||['default']), 'neon', 'void', 'fire'])];
   },
+  neon_100:  (save) => { save.neonBalance = (save.neonBalance || 0) + 100; },
+  neon_500:  (save) => { save.neonBalance = (save.neonBalance || 0) + 550; },
+  neon_1500: (save) => { save.neonBalance = (save.neonBalance || 0) + 1800; },
+  neon_5000: (save) => { save.neonBalance = (save.neonBalance || 0) + 7500; },
 };
 
 // POST /payments/approve — appelé côté client (onReadyForServerApproval)
