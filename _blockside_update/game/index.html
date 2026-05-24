@@ -1364,8 +1364,21 @@ let _piUid = null;
 
 function isPiAvailable() { return typeof window.Pi !== 'undefined'; }
 
+// Attend que Pi Browser injecte window.Pi (jusqu'à 5 secondes)
+function waitForPi(ms = 5000) {
+  return new Promise(resolve => {
+    if (isPiAvailable()) { resolve(true); return; }
+    const t0 = Date.now();
+    const iv = setInterval(() => {
+      if (isPiAvailable()) { clearInterval(iv); resolve(true); }
+      else if (Date.now() - t0 > ms) { clearInterval(iv); resolve(false); }
+    }, 100);
+  });
+}
+
 async function initPiSDK() {
-  if (!isPiAvailable() || _piInitialized) return _piInitialized;
+  if (_piInitialized) return true;
+  if (!isPiAvailable()) return false;
   try {
     await Pi.init({ version: '2.0', sandbox: true });
     _piInitialized = true;
@@ -1518,14 +1531,19 @@ function _piDebug(msg) {
 }
 
 async function loginWithPi() {
-  if (!isPiAvailable()) {
-    _piDebug('window.Pi non disponible — mode démo');
+  const btn = document.querySelector('.pi-login-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Attente Pi…'; }
+  _piDebug('Attente de Pi Browser (max 5s)…');
+
+  const piFound = await waitForPi(5000);
+  if (!piFound) {
+    _piDebug('window.Pi absent — mode démo');
+    if (btn) { btn.disabled = false; btn.textContent = '🌐 Connexion Pi Network'; }
     loginDemo();
     return;
   }
 
-  const btn = document.querySelector('.pi-login-btn');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Connexion…'; }
+  if (btn) { btn.textContent = '⏳ Connexion…'; }
   _piDebug('Pi SDK détecté — initialisation…');
 
   try {
@@ -2500,7 +2518,7 @@ function confirmReset() {
     state.vehicles = { owned:[], active:null }; state.tutorialDone = false;
     state.ownedSkins = ['default']; state.activeSkin = 'default'; state.seasonPass = false;
     state.prestigeLevel = 0; state.prestigeBonus = 1.0; state.lbTab = 0;
-    _piAccessToken = null; _piUid = null; _piInitialized = false;
+    _piAccessToken = null; _piUid = null;
     showScreen('splash');
     if (isPiAvailable()) setTimeout(() => loginWithPi(), 400);
   });
