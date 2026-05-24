@@ -714,6 +714,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
       <div class="stat-val" id="hubBuildings">0</div>
       <div class="stat-label">🏗️ Bâtiments</div>
     </div>
+    <div class="stat-item">
+      <div class="stat-val" id="hubNeon" style="color:#2F9BFF">0</div>
+      <div class="stat-label">⚡ NEON</div>
+    </div>
   </div>
   <!-- Live Events Banner -->
   <div class="events-banner" id="eventsBanner"></div>
@@ -1222,10 +1226,12 @@ const REP_TITLES = [
 ];
 
 const PREMIUM_ITEMS = [
-  {id:'vip',emoji:'💎',name:'VIP Pass',desc:'Multiplie tes revenus par ×2 de façon permanente. L\'investissement ultime.',price:1,effect:'x2_income'},
-  {id:'skin',emoji:'👑',name:'Legendary Skin',desc:'Skin exclusif cosmétique pour ton personnage. Affiche ton statut légendaire.',price:3,effect:'legendary_skin'},
-  {id:'battle',emoji:'⚔️',name:'Battle Pass',desc:'Missions hebdomadaires + récompenses exclusives. Nouveau contenu chaque semaine.',price:5,effect:'battle_pass'},
-  {id:'key',emoji:'🗝️',name:'District Key',desc:'Débloque un slot de construction supplémentaire dans n\'importe quel district.',price:2,effect:'extra_slot'}
+  {id:'vip',emoji:'💎',name:'VIP Pass',desc:'Multiplie tes revenus par ×2 de façon permanente. L\'investissement ultime.',price:2,effect:'x2_income'},
+  {id:'skin',emoji:'👑',name:'Legendary Skin',desc:'Skin exclusif cosmétique pour ton personnage. Affiche ton statut légendaire.',price:1,effect:'legendary_skin'},
+  {id:'battle',emoji:'⚔️',name:'Battle Pass',desc:'Missions hebdomadaires + récompenses exclusives. Nouveau contenu chaque semaine.',price:1,effect:'battle_pass'},
+  {id:'key',emoji:'🗝️',name:'District Key',desc:'Débloque un slot de construction supplémentaire dans n\'importe quel district.',price:2,effect:'extra_slot'},
+  {id:'neon_skin_pack',emoji:'🎨',name:'Neon Skin Pack',desc:'3 skins exclusifs : Neon, Void & Fire. Collection complète Season 2.',price:2,effect:'neon_skin_pack'},
+  {id:'city_key',emoji:'🏙️',name:'City Key',desc:'Débloque TOUS les districts instantanément. Expansion maximale.',price:5,effect:'city_key'},
 ];
 
 const FACTIONS = [
@@ -1322,8 +1328,15 @@ const CHARACTER_SKINS = [
 ];
 
 const SEASONAL_PI_ITEMS = [
-  {id:'s2_pass',emoji:'🌟',name:'Season 2 Pass',desc:'Missions exclusives + skin Season 2 GRATUIT. Durée : 30 jours.',price:5,effect:'s2_pass',limited:true,timer:'6j 14h'},
-  {id:'gold_boost',emoji:'💎',name:'Gold Boost ×5',desc:'Multiplicateur de revenus ×5 pendant 24h. Offre flash !',price:3,effect:'gold_boost',limited:true,timer:'2j 08h'},
+  {id:'s2_pass',emoji:'🌟',name:'Season 2 Pass',desc:'Missions exclusives + skin Season 2 GRATUIT. Durée : 30 jours.',price:3,effect:'s2_pass',limited:true,timer:'6j 14h'},
+  {id:'gold_boost',emoji:'💎',name:'Gold Boost ×5',desc:'Multiplicateur de revenus ×5 pendant 24h. Offre flash !',price:0.5,effect:'gold_boost',limited:true,timer:'2j 08h'},
+];
+
+const NEON_PACKAGES = [
+  {id:'neon_100',emoji:'⚡',name:'100 NEON',desc:'100 NEON coins pour dépenser en jeu.',price:0.5,neon:100},
+  {id:'neon_500',emoji:'💜',name:'500 NEON',desc:'500 NEON coins + 10% bonus (550 au total).',price:2,neon:550},
+  {id:'neon_1500',emoji:'🔮',name:'1500 NEON',desc:'1500 NEON coins + 20% bonus (1800 au total).',price:5,neon:1800},
+  {id:'neon_5000',emoji:'🌟',name:'5000 NEON',desc:'5000 NEON coins + 50% bonus (7500 au total). Meilleur rapport!',price:15,neon:7500},
 ];
 
 // Phase 6 — World expansion
@@ -1482,6 +1495,7 @@ let state = {
   ownedSkins: ['default'],
   activeSkin: 'default',
   seasonPass: false,
+  neonBalance: 0,
   // Phase 6 — Prestige
   prestigeLevel: 0,
   prestigeBonus: 1.0,
@@ -1550,7 +1564,7 @@ async function loginWithPi() {
     const inited = await initPiSDK();
     _piDebug(inited ? 'Pi.init() OK — authentification…' : 'Pi.init() échoué — tentative auth…');
 
-    const auth = await Pi.authenticate(['username'], onIncompletePayment);
+    const auth = await Pi.authenticate(['username', 'payments'], onIncompletePayment);
     _piDebug('Auth OK — user: ' + (auth?.user?.username || '?'));
 
     state.username = auth.user.username || 'PiUser';
@@ -1971,6 +1985,7 @@ function updateHUDStats() {
   if(el('hubMoney')) el('hubMoney').textContent = fmt(state.money);
   if(el('hubRep')) el('hubRep').textContent = fmt(state.rep);
   if(el('hubBuildings')) el('hubBuildings').textContent = state.totalBuildings;
+  if(el('hubNeon')) el('hubNeon').textContent = fmt(state.neonBalance || 0);
   if(el('hubPendingIncome')) el('hubPendingIncome').textContent = fmt(getTotalPendingIncome());
 }
 
@@ -2336,11 +2351,30 @@ function renderMarket() {
       </div>`;
     }).join('');
 
-  el.innerHTML = s2Banner + seasonalHTML + standardHTML;
+  const neonHTML = `<div class="section-title mb8 mt4">⚡ NEON Currency</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;padding:0 2px">Monnaie in-game rechargeable — Solde actuel : <strong style="color:#2F9BFF">${fmt(state.neonBalance||0)} NEON</strong></div>` +
+    NEON_PACKAGES.map(pkg => `<div class="market-item">
+      <div class="market-item-glow" style="background:radial-gradient(circle,#2F9BFF,transparent)"></div>
+      <div class="market-item-top">
+        <div class="market-item-emoji">${pkg.emoji}</div>
+        <div class="market-item-info">
+          <div class="market-item-name">${pkg.name}</div>
+          <div class="market-item-desc">${pkg.desc}</div>
+        </div>
+      </div>
+      <div class="market-item-price">
+        <div class="pi-price"><span class="pi-symbol">π</span>${pkg.price}</div>
+        <button class="buy-pi-btn" onclick="buyPiItem('${pkg.id}')">Acheter</button>
+      </div>
+    </div>`).join('');
+
+  el.innerHTML = s2Banner + seasonalHTML + standardHTML + neonHTML;
 }
 
 function buyPiItem(itemId) {
-  paymentItem = PREMIUM_ITEMS.find(x=>x.id===itemId);
+  paymentItem = PREMIUM_ITEMS.find(x=>x.id===itemId)
+    || SEASONAL_PI_ITEMS.find(x=>x.id===itemId)
+    || NEON_PACKAGES.find(x=>x.id===itemId);
   if (!paymentItem) return;
   showPaymentModal('confirm');
   openModal('paymentModal');
@@ -2363,7 +2397,10 @@ function showPaymentModal(state_name) {
     body.innerHTML = `<div class="payment-states"><div class="payment-spinner"></div><div class="payment-title">Traitement...</div><div class="payment-desc">Connexion Pi Network en cours</div></div>`;
     footer.innerHTML = '';
   } else if (state_name==='success') {
-    body.innerHTML = `<div class="payment-states"><span class="payment-icon">✅</span><div class="payment-title" style="color:var(--green)">Achat réussi!</div><div class="payment-desc">${paymentItem.name} est maintenant actif!</div></div>`;
+    const successDesc = paymentItem.neon
+      ? `+${fmt(paymentItem.neon)} NEON ajoutés ! Solde : ${fmt(state.neonBalance||0)} NEON`
+      : `${paymentItem.name} est maintenant actif !`;
+    body.innerHTML = `<div class="payment-states"><span class="payment-icon">✅</span><div class="payment-title" style="color:var(--green)">Achat réussi!</div><div class="payment-desc">${successDesc}</div></div>`;
     footer.innerHTML = `<button class="btn btn-primary btn-full" onclick="closeModal('paymentModal');renderMarket()">Fermer</button>`;
   } else if (state_name==='error') {
     body.innerHTML = `<div class="payment-states"><span class="payment-icon">❌</span><div class="payment-title" style="color:var(--pink)">Erreur de paiement</div><div class="payment-desc">Le paiement n'a pas pu être traité.</div></div>`;
@@ -2388,9 +2425,12 @@ async function processPiPayment() {
           await API.approvePayment(pid, paymentItem.id);
         },
         onReadyForServerCompletion: async (pid, txid) => {
-          const res = await API.completePayment(pid, txid);
-          // Applique les effets (venant du backend ou en local si backend KO)
-          if (!state.premiumOwned.includes(paymentItem.id)) state.premiumOwned.push(paymentItem.id);
+          await API.completePayment(pid, txid);
+          if (paymentItem.neon) {
+            state.neonBalance = (state.neonBalance || 0) + paymentItem.neon;
+          } else {
+            if (!state.premiumOwned.includes(paymentItem.id)) state.premiumOwned.push(paymentItem.id);
+          }
           applyPaymentEffect(paymentItem);
           checkAchievements();
           saveGame();
@@ -2403,7 +2443,11 @@ async function processPiPayment() {
   } else {
     // Demo fallback
     setTimeout(() => {
-      if (!state.premiumOwned.includes(paymentItem.id)) state.premiumOwned.push(paymentItem.id);
+      if (paymentItem.neon) {
+        state.neonBalance = (state.neonBalance || 0) + paymentItem.neon;
+      } else {
+        if (!state.premiumOwned.includes(paymentItem.id)) state.premiumOwned.push(paymentItem.id);
+      }
       applyPaymentEffect(paymentItem);
       checkAchievements();
       saveGame();
@@ -2414,6 +2458,11 @@ async function processPiPayment() {
 
 function applyPaymentEffect(item) {
   if (!item) return;
+  if (item.neon) {
+    // NEON currency — already added in processPiPayment before this call
+    updateHUDStats();
+    return;
+  }
   if (item.effect && item.effect.startsWith('skin_')) {
     const skinId = item.effect.replace('skin_','');
     if (!state.ownedSkins) state.ownedSkins = ['default'];
@@ -2432,6 +2481,7 @@ function applyPaymentEffect(item) {
   if (item.effect === 'city_key') {
     DISTRICTS.forEach(d => { if (state.districts[d.id]) state.districts[d.id].unlocked = true; });
   }
+  updateHUDStats();
 }
 
 // ============================================================
@@ -3411,7 +3461,7 @@ function renderBattlePass() {
         <div class="fw7 fs14">Pass Premium</div>
         <div class="fs12 text-muted mt4">Double les récompenses + items exclusifs</div>
       </div>
-      <button class="btn btn-gold" style="padding:8px 14px;font-size:12px" onclick="buyPiItem('battle')">π5</button>
+      <button class="btn btn-gold" style="padding:8px 14px;font-size:12px" onclick="buyPiItem('battle')">π1</button>
     </div>`;
   }
 
@@ -3624,7 +3674,7 @@ window.addEventListener('load', async () => {
     // Silently refresh Pi token in background for existing sessions
     if (isPiAvailable()) {
       initPiSDK().then(() =>
-        Pi.authenticate(['username'], onIncompletePayment)
+        Pi.authenticate(['username', 'payments'], onIncompletePayment)
       ).then(auth => {
         _piAccessToken = auth.accessToken;
         _piUid = auth.user.uid;
