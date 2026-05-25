@@ -1839,6 +1839,7 @@ function openBidModal(auctionId, nftName, nftEmoji, currentBid, startPrice) {
     const res = await API.placeBid(auctionId, amount);
     if (res?.success) {
       overlay.remove();
+      SFX.play('bid');
       showToast(`🔨 Offre de π${amount} placée !`, 'success');
       renderMarket();
     } else { showToast(res?.error || 'Erreur enchère', 'error'); }
@@ -2205,6 +2206,7 @@ function goBack() { showScreen(prevScreen==='districtView'?'cityMap':prevScreen)
 
 function navTo(screenId, el) {
   showScreen(screenId);
+  SFX.ambient(screenId);
   document.querySelectorAll('.bottom-nav .nav-item').forEach(n=>n.classList.remove('active'));
   if (el) el.classList.add('active');
 }
@@ -2397,6 +2399,7 @@ function renderCityMap() {
 // ============================================================
 function openDistrict(districtId) {
   currentDistrictId = districtId;
+  SFX.ambient(districtId);
   if (!state.visitedDistricts) state.visitedDistricts = [];
   if (!state.visitedDistricts.includes(districtId)) {
     state.visitedDistricts.push(districtId);
@@ -3063,6 +3066,7 @@ async function processPiPayment() {
           applyPaymentEffect(paymentItem);
           checkAchievements();
           saveGame();
+          SFX.play(paymentItem.effect === 'nft' || paymentItem.effect === 'nft_auction' ? 'nft' : 'purchase');
           showPaymentModal('success');
         },
         onCancel: () => showPaymentModal('error'),
@@ -4006,21 +4010,46 @@ function collectAllDistricts() {
 // ── SOUND SYSTEM (Web Audio API) ──────────────────────────────
 const SFX = {
   _ctx: null, _enabled: true,
+  _ambNodes: [], _ambInterval: null, _ambScreen: null,
+
+  // Profils musicaux par district/écran — cyberpunk urbain
+  _THEMES: {
+    hub:         {base:55,  harm:82,  arp:[110,138,165,220], type:'sine',    pulse:800,  vol:.055},
+    cityMap:     {base:65,  harm:97,  arp:[130,162,195,260], type:'sine',    pulse:700,  vol:.055},
+    districtView:{base:40,  harm:60,  arp:[80, 100,120,160], type:'sawtooth',pulse:900,  vol:.045},
+    lowside:     {base:40,  harm:60,  arp:[80, 100,120,160], type:'sawtooth',pulse:900,  vol:.045},
+    neon_market: {base:80,  harm:120, arp:[160,200,240,320], type:'sine',    pulse:500,  vol:.055},
+    sky:         {base:110, harm:165, arp:[220,275,330,440], type:'sine',    pulse:1100, vol:.045},
+    underblock:  {base:30,  harm:45,  arp:[60, 75, 90, 120], type:'square',  pulse:1300, vol:.045},
+    the_edge:    {base:100, harm:150, arp:[200,250,300,400], type:'sawtooth',pulse:400,  vol:.055},
+    piMarket:    {base:70,  harm:105, arp:[140,175,210,280], type:'sine',    pulse:750,  vol:.050},
+    profile:     {base:60,  harm:90,  arp:[120,150,180,240], type:'sine',    pulse:1000, vol:.045},
+    crew:        {base:85,  harm:127, arp:[170,212,255,340], type:'sawtooth',pulse:650,  vol:.045},
+    leaderboard: {base:90,  harm:135, arp:[180,225,270,360], type:'sine',    pulse:600,  vol:.050},
+    missions:    {base:75,  harm:112, arp:[150,187,225,300], type:'sine',    pulse:680,  vol:.050},
+    battlePass:  {base:95,  harm:142, arp:[190,237,285,380], type:'sawtooth',pulse:580,  vol:.055},
+  },
+
   init() {
     try { this._ctx = new (window.AudioContext||window.webkitAudioContext)(); } catch(e){}
   },
+
   play(type) {
     if (!this._enabled || !this._ctx) return;
     const C = {
-      collect:  {f1:800, f2:1400, dur:.12, type:'square',  vol:.15},
-      bigcollect:{f1:400,f2:1200, dur:.25, type:'sine',    vol:.2},
-      buy:      {f1:350, f2:700,  dur:.2,  type:'sawtooth',vol:.15},
-      levelup:  {f1:523, f2:1568, dur:.5,  type:'sine',    vol:.2},
-      prestige: {f1:261, f2:1046, dur:.8,  type:'sine',    vol:.25},
-      click:    {f1:1200,f2:1000, dur:.05, type:'sine',    vol:.08},
-      error:    {f1:200, f2:150,  dur:.2,  type:'square',  vol:.15},
-      war:      {f1:80,  f2:200,  dur:.4,  type:'sawtooth',vol:.2},
-      unlock:   {f1:600, f2:1800, dur:.35, type:'sine',    vol:.2},
+      collect:     {f1:800,  f2:1400, dur:.12, type:'square',   vol:.15},
+      bigcollect:  {f1:400,  f2:1200, dur:.25, type:'sine',     vol:.20},
+      buy:         {f1:350,  f2:700,  dur:.20, type:'sawtooth', vol:.15},
+      purchase:    {f1:880,  f2:1760, dur:.30, type:'sine',     vol:.18},
+      bid:         {f1:440,  f2:880,  dur:.15, type:'square',   vol:.15},
+      nft:         {f1:220,  f2:1760, dur:.60, type:'sine',     vol:.20},
+      levelup:     {f1:523,  f2:1568, dur:.50, type:'sine',     vol:.20},
+      prestige:    {f1:261,  f2:1046, dur:.80, type:'sine',     vol:.25},
+      click:       {f1:1200, f2:1000, dur:.05, type:'sine',     vol:.08},
+      error:       {f1:200,  f2:150,  dur:.20, type:'square',   vol:.15},
+      war:         {f1:80,   f2:200,  dur:.40, type:'sawtooth', vol:.20},
+      unlock:      {f1:600,  f2:1800, dur:.35, type:'sine',     vol:.20},
+      notification:{f1:660,  f2:990,  dur:.18, type:'sine',     vol:.12},
     };
     const c = C[type]||C.click;
     try {
@@ -4036,8 +4065,66 @@ const SFX = {
       o.stop(this._ctx.currentTime + c.dur + .1);
     } catch(e) {}
   },
+
+  _makeLayer(freq, type, vol, fadein=2.0) {
+    if (!this._ctx) return null;
+    try {
+      const o = this._ctx.createOscillator();
+      const g = this._ctx.createGain();
+      const f = this._ctx.createBiquadFilter();
+      f.type = 'lowpass'; f.frequency.value = 700;
+      o.type = type; o.frequency.value = freq;
+      g.gain.setValueAtTime(0, this._ctx.currentTime);
+      g.gain.linearRampToValueAtTime(vol, this._ctx.currentTime + fadein);
+      o.connect(f); f.connect(g); g.connect(this._ctx.destination);
+      o.start();
+      return {o, g};
+    } catch(e) { return null; }
+  },
+
+  ambient(screenId) {
+    if (!this._enabled || !this._ctx) return;
+    if (this._ambScreen === screenId) return;
+    this._ambScreen = screenId;
+    this.stopAmbient(false);
+    const t = this._THEMES[screenId] || this._THEMES.hub;
+    const n1 = this._makeLayer(t.base,    'sine',  t.vol);
+    const n2 = this._makeLayer(t.harm,    t.type,  t.vol * .45);
+    const n3 = this._makeLayer(t.base*3,  'sine',  t.vol * .12);
+    this._ambNodes = [n1, n2, n3].filter(Boolean);
+    let beat = 0;
+    this._ambInterval = setInterval(() => {
+      if (!this._enabled || !this._ctx) return;
+      beat++;
+      try {
+        const freq = t.arp[beat % t.arp.length];
+        const o = this._ctx.createOscillator();
+        const g = this._ctx.createGain();
+        o.type = 'sine'; o.frequency.value = freq;
+        g.gain.setValueAtTime(t.vol * .28, this._ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(.001, this._ctx.currentTime + .5);
+        o.connect(g); g.connect(this._ctx.destination);
+        o.start(); o.stop(this._ctx.currentTime + .55);
+      } catch(e) {}
+    }, t.pulse);
+  },
+
+  stopAmbient(resetScreen=true) {
+    if (this._ambInterval) { clearInterval(this._ambInterval); this._ambInterval = null; }
+    this._ambNodes.forEach(n => {
+      if (!n || !this._ctx) return;
+      try {
+        n.g.gain.linearRampToValueAtTime(0, this._ctx.currentTime + 1.0);
+        setTimeout(() => { try { n.o.stop(); } catch(e){} }, 1100);
+      } catch(e) {}
+    });
+    this._ambNodes = [];
+    if (resetScreen) this._ambScreen = null;
+  },
+
   toggle() {
     this._enabled = !this._enabled;
+    if (!this._enabled) this.stopAmbient();
     document.getElementById('soundBtn').textContent = this._enabled ? '🔊' : '🔇';
     localStorage.setItem('sfx', this._enabled ? '1' : '0');
   }
