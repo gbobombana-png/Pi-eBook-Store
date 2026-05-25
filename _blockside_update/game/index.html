@@ -711,6 +711,26 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
 .p2p-seller{font-size:11px;color:var(--muted);margin-top:2px}
 .p2p-footer{display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid rgba(255,255,255,.06)}
 
+/* ===== DROP ALERT OVERLAY ===== */
+#dropAlertOverlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.88);backdrop-filter:blur(14px);opacity:0;pointer-events:none;transition:opacity .4s}
+#dropAlertOverlay.active{opacity:1;pointer-events:all}
+.drop-alert-border{padding:2px;border-radius:26px;background:linear-gradient(135deg,#fff,var(--gold),var(--pink),var(--purple),var(--gold),#fff);animation:border-rotate 3s linear infinite;max-width:340px;width:92%}
+.drop-alert-card{background:#07070F;border-radius:24px;padding:22px 20px 20px;position:relative;overflow:hidden}
+.drop-alert-glow{position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;filter:blur(60px);opacity:.18;pointer-events:none}
+.drop-alert-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,45,120,.15);border:1px solid rgba(255,45,120,.5);border-radius:20px;padding:4px 12px;font-size:10px;font-weight:800;color:#FF2D78;letter-spacing:1px;margin-bottom:14px;animation:flash-pulse .9s ease-in-out infinite}
+.drop-alert-emoji{font-size:56px;display:block;text-align:center;margin-bottom:10px;filter:drop-shadow(0 0 20px currentColor)}
+.drop-alert-name{font-size:20px;font-weight:900;text-align:center;margin-bottom:4px}
+.drop-alert-rarity{text-align:center;margin-bottom:12px}
+.drop-alert-rivalry{font-size:11px;font-style:italic;line-height:1.6;text-align:center;opacity:.6;padding:0 8px;margin-bottom:14px}
+.drop-alert-stats{display:flex;gap:10px;margin-bottom:16px}
+.drop-alert-stat{flex:1;background:rgba(255,255,255,.05);border-radius:12px;padding:10px;text-align:center}
+.drop-alert-stat-val{font-size:16px;font-weight:900;font-family:'Space Mono',monospace}
+.drop-alert-stat-lbl{font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:.5px;text-transform:uppercase}
+.drop-alert-cta{width:100%;padding:14px;border-radius:16px;border:none;background:linear-gradient(135deg,var(--orange),var(--pink));color:#fff;font-family:'Sora',sans-serif;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:.5px;margin-bottom:8px}
+.drop-alert-skip{width:100%;padding:10px;background:transparent;border:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:'Sora',sans-serif}
+/* Nav badge */
+.nav-live-badge{display:inline-block;background:#FF2D78;color:#fff;font-size:8px;font-weight:800;padding:1px 5px;border-radius:6px;margin-left:4px;animation:flash-pulse .9s ease-in-out infinite;vertical-align:middle;letter-spacing:.5px}
+
 /* ===== CITY WEATHER ===== */
 .weather-bar{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:10px;flex-shrink:0}
 .weather-icon{font-size:20px}
@@ -1121,6 +1141,36 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
 <div id="comboDisplay"><div class="combo-text">×3</div><div class="combo-sub">COMBO!</div></div>
 
 <!-- LEVEL UP OVERLAY -->
+<!-- DROP ALERT OVERLAY -->
+<div id="dropAlertOverlay">
+  <div class="drop-alert-border">
+    <div class="drop-alert-card">
+      <div class="drop-alert-glow" id="dropAlertGlow"></div>
+      <div style="text-align:center"><div class="drop-alert-badge">🔨 DROP EN COURS</div></div>
+      <div class="drop-alert-emoji" id="dropAlertEmoji">🏆</div>
+      <div class="drop-alert-name" id="dropAlertName">Founder Badge</div>
+      <div class="drop-alert-rarity"><span id="dropAlertRarityPill" style="font-size:10px;padding:3px 10px;border-radius:20px;font-weight:700;font-family:'Space Mono',monospace">Rare</span></div>
+      <div class="drop-alert-rivalry" id="dropAlertRivalry"></div>
+      <div class="drop-alert-stats">
+        <div class="drop-alert-stat">
+          <div class="drop-alert-stat-val" id="dropAlertBid">—</div>
+          <div class="drop-alert-stat-lbl">Offre actuelle</div>
+        </div>
+        <div class="drop-alert-stat">
+          <div class="drop-alert-stat-val" id="dropAlertTime">—</div>
+          <div class="drop-alert-stat-lbl">Temps restant</div>
+        </div>
+        <div class="drop-alert-stat">
+          <div class="drop-alert-stat-val" id="dropAlertBids">0</div>
+          <div class="drop-alert-stat-lbl">Offres</div>
+        </div>
+      </div>
+      <button class="drop-alert-cta" onclick="closeDropAlert(true)">🔨 Participer à l'enchère →</button>
+      <button class="drop-alert-skip" onclick="closeDropAlert(false)">Plus tard</button>
+    </div>
+  </div>
+</div>
+
 <div id="levelupOverlay">
   <div class="levelup-card">
     <div class="levelup-stars">⭐⭐⭐</div>
@@ -1941,6 +1991,7 @@ async function loginWithPi() {
       }
       initDistricts(); updateHUDStats(); renderActivity();
       showScreen('hub'); startGameTick(); initWeather();
+      setTimeout(checkActiveDrops, 2500);
     } else {
       saveGame();
       goToCharSelect();
@@ -2312,6 +2363,7 @@ function startGame() {
   showScreen('hub');
   startGameTick();
   initWeather();
+  setTimeout(checkActiveDrops, 2500);
   if (!state.tutorialDone) setTimeout(startTutorial, 1200);
 }
 
@@ -2659,6 +2711,89 @@ function leaveFaction() {
 // ============================================================
 // PI MARKET
 // ============================================================
+// ============================================================
+// DROP ALERT — notification cinématique pour les enchères créateur
+// ============================================================
+let _dropAlertAuctionId = null;
+
+function checkActiveDrops() {
+  API.getNFTAuctions().then(res => {
+    const drops = (res?.auctions || []).filter(a => a.isCreatorDrop);
+    if (!drops.length) return;
+
+    // Prend le drop avec le plus de temps restant (le plus récent)
+    const drop = drops.sort((a,b) => b.endsAt - a.endsAt)[0];
+
+    // Ne pas montrer si déjà vu pour cette enchère
+    if (localStorage.getItem('seenDrop_' + drop.auctionId) === '1') {
+      _updateNavBadge(true);
+      return;
+    }
+
+    // Trouver le NFT correspondant dans le catalog
+    const nft = NFT_CATALOG.find(n => n.id === drop.nftId) || {
+      name: drop.nftName, emoji: drop.nftEmoji, rarity: drop.nftRarity,
+      rarityColor: '#9B2FFF', rivalry: 'Un drop exclusif est en cours !'
+    };
+
+    const tl = Math.max(0, drop.timeLeft || (drop.endsAt - Date.now()));
+    const h = Math.floor(tl / 3600000);
+    const m = Math.floor((tl % 3600000) / 60000);
+    const timeStr = h > 0 ? `${h}h ${m}m` : `${m}m`;
+
+    // Remplir l'overlay
+    document.getElementById('dropAlertEmoji').textContent = nft.emoji;
+    document.getElementById('dropAlertName').textContent = nft.name;
+    document.getElementById('dropAlertRivalry').textContent = nft.rivalry || '';
+    document.getElementById('dropAlertBid').textContent = drop.currentBid > 0 ? `π${drop.currentBid}` : '—';
+    document.getElementById('dropAlertTime').textContent = timeStr;
+    document.getElementById('dropAlertBids').textContent = drop.bids?.length || 0;
+    document.getElementById('dropAlertGlow').style.background = nft.rarityColor;
+    const pill = document.getElementById('dropAlertRarityPill');
+    pill.textContent = nft.rarity;
+    pill.style.background = nft.rarityColor + '22';
+    pill.style.color = nft.rarityColor;
+    pill.style.border = `1px solid ${nft.rarityColor}44`;
+
+    _dropAlertAuctionId = drop.auctionId;
+    _updateNavBadge(true);
+
+    // Afficher après un court délai (laisser le hub charger)
+    setTimeout(() => {
+      document.getElementById('dropAlertOverlay').classList.add('active');
+      SFX.play('notification');
+      // Auto-dismiss après 20s si pas d'interaction
+      setTimeout(() => closeDropAlert(false), 20000);
+    }, 1800);
+  }).catch(() => {});
+}
+
+function closeDropAlert(goToMarket) {
+  const overlay = document.getElementById('dropAlertOverlay');
+  overlay.classList.remove('active');
+  if (_dropAlertAuctionId) {
+    localStorage.setItem('seenDrop_' + _dropAlertAuctionId, '1');
+  }
+  if (goToMarket) {
+    marketTab = 'nft';
+    navTo('piMarket', document.querySelector('.nav-item[onclick*="piMarket"]'));
+    SFX.play('click');
+  }
+}
+
+function _updateNavBadge(show) {
+  document.querySelectorAll('.nav-label').forEach(lbl => {
+    if (lbl.textContent.trim() === 'Boutique') {
+      const existing = lbl.querySelector('.nav-live-badge');
+      if (show && !existing) {
+        lbl.innerHTML = 'Boutique<span class="nav-live-badge">LIVE</span>';
+      } else if (!show && existing) {
+        existing.remove();
+      }
+    }
+  });
+}
+
 function switchMarketTab(tab) {
   marketTab = tab;
   document.querySelectorAll('.mkt-tab').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
