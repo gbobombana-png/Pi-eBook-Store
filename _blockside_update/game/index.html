@@ -1339,6 +1339,13 @@ const NEON_PACKAGES = [
   {id:'neon_5000',emoji:'🌟',name:'5000 NEON',desc:'5000 NEON coins + 50% bonus (7500 au total). Meilleur rapport!',price:15,neon:7500},
 ];
 
+const NFT_ITEMS = [
+  {id:'nft_founder',emoji:'🏆',name:'Founder Badge',desc:'Badge unique "Fondateur BLOCKSIDE". Statut permanent visible par tous les joueurs.',price:1,rarity:'Rare',rarityColor:'#2F9BFF',effect:'nft'},
+  {id:'nft_legend',emoji:'👑',name:'Legend Tag',desc:'Tag "LÉGENDE" affiché sur ton profil. Prouve ton statut d\'élite.',price:3,rarity:'Epic',rarityColor:'#9B2FFF',effect:'nft'},
+  {id:'nft_dragon',emoji:'🐉',name:'Dragon Skin NFT',desc:'Skin Dragon ultra-rare. 1 seul par joueur. Blockchain ready.',price:5,rarity:'Legendary',rarityColor:'#FFD700',effect:'nft'},
+  {id:'nft_city',emoji:'🌆',name:'City Genesis NFT',desc:'Titre de propriétaire virtuel d\'un district BLOCKSIDE. Édition limitée.',price:10,rarity:'Mythic',rarityColor:'#FF2D78',effect:'nft'},
+];
+
 // Phase 6 — World expansion
 const PRESTIGE_TIERS = [
   {level:1,name:'Prestige I',bonus:'+15% tous les revenus',icon:'⭐',costRep:10000,costMoney:250000},
@@ -1496,6 +1503,7 @@ let state = {
   activeSkin: 'default',
   seasonPass: false,
   neonBalance: 0,
+  nftOwned: [],
   // Phase 6 — Prestige
   prestigeLevel: 0,
   prestigeBonus: 1.0,
@@ -2368,14 +2376,45 @@ function renderMarket() {
       </div>
     </div>`).join('');
 
-  el.innerHTML = s2Banner + seasonalHTML + standardHTML + neonHTML;
+  const nftOwned = state.nftOwned || [];
+  const nftHTML = `<div class="section-title mb8 mt4">🎨 NFT Collection <span class="flash-badge">BLOCKCHAIN</span></div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:4px;padding:0 2px">Items uniques · 1 par joueur · Migration blockchain Pi Mainnet prévue</div>
+    <div style="font-size:12px;font-weight:700;color:#9B2FFF;margin-bottom:10px;padding:0 2px">📦 Ta collection : ${nftOwned.length}/${NFT_ITEMS.length} NFT</div>` +
+    NFT_ITEMS.map(nft => {
+      const owned = nftOwned.find(n=>n.nftId===nft.id);
+      return `<div class="market-item" style="border-color:${owned ? nft.rarityColor : nft.rarityColor+'44'}">
+        <div class="market-item-glow" style="background:radial-gradient(circle,${nft.rarityColor}55,transparent)"></div>
+        <div class="market-item-top">
+          <div class="market-item-emoji">${nft.emoji}</div>
+          <div class="market-item-info">
+            <div class="market-item-name">${nft.name} <span style="font-size:10px;padding:2px 7px;border-radius:6px;background:${nft.rarityColor}22;color:${nft.rarityColor};font-weight:700;border:1px solid ${nft.rarityColor}44">${nft.rarity}</span></div>
+            <div class="market-item-desc">${nft.desc}</div>
+            ${owned ? `<div style="font-size:9px;color:var(--muted);margin-top:5px;font-family:'Space Mono',monospace;word-break:break-all;line-height:1.4">${owned.tokenId}</div>` : ''}
+          </div>
+        </div>
+        <div class="market-item-price">
+          <div class="pi-price"><span class="pi-symbol">π</span>${nft.price}</div>
+          ${owned
+            ? `<div class="owned-badge" style="border-color:${nft.rarityColor};color:${nft.rarityColor};background:${nft.rarityColor}15">✓ Minté</div>`
+            : `<button class="buy-pi-btn" onclick="buyPiItem('${nft.id}')" style="background:linear-gradient(135deg,${nft.rarityColor},${nft.rarityColor}88)">Minter π${nft.price}</button>`}
+        </div>
+      </div>`;
+    }).join('');
+
+  el.innerHTML = s2Banner + seasonalHTML + standardHTML + neonHTML + nftHTML;
 }
 
 function buyPiItem(itemId) {
   paymentItem = PREMIUM_ITEMS.find(x=>x.id===itemId)
     || SEASONAL_PI_ITEMS.find(x=>x.id===itemId)
-    || NEON_PACKAGES.find(x=>x.id===itemId);
+    || NEON_PACKAGES.find(x=>x.id===itemId)
+    || NFT_ITEMS.find(x=>x.id===itemId);
   if (!paymentItem) return;
+  // NFT déjà minté → bloquer
+  if (paymentItem.effect === 'nft' && (state.nftOwned||[]).find(n=>n.nftId===itemId)) {
+    showToast('Tu possèdes déjà ce NFT !', 'info');
+    return;
+  }
   showPaymentModal('confirm');
   openModal('paymentModal');
 }
@@ -2397,10 +2436,17 @@ function showPaymentModal(state_name) {
     body.innerHTML = `<div class="payment-states"><div class="payment-spinner"></div><div class="payment-title">Traitement...</div><div class="payment-desc">Connexion Pi Network en cours</div></div>`;
     footer.innerHTML = '';
   } else if (state_name==='success') {
-    const successDesc = paymentItem.neon
-      ? `+${fmt(paymentItem.neon)} NEON ajoutés ! Solde : ${fmt(state.neonBalance||0)} NEON`
-      : `${paymentItem.name} est maintenant actif !`;
-    body.innerHTML = `<div class="payment-states"><span class="payment-icon">✅</span><div class="payment-title" style="color:var(--green)">Achat réussi!</div><div class="payment-desc">${successDesc}</div></div>`;
+    let successDesc, successExtra = '';
+    if (paymentItem.neon) {
+      successDesc = `+${fmt(paymentItem.neon)} NEON ajoutés ! Solde : ${fmt(state.neonBalance||0)} NEON`;
+    } else if (paymentItem.effect === 'nft') {
+      const mintedNft = (state.nftOwned||[]).find(n=>n.nftId===paymentItem.id);
+      successDesc = `${paymentItem.name} minté avec succès !`;
+      successExtra = mintedNft ? `<div style="font-size:10px;color:var(--muted);margin-top:8px;font-family:'Space Mono',monospace;word-break:break-all">${mintedNft.tokenId}</div>` : '';
+    } else {
+      successDesc = `${paymentItem.name} est maintenant actif !`;
+    }
+    body.innerHTML = `<div class="payment-states"><span class="payment-icon">✅</span><div class="payment-title" style="color:var(--green)">Achat réussi!</div><div class="payment-desc">${successDesc}</div>${successExtra}</div>`;
     footer.innerHTML = `<button class="btn btn-primary btn-full" onclick="closeModal('paymentModal');renderMarket()">Fermer</button>`;
   } else if (state_name==='error') {
     body.innerHTML = `<div class="payment-states"><span class="payment-icon">❌</span><div class="payment-title" style="color:var(--pink)">Erreur de paiement</div><div class="payment-desc">Le paiement n'a pas pu être traité.</div></div>`;
@@ -2428,6 +2474,14 @@ async function processPiPayment() {
           await API.completePayment(pid, txid);
           if (paymentItem.neon) {
             state.neonBalance = (state.neonBalance || 0) + paymentItem.neon;
+          } else if (paymentItem.effect === 'nft') {
+            const serial = txid.slice(-8).toUpperCase();
+            const uid6 = (_piUid||'DEMO00').slice(0,6).toUpperCase();
+            const tokenId = `BLK-NFT-${paymentItem.id.replace('nft_','').toUpperCase()}-${uid6}-${serial}`;
+            if (!state.nftOwned) state.nftOwned = [];
+            if (!state.nftOwned.find(n=>n.nftId===paymentItem.id)) {
+              state.nftOwned.push({nftId:paymentItem.id, tokenId, mintedAt:Date.now(), txid});
+            }
           } else {
             if (!state.premiumOwned.includes(paymentItem.id)) state.premiumOwned.push(paymentItem.id);
           }
@@ -2445,6 +2499,14 @@ async function processPiPayment() {
     setTimeout(() => {
       if (paymentItem.neon) {
         state.neonBalance = (state.neonBalance || 0) + paymentItem.neon;
+      } else if (paymentItem.effect === 'nft') {
+        const serial = Math.random().toString(36).slice(-8).toUpperCase();
+        const uid6 = (_piUid||'DEMO00').slice(0,6).toUpperCase();
+        const tokenId = `BLK-NFT-${paymentItem.id.replace('nft_','').toUpperCase()}-${uid6}-${serial}`;
+        if (!state.nftOwned) state.nftOwned = [];
+        if (!state.nftOwned.find(n=>n.nftId===paymentItem.id)) {
+          state.nftOwned.push({nftId:paymentItem.id, tokenId, mintedAt:Date.now(), txid:'demo'});
+        }
       } else {
         if (!state.premiumOwned.includes(paymentItem.id)) state.premiumOwned.push(paymentItem.id);
       }
@@ -2459,7 +2521,15 @@ async function processPiPayment() {
 function applyPaymentEffect(item) {
   if (!item) return;
   if (item.neon) {
-    // NEON currency — already added in processPiPayment before this call
+    updateHUDStats();
+    return;
+  }
+  if (item.effect === 'nft') {
+    // Dragon Skin NFT débloque aussi le skin 'dragon'
+    if (item.id === 'nft_dragon') {
+      if (!state.ownedSkins) state.ownedSkins = ['default'];
+      if (!state.ownedSkins.includes('dragon')) state.ownedSkins.push('dragon');
+    }
     updateHUDStats();
     return;
   }
@@ -2527,6 +2597,23 @@ function renderProfile() {
       <div style="font-size:13px;font-weight:700;margin-bottom:10px">🎨 Skins (${state.ownedSkins?.length||1}/${CHARACTER_SKINS.length})</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">${renderSkinsCompact(char.color)}</div>
     </div>
+    ${(state.nftOwned||[]).length > 0 ? `
+    <div style="margin:0 16px;background:var(--card);border-radius:16px;padding:16px;border:1px solid rgba(155,47,255,.4)">
+      <div style="font-size:13px;font-weight:700;margin-bottom:12px">🎨 NFT Collection <span style="font-size:11px;color:var(--muted);font-weight:400">${(state.nftOwned||[]).length}/${NFT_ITEMS.length}</span></div>
+      ${(state.nftOwned||[]).map(n=>{
+        const def = NFT_ITEMS.find(x=>x.id===n.nftId)||{emoji:'🎨',name:n.nftId,rarityColor:'#9B2FFF',rarity:'?'};
+        const ts = new Date(n.mintedAt).toLocaleDateString('fr-FR');
+        return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:${def.rarityColor}11;border-radius:12px;border:1px solid ${def.rarityColor}33;margin-bottom:8px">
+          <div style="font-size:28px">${def.emoji}</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:700;color:${def.rarityColor}">${def.name}</div>
+            <div style="font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:3px;word-break:break-all">${n.tokenId}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px">Minté le ${ts}</div>
+          </div>
+          <span style="font-size:10px;padding:2px 6px;border-radius:6px;background:${def.rarityColor}22;color:${def.rarityColor};font-weight:700;white-space:nowrap">${def.rarity}</span>
+        </div>`;
+      }).join('')}
+    </div>` : ''}
     <button class="share-btn" style="--cc:${char.color}" onclick="shareProfile()">📤 Partager mon profil</button>
     ${!state.piAuthenticated ? `
     <button onclick="loginWithPi()" style="width:calc(100% - 32px);margin:0 16px 8px;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#9B2FFF,#FF2D78);color:#fff;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
@@ -2567,6 +2654,7 @@ function confirmReset() {
     state.missionsLastWeeklyReset = 0; state.dailyReward = { streak:0, lastClaimed:0 };
     state.vehicles = { owned:[], active:null }; state.tutorialDone = false;
     state.ownedSkins = ['default']; state.activeSkin = 'default'; state.seasonPass = false;
+    state.neonBalance = 0; state.nftOwned = [];
     state.prestigeLevel = 0; state.prestigeBonus = 1.0; state.lbTab = 0;
     _piAccessToken = null; _piUid = null;
     showScreen('splash');
