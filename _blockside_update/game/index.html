@@ -642,6 +642,75 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
 @keyframes flash-pulse{0%,100%{opacity:1}50%{opacity:.65}}
 .market-seasonal{background:linear-gradient(135deg,rgba(155,47,255,.12),rgba(255,45,120,.12));border-color:rgba(155,47,255,.4)!important}
 
+/* ===== MARKET REDESIGN ===== */
+#piMarket{background:var(--bg)}
+.mkt-hdr{flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.06)}
+.mkt-top-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px}
+.mkt-brand{font-size:20px;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.mkt-brand-sub{font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:1px}
+.mkt-neon-badge{font-size:15px;font-weight:800;color:#2F9BFF;font-family:'Space Mono',monospace;text-align:right}
+.mkt-neon-label{font-size:9px;color:var(--muted);text-align:right;margin-top:1px}
+.mkt-tabs{display:flex;gap:6px;padding:0 14px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.mkt-tabs::-webkit-scrollbar{display:none}
+.mkt-tab{padding:7px 16px;border-radius:20px;border:1px solid rgba(255,255,255,.12);background:transparent;color:var(--muted);font-family:'Sora',sans-serif;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0}
+.mkt-tab.on{background:linear-gradient(135deg,var(--orange),var(--pink));color:#fff;border-color:transparent;box-shadow:0 3px 14px rgba(255,107,26,.4)}
+.mkt-section{padding:14px 14px 90px}
+.mkt-section.off{display:none!important}
+
+/* NFT Hero Cards */
+.nft-hero{border-radius:22px;overflow:hidden;margin-bottom:14px;position:relative;border:1px solid rgba(255,255,255,.07)}
+.nft-hero-inner{padding:18px;position:relative;z-index:2;min-height:160px}
+.nft-hero-glow{position:absolute;top:-30px;right:-30px;width:160px;height:160px;border-radius:50%;filter:blur(55px);opacity:.22;z-index:1;pointer-events:none}
+.nft-hero-emoji{position:absolute;right:14px;bottom:14px;font-size:64px;z-index:1;opacity:.2;pointer-events:none}
+.nft-rarity-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;font-family:'Space Mono',monospace;letter-spacing:.5px;margin-bottom:10px}
+.nft-hero-name{font-size:22px;font-weight:900;letter-spacing:.5px;line-height:1;margin-bottom:3px}
+.nft-hero-desc{font-size:11px;opacity:.45;margin-bottom:14px}
+.nft-perks-box{background:rgba(0,0,0,.38);border-radius:12px;padding:10px 12px;margin-bottom:10px;backdrop-filter:blur(4px)}
+.nft-perk-line{font-size:11px;padding:2px 0;display:flex;gap:8px;align-items:flex-start}
+.nft-rivalry-quote{padding:7px 10px;border-radius:9px;border-left:3px solid;margin-bottom:10px;font-size:11px;font-style:italic;line-height:1.5;opacity:.75}
+.nft-supply-bar{height:3px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden;margin-bottom:4px}
+.nft-supply-fill{height:100%;border-radius:2px;transition:width .8s ease}
+.nft-supply-txt{font-size:10px;text-align:right;margin-bottom:8px;opacity:.55}
+.nft-status-zone{border-radius:12px;padding:10px 12px}
+.nft-bid-btn{padding:8px 16px;border-radius:10px;border:none;font-family:'Sora',sans-serif;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap}
+
+/* NEON packages */
+.neon-wallet-card{background:linear-gradient(135deg,rgba(47,155,255,.12),rgba(155,47,255,.1));border:1px solid rgba(47,155,255,.25);border-radius:18px;padding:16px;margin-bottom:14px;display:flex;align-items:center;gap:14px}
+.neon-wallet-icon{font-size:32px}
+.neon-wallet-amount{font-size:28px;font-weight:900;color:#2F9BFF;font-family:'Space Mono',monospace;line-height:1}
+.neon-wallet-label{font-size:11px;color:var(--muted);margin-top:2px}
+.neon-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.neon-card{border-radius:18px;padding:16px 14px 14px;position:relative;overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s;border:1px solid rgba(47,155,255,.18);background:linear-gradient(145deg,rgba(47,155,255,.09),rgba(155,47,255,.06))}
+.neon-card:active{transform:scale(.96);box-shadow:none}
+.neon-card-emoji{font-size:28px;display:block;margin-bottom:10px}
+.neon-card-amount{font-size:22px;font-weight:900;color:#2F9BFF;font-family:'Space Mono',monospace;line-height:1}
+.neon-card-receive{font-size:12px;font-weight:700;color:#fff;margin-top:3px}
+.neon-card-bonus{font-size:10px;font-weight:700;color:var(--green);margin-top:2px}
+.neon-card-price{font-size:13px;color:var(--gold);font-family:'Space Mono',monospace;font-weight:700;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)}
+.neon-card-bg-emoji{position:absolute;right:-4px;bottom:-6px;font-size:52px;opacity:.05;pointer-events:none}
+
+/* Premium items */
+.prem-section-lbl{font-size:10px;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;padding:4px 2px;margin-top:16px;margin-bottom:8px}
+.prem-card{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;border:1px solid var(--border);background:var(--card);margin-bottom:8px;position:relative;overflow:hidden}
+.prem-card.owned{border-color:rgba(74,222,128,.28)}
+.prem-card-glow{position:absolute;right:-10px;top:-10px;width:70px;height:70px;border-radius:50%;filter:blur(28px);opacity:.35;pointer-events:none}
+.prem-icon{font-size:32px;width:46px;text-align:center;flex-shrink:0}
+.prem-info{flex:1;min-width:0}
+.prem-name{font-size:13px;font-weight:800}
+.prem-desc{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4}
+.prem-right{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.prem-pi-price{font-size:15px;font-weight:800;color:var(--gold);font-family:'Space Mono',monospace}
+.prem-buy-btn{padding:7px 14px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--orange),var(--pink));color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:'Sora',sans-serif}
+.prem-owned-tag{font-size:11px;font-weight:700;color:var(--green);padding:4px 10px;border-radius:8px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3)}
+
+/* P2P secondary market */
+.p2p-card{background:var(--card);border:1px solid rgba(155,47,255,.25);border-radius:16px;padding:14px;margin-bottom:10px}
+.p2p-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.p2p-emoji{font-size:34px;width:44px;text-align:center;flex-shrink:0}
+.p2p-name{font-size:14px;font-weight:800}
+.p2p-seller{font-size:11px;color:var(--muted);margin-top:2px}
+.p2p-footer{display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid rgba(255,255,255,.06)}
+
 /* ===== CITY WEATHER ===== */
 .weather-bar{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:10px;flex-shrink:0}
 .weather-icon{font-size:20px}
@@ -844,15 +913,20 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
 
 <!-- PI MARKET -->
 <div id="piMarket" class="screen">
-  <div class="market-header" style="flex-shrink:0">
-    <div class="back-btn" onclick="goBack()">← Hub</div>
-    <div style="display:flex;align-items:center;justify-content:space-between">
-      <div class="market-title">Pi Market</div>
-      <button class="btn btn-purple" style="padding:8px 14px;font-size:12px" onclick="showScreen('battlePass')">⚔️ Battle Pass</button>
+  <div class="mkt-hdr">
+    <div class="mkt-top-row">
+      <div>
+        <div class="mkt-brand">BLOCKSIDE Market</div>
+        <div class="mkt-brand-sub">PI NETWORK · NFT · WEB3</div>
+      </div>
+      <div>
+        <div class="mkt-neon-badge" id="mktNeonBal">⚡ 0</div>
+        <div class="mkt-neon-label">NEON Balance</div>
+      </div>
     </div>
-    <div class="market-note">Items premium payés avec de vrais Pi Coins</div>
+    <div class="mkt-tabs" id="mktTabs"></div>
   </div>
-  <div class="market-items scrollable" id="marketItems"></div>
+  <div class="market-items scrollable" id="marketItems" style="padding:0 0 80px"></div>
   <div class="bottom-nav">
     <div class="nav-item" onclick="navTo('hub',this)"><div class="nav-icon">🏠</div><div class="nav-label">Hub</div></div>
     <div class="nav-item" onclick="navTo('cityMap',this)"><div class="nav-icon">🏙️</div><div class="nav-label">Ville</div></div>
@@ -1575,6 +1649,7 @@ let buildModalSlotIndex = null;
 let detailModalBuilding = null;
 let detailModalDistrictId = null;
 let paymentItem = null;
+let marketTab = 'nft';
 let gameTickInterval = null;
 
 // ============================================================
@@ -2581,151 +2656,224 @@ function leaveFaction() {
 // ============================================================
 // PI MARKET
 // ============================================================
+function switchMarketTab(tab) {
+  marketTab = tab;
+  document.querySelectorAll('.mkt-tab').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  document.querySelectorAll('.mkt-section').forEach(s => s.classList.toggle('off', s.dataset.section !== tab));
+}
+
 function renderMarket() {
   const el = document.getElementById('marketItems');
   if (!el) return;
-  const glowColors = ['#9B2FFF','#FFD700','#FF2D78','#2F9BFF'];
 
-  // Season 2 Banner
-  const s2Banner = `<div class="season-banner">
-    <div class="season-banner-bg"></div>
-    <div class="season-banner-content">
-      <div class="season-tag">✨ SEASON 2 — NEON UPRISING</div>
-      <div class="season-title">L'Empire Néon</div>
-      <div class="season-desc">Nouvelles missions · Skins exclusifs · Events légendaires<br>Débloque des récompenses inédites cette saison.</div>
-    </div>
-  </div>`;
+  const neonBadge = document.getElementById('mktNeonBal');
+  if (neonBadge) neonBadge.textContent = `⚡ ${fmt(state.neonBalance||0)}`;
 
-  // Seasonal limited items
-  const seasonalHTML = `<div class="section-title mb8">🔥 Offres Limitées <span class="flash-badge">FLASH</span></div>` +
-    SEASONAL_PI_ITEMS.map(item => {
-      const owned = state.premiumOwned.includes(item.id);
-      return `<div class="market-item market-seasonal ${owned?'owned':''}">
-        <div class="market-item-glow" style="background:radial-gradient(circle,#9B2FFF,transparent)"></div>
-        <div class="market-item-top">
-          <div class="market-item-emoji">${item.emoji}</div>
-          <div class="market-item-info">
-            <div class="market-item-name">${item.name}${item.limited?` <span class="flash-badge">${item.timer}</span>`:''}</div>
-            <div class="market-item-desc">${item.desc}</div>
-          </div>
-        </div>
-        <div class="market-item-price">
-          <div class="pi-price"><span class="pi-symbol">π</span>${item.price}</div>
-          ${owned
-            ? '<div class="owned-badge">✓ Actif</div>'
-            : `<button class="buy-pi-btn" onclick="buyPiItem('${item.id}')">Acheter</button>`}
-        </div>
-      </div>`;
-    }).join('');
-
-  // Standard items
-  const standardHTML = `<div class="section-title mb8 mt4">💎 Items Premium</div>` +
-    PREMIUM_ITEMS.map((item,i) => {
-      const owned = state.premiumOwned.includes(item.id);
-      return `<div class="market-item ${owned?'owned':''}">
-        <div class="market-item-glow" style="background:radial-gradient(circle,${glowColors[i]},transparent)"></div>
-        <div class="market-item-top">
-          <div class="market-item-emoji">${item.emoji}</div>
-          <div class="market-item-info">
-            <div class="market-item-name">${item.name}</div>
-            <div class="market-item-desc">${item.desc}</div>
-          </div>
-        </div>
-        <div class="market-item-price">
-          <div class="pi-price"><span class="pi-symbol">π</span>${item.price}</div>
-          ${owned
-            ? '<div class="owned-badge">✓ Actif</div>'
-            : `<button class="buy-pi-btn" onclick="buyPiItem('${item.id}')">Acheter avec Pi</button>`}
-        </div>
-      </div>`;
-    }).join('');
-
-  const neonHTML = `<div class="section-title mb8 mt4">⚡ NEON Currency</div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;padding:0 2px">Monnaie in-game rechargeable — Solde actuel : <strong style="color:#2F9BFF">${fmt(state.neonBalance||0)} NEON</strong></div>` +
-    NEON_PACKAGES.map(pkg => `<div class="market-item">
-      <div class="market-item-glow" style="background:radial-gradient(circle,#2F9BFF,transparent)"></div>
-      <div class="market-item-top">
-        <div class="market-item-emoji">${pkg.emoji}</div>
-        <div class="market-item-info">
-          <div class="market-item-name">${pkg.name}</div>
-          <div class="market-item-desc">${pkg.desc}</div>
-        </div>
-      </div>
-      <div class="market-item-price">
-        <div class="pi-price"><span class="pi-symbol">π</span>${pkg.price}</div>
-        <button class="buy-pi-btn" onclick="buyPiItem('${pkg.id}')">Acheter</button>
-      </div>
-    </div>`).join('');
+  const TABS = [
+    {id:'nft',    label:'🎨 NFTs'},
+    {id:'neon',   label:'⚡ NEON'},
+    {id:'premium',label:'💎 Premium'},
+    {id:'saison', label:'🌟 Saison'},
+  ];
+  const tabsEl = document.getElementById('mktTabs');
+  if (tabsEl) {
+    tabsEl.innerHTML = TABS.map(t =>
+      `<button class="mkt-tab${marketTab===t.id?' on':''}" data-tab="${t.id}" onclick="switchMarketTab('${t.id}')">${t.label}</button>`
+    ).join('');
+  }
 
   const nftOwned = state.nftOwned || [];
+  const off = (tab) => marketTab !== tab ? ' off' : '';
 
-  // Carte spéciale NFT Origin — visible par tous, jamais disponible
-  const originCard = `<div style="margin-bottom:12px;padding:2px;background:linear-gradient(135deg,#ffffff,#FFD700,#9B2FFF,#FF2D78,#2F9BFF,#ffffff);border-radius:18px;animation:border-rotate 4s linear infinite">
-    <div style="background:#07070F;border-radius:16px;padding:16px">
-      <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.25);margin-bottom:12px;text-align:center">✦ &nbsp; NFT GENESIS — 1 SEUL DANS L'UNIVERS &nbsp; ✦</div>
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-        <div style="font-size:46px;filter:drop-shadow(0 0 20px rgba(255,255,255,.5));flex-shrink:0">🌌</div>
+  // ── NFT ORIGIN card ─────────────────────────────────────────────────
+  const originCard = `<div style="margin-bottom:16px;padding:2px;background:linear-gradient(135deg,#fff,#FFD700,#9B2FFF,#FF2D78,#2F9BFF,#fff);border-radius:22px;animation:border-rotate 4s linear infinite">
+    <div style="background:#07070F;border-radius:20px;padding:18px">
+      <div style="font-size:9px;font-weight:700;letter-spacing:3px;color:rgba(255,255,255,.2);margin-bottom:14px;text-align:center">✦ &nbsp; NFT GENESIS — 1 SEUL DANS L'UNIVERS &nbsp; ✦</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+        <div style="font-size:52px;filter:drop-shadow(0 0 24px rgba(255,255,255,.4));flex-shrink:0">🌌</div>
         <div style="flex:1">
-          <div style="font-size:17px;font-weight:900;background:linear-gradient(135deg,#fff,#FFD700,#FF2D78);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:.5px">BLOCKSIDE Origin</div>
-          <div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:3px">Le NFT absolu. La puissance totale.</div>
+          <span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:9px;font-weight:700;font-family:'Space Mono',monospace;letter-spacing:1px;background:linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,215,0,.15));color:#FFD700;border:1px solid rgba(255,215,0,.35);margin-bottom:6px">✦ GENESIS</span>
+          <div style="font-size:20px;font-weight:900;background:linear-gradient(135deg,#fff,#FFD700,#FF2D78);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1">BLOCKSIDE Origin</div>
+          <div style="font-size:11px;opacity:.38;margin-top:3px">Le NFT absolu. La puissance totale.</div>
         </div>
-        <span style="font-size:10px;padding:3px 8px;border-radius:8px;background:linear-gradient(135deg,rgba(255,255,255,.1),rgba(255,215,0,.15));color:#FFD700;font-weight:700;border:1px solid rgba(255,215,0,.3);white-space:nowrap">✦ GENESIS</span>
       </div>
-      <div style="background:rgba(255,255,255,.03);border-radius:10px;padding:10px;margin-bottom:12px">
-        <div style="font-size:11px;padding:2px 0;display:flex;gap:6px"><span style="color:#FFD700;font-weight:700">✦</span><span>×2 sur <strong>TOUS</strong> les revenus — permanent</span></div>
-        <div style="font-size:11px;padding:2px 0;display:flex;gap:6px"><span style="color:#FFD700;font-weight:700">✦</span><span>×2 sur <strong>TOUTE</strong> la réputation — permanent</span></div>
-        <div style="font-size:11px;padding:2px 0;display:flex;gap:6px"><span style="color:#FFD700;font-weight:700">✦</span><span>Bâtiment Origin Nexus (25 000 NEON/cycle)</span></div>
-        <div style="font-size:11px;padding:2px 0;display:flex;gap:6px"><span style="color:#FFD700;font-weight:700">✦</span><span>Tous les districts débloqués — définitivement</span></div>
-        <div style="font-size:11px;padding:2px 0;display:flex;gap:6px"><span style="color:#FFD700;font-weight:700">✦</span><span>Puissance absolue sur BLOCKSIDE — aucun autre NFT n'approche</span></div>
+      <div class="nft-perks-box" style="margin-bottom:12px">
+        <div class="nft-perk-line"><span style="color:#FFD700;font-weight:700">✦</span><span>×2 sur <strong>TOUS</strong> les revenus — permanent</span></div>
+        <div class="nft-perk-line"><span style="color:#FFD700;font-weight:700">✦</span><span>×2 sur <strong>TOUTE</strong> la réputation — permanent</span></div>
+        <div class="nft-perk-line"><span style="color:#FFD700;font-weight:700">✦</span><span>Bâtiment Origin Nexus (25 000 NEON/cycle)</span></div>
+        <div class="nft-perk-line"><span style="color:#FFD700;font-weight:700">✦</span><span>Tous les districts débloqués — définitivement</span></div>
       </div>
-      <div style="background:rgba(0,0,0,.4);border-radius:12px;border:1px solid rgba(255,255,255,.07);padding:14px;text-align:center">
-        <div style="font-size:24px;margin-bottom:8px">🔒</div>
+      <div style="background:rgba(0,0,0,.5);border-radius:14px;border:1px solid rgba(255,255,255,.06);padding:16px;text-align:center">
+        <div style="font-size:28px;margin-bottom:8px">🔒</div>
         <div style="font-size:13px;font-weight:900;color:#fff;letter-spacing:1px;margin-bottom:8px">CE NFT N'EST PAS À VENDRE</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.45);line-height:1.7">Ce NFT appartient au Créateur de BLOCKSIDE.<br>Il n'en existera jamais qu'<strong style="color:#FFD700">UN SEUL</strong> dans l'univers entier.<br>Il ne s'achète pas. Il ne se gagne pas.<br><em style="color:rgba(255,255,255,.6)">Il est.</em></div>
-        <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);font-size:11px;color:rgba(255,255,255,.2);font-style:italic;line-height:1.6">"Mais qu'arriverait-il si un jour<br>le Créateur décidait de s'en séparer ?" 🌌</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.4);line-height:1.8">Ce NFT appartient au Créateur de BLOCKSIDE.<br>Il n'en existera jamais qu'<strong style="color:#FFD700">UN SEUL</strong> dans l'univers entier.<br>Il ne s'achète pas. Il ne se gagne pas.<br><em style="color:rgba(255,255,255,.55)">Il est.</em></div>
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);font-size:11px;color:rgba(255,255,255,.18);font-style:italic;line-height:1.6">"Mais qu'arriverait-il si un jour<br>le Créateur décidait de s'en séparer ?" 🌌</div>
       </div>
-      <div style="margin-top:8px;text-align:center;font-size:9px;color:rgba(255,255,255,.15);font-family:'Space Mono',monospace">BLK-NFT-ORIGIN-GAEL99-GENESIS-0001</div>
+      <div style="margin-top:8px;text-align:center;font-size:9px;color:rgba(255,255,255,.12);font-family:'Space Mono',monospace">BLK-NFT-ORIGIN-GAEL99-GENESIS-0001</div>
     </div>
   </div>`;
 
-  const nftHTML = `<div class="section-title mb8 mt4">🎨 NFT Collection <span class="flash-badge">BLOCKCHAIN</span></div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:4px;padding:0 2px">Drops contrôlés par le créateur · 1 NFT par type par joueur · Éditions ultra-limitées</div>
-    <div style="font-size:12px;color:#9B2FFF;margin-bottom:10px;padding:0 2px">📦 Ta collection : ${nftOwned.filter(n=>n.nftId!=='nft_origin').length}/${NFT_CATALOG.length} NFT</div>
-    ${originCard}` +
-    NFT_CATALOG.map(nft => {
-      const owned = nftOwned.find(n=>n.nftId===nft.id);
-      return `<div class="market-item" style="border-color:${nft.rarityColor}44;padding-bottom:10px">
-        <div class="market-item-glow" style="background:radial-gradient(circle,${nft.rarityColor}44,transparent)"></div>
-        <div class="market-item-top">
-          <div class="market-item-emoji">${nft.emoji}</div>
-          <div class="market-item-info" style="flex:1">
-            <div class="market-item-name">${nft.name} <span style="font-size:10px;padding:2px 7px;border-radius:6px;background:${nft.rarityColor}22;color:${nft.rarityColor};font-weight:700;border:1px solid ${nft.rarityColor}44">${nft.rarity}</span></div>
-            <div class="market-item-desc">${nft.desc}</div>
-          </div>
+  // ── NFT hero cards ───────────────────────────────────────────────────
+  const hexRgb = (hex) => {
+    const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    return `${r},${g},${b}`;
+  };
+  const nftCardsHTML = NFT_CATALOG.map(nft => {
+    const owned = nftOwned.find(n => n.nftId === nft.id);
+    const rgb = hexRgb(nft.rarityColor);
+    return `<div class="nft-hero" style="background:linear-gradient(145deg,rgba(${rgb},.11),rgba(${rgb},.04));border-color:rgba(${rgb},.28)">
+      <div class="nft-hero-glow" style="background:${nft.rarityColor}"></div>
+      <div class="nft-hero-emoji">${nft.emoji}</div>
+      <div class="nft-hero-inner">
+        <span class="nft-rarity-pill" style="background:rgba(${rgb},.15);color:${nft.rarityColor};border:1px solid rgba(${rgb},.3)">${nft.rarity}</span>
+        <div class="nft-hero-name" style="color:${nft.rarityColor}">${nft.name}</div>
+        <div class="nft-hero-desc">${nft.desc}</div>
+        <div class="nft-perks-box">
+          ${nft.perks.map(p=>`<div class="nft-perk-line"><span style="color:${nft.rarityColor};font-weight:700;flex-shrink:0">✦</span><span>${p}</span></div>`).join('')}
         </div>
-        <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.05)">
-          ${nft.perks.map(p=>`<div style="font-size:11px;padding:2px 0;display:flex;gap:6px"><span style="color:${nft.rarityColor};font-weight:700;flex-shrink:0">✦</span><span>${p}</span></div>`).join('')}
+        <div class="nft-rivalry-quote" style="border-color:rgba(${rgb},.35);background:rgba(${rgb},.07);color:${nft.rarityColor}">⚔️ ${nft.rivalry}</div>
+        ${owned ? `<div style="padding:8px 12px;background:rgba(74,222,128,.08);border-radius:10px;border:1px solid rgba(74,222,128,.25);font-size:11px;color:var(--green);font-weight:700;margin-bottom:8px">✓ Tu possèdes ce NFT · 1 exemplaire max<div style="font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:3px;word-break:break-all">${owned.tokenId}</div></div>` : ''}
+        <div id="nft-status-${nft.id}">
+          <div class="nft-supply-bar"><div class="nft-supply-fill" style="width:0%;background:${nft.rarityColor}"></div></div>
+          <div class="nft-supply-txt">0/${nft.maxSupply} · Chargement…</div>
+          <div style="height:32px"></div>
         </div>
-        <div style="margin-top:8px;font-size:11px;font-style:italic;color:${nft.rarityColor}99;padding:6px 8px;background:${nft.rarityColor}08;border-radius:8px;border-left:2px solid ${nft.rarityColor}44">⚔️ ${nft.rivalry}</div>
-        ${owned ? `<div style="margin-top:8px;padding:6px 10px;background:rgba(74,222,128,.1);border-radius:8px;border:1px solid rgba(74,222,128,.3);font-size:11px;color:var(--green);font-weight:700">✓ Tu fais partie des possesseurs de ce NFT <span style="font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;margin-left:4px;word-break:break-all">${owned.tokenId}</span></div>` : ''}
-        <div id="nft-status-${nft.id}" style="margin-top:8px">
-          <div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;margin-bottom:3px"><div style="width:0%;height:100%;background:${nft.rarityColor};border-radius:2px"></div></div>
-          <div style="font-size:10px;color:var(--muted);text-align:right;margin-bottom:4px">0/${nft.maxSupply} possesseurs · 🔒 Drop en attente</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const collectionCount = nftOwned.filter(n => n.nftId !== 'nft_origin').length;
+
+  // ── NFT section ──────────────────────────────────────────────────────
+  const nftSection = `<div class="mkt-section${off('nft')}" data-section="nft">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div>
+        <div style="font-size:14px;font-weight:800">NFT Collection</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Éditions limitées · 1 par joueur · Drops créateur</div>
+      </div>
+      <div style="background:rgba(155,47,255,.15);border:1px solid rgba(155,47,255,.3);border-radius:12px;padding:6px 12px;text-align:center;flex-shrink:0">
+        <div style="font-size:16px;font-weight:900;color:#CC77FF;font-family:'Space Mono',monospace">${collectionCount}/${NFT_CATALOG.length}</div>
+        <div style="font-size:9px;color:var(--muted)">NFTs</div>
+      </div>
+    </div>
+    ${originCard}
+    ${nftCardsHTML}
+    <div style="height:1px;background:rgba(255,255,255,.07);margin:16px 0"></div>
+    <div style="font-size:14px;font-weight:800;margin-bottom:3px">🔄 Marché Secondaire</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:12px">Revente entre joueurs · Vendeur reçoit 90% en NEON</div>
+    <div id="nftP2PList"><div style="text-align:center;color:var(--muted);font-size:12px;padding:20px 0">⏳ Chargement des enchères…</div></div>
+  </div>`;
+
+  // ── NEON section ─────────────────────────────────────────────────────
+  const neonSection = `<div class="mkt-section${off('neon')}" data-section="neon">
+    <div class="neon-wallet-card">
+      <div class="neon-wallet-icon">⚡</div>
+      <div>
+        <div class="neon-wallet-amount">${fmt(state.neonBalance||0)}</div>
+        <div class="neon-wallet-label">NEON Balance · Monnaie in-game</div>
+      </div>
+    </div>
+    <div style="font-size:10px;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:10px">Recharger avec Pi</div>
+    <div class="neon-grid">
+      ${NEON_PACKAGES.map(pkg => {
+        const base = parseInt(pkg.name);
+        const bonus = pkg.neon - base;
+        const bonusPct = base > 0 ? Math.round((bonus/base)*100) : 0;
+        return `<div class="neon-card" onclick="buyPiItem('${pkg.id}')">
+          <div class="neon-card-bg-emoji">${pkg.emoji}</div>
+          <span class="neon-card-emoji">${pkg.emoji}</span>
+          <div class="neon-card-amount">${base.toLocaleString()}</div>
+          <div class="neon-card-receive">${bonus > 0 ? `→ ${fmt(pkg.neon)} reçus` : `${fmt(pkg.neon)} NEON`}</div>
+          ${bonusPct > 0 ? `<div class="neon-card-bonus">+${bonusPct}% BONUS</div>` : ''}
+          <div class="neon-card-price">π${pkg.price}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="margin-top:14px;padding:12px 14px;background:rgba(47,155,255,.07);border-radius:14px;border:1px solid rgba(47,155,255,.18);font-size:11px;color:var(--muted);line-height:1.7">
+      💡 Le NEON est la monnaie in-game de BLOCKSIDE. Utilisé pour construire, améliorer des bâtiments, et participer aux enchères NFT du marché secondaire.
+    </div>
+  </div>`;
+
+  // ── Premium section ───────────────────────────────────────────────────
+  const premColors = ['#2F9BFF','#9B2FFF','#FF6B1A','#FFD700','#FF2D78','#4ADE80'];
+  const premiumSection = `<div class="mkt-section${off('premium')}" data-section="premium">
+    <div class="prem-section-lbl">Items Permanents</div>
+    ${PREMIUM_ITEMS.map((item,i) => {
+      const owned = state.premiumOwned.includes(item.id);
+      const col = premColors[i % premColors.length];
+      return `<div class="prem-card${owned?' owned':''}">
+        <div class="prem-card-glow" style="background:${col}"></div>
+        <div class="prem-icon">${item.emoji}</div>
+        <div class="prem-info">
+          <div class="prem-name">${item.name}</div>
+          <div class="prem-desc">${item.desc}</div>
+        </div>
+        <div class="prem-right">
+          <div class="prem-pi-price">π${item.price}</div>
+          ${owned ? `<div class="prem-owned-tag">✓ Actif</div>` : `<button class="prem-buy-btn" onclick="buyPiItem('${item.id}')">Acheter</button>`}
         </div>
       </div>`;
-    }).join('');
+    }).join('')}
+    <div class="prem-section-lbl">Flash Deals</div>
+    ${SEASONAL_PI_ITEMS.map(item => {
+      const owned = state.premiumOwned.includes(item.id);
+      return `<div class="prem-card${owned?' owned':''}">
+        <div class="prem-card-glow" style="background:#9B2FFF"></div>
+        <div class="prem-icon">${item.emoji}</div>
+        <div class="prem-info">
+          <div class="prem-name">${item.name}${item.limited ? ` <span class="flash-badge">⏱ ${item.timer}</span>` : ''}</div>
+          <div class="prem-desc">${item.desc}</div>
+        </div>
+        <div class="prem-right">
+          <div class="prem-pi-price">π${item.price}</div>
+          ${owned ? `<div class="prem-owned-tag">✓ Actif</div>` : `<button class="prem-buy-btn" onclick="buyPiItem('${item.id}')">Acheter</button>`}
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
 
-  // Section Marché Secondaire P2P
-  let p2pHTML = `<div class="section-title mb8 mt4">🔄 Marché Secondaire <span class="flash-badge">P2P</span></div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;padding:0 2px">Revente entre joueurs · Vendeur reçoit 90% en NEON · 10% commission plateforme</div>`;
+  // ── Season section ────────────────────────────────────────────────────
+  const s2Owned = state.premiumOwned.includes('s2_pass');
+  const seasonSection = `<div class="mkt-section${off('saison')}" data-section="saison">
+    <div class="season-banner">
+      <div class="season-banner-bg"></div>
+      <div class="season-banner-content">
+        <div class="season-tag">✨ SEASON 2 — NEON UPRISING</div>
+        <div class="season-title">L'Empire Néon</div>
+        <div class="season-desc">Nouvelles missions · Skins exclusifs · Events légendaires<br>Débloque des récompenses inédites cette saison.</div>
+      </div>
+    </div>
+    <div style="padding:14px;background:rgba(155,47,255,.1);border:1px solid rgba(155,47,255,.3);border-radius:16px;margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div>
+          <div style="font-size:15px;font-weight:900;color:#fff;margin-bottom:4px">Season 2 Pass 🌟</div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.5">Missions exclusives + Skin Neon gratuit<br>Durée : 30 jours · Offre limitée</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:20px;font-weight:900;color:var(--gold);font-family:'Space Mono',monospace;margin-bottom:6px">π3</div>
+          ${s2Owned ? `<div class="prem-owned-tag">✓ Actif</div>` : `<button class="prem-buy-btn" onclick="buyPiItem('s2_pass')">Obtenir</button>`}
+        </div>
+      </div>
+    </div>
+    <div style="font-size:10px;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:10px">Récompenses incluses</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${['Missions hebdomadaires exclusives','Skin Néon débloqué gratuitement','Accès aux événements Season 2','Badge Season 2 sur ton profil'].map(r =>
+        `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card);border-radius:12px;border:1px solid var(--border)">
+          <span style="font-size:16px">${s2Owned?'✅':'🔒'}</span>
+          <span style="font-size:12px;font-weight:600;${s2Owned?'color:#fff':'color:var(--muted)'}">${r}</span>
+        </div>`
+      ).join('')}
+    </div>
+  </div>`;
 
-  // Chargement unique des données enchères — met à jour les cartes NFT ET le marché secondaire
+  el.innerHTML = nftSection + neonSection + premiumSection + seasonSection;
+
+  // ── Async: NFT supply + P2P ─────────────────────────────────────────
   API.getNFTAuctions().then(res => {
     const auctions = res?.auctions || [];
     const wonUnpaid = res?.wonUnpaid || [];
     const supply = res?.supply || {};
 
-    // Mise à jour des statuts sur les cartes NFT (drops créateur)
     NFT_CATALOG.forEach(nft => {
       const statusEl = document.getElementById(`nft-status-${nft.id}`);
       if (!statusEl) return;
@@ -2733,58 +2881,57 @@ function renderMarket() {
       const pct = Math.min(100, (sup.minted / sup.max) * 100);
       const isSoldOut = sup.minted >= sup.max;
       const isLastOne = !isSoldOut && sup.minted === sup.max - 1 && sup.max > 1;
-      const creatorAuction = auctions.find(a => a.nftId === nft.id && a.isCreatorDrop);
       const alreadyOwnsThis = nftOwned.some(n => n.nftId === nft.id);
       const remaining = sup.max - sup.minted;
       const barColor = isSoldOut ? 'var(--pink)' : isLastOne ? 'var(--orange)' : nft.rarityColor;
       const supplyLabel = isSoldOut
-        ? `${sup.minted}/${sup.max} possesseurs · 🏁 Épuisé`
-        : isLastOne
-          ? `${sup.minted}/${sup.max} possesseurs · ⚠️ DERNIER EXEMPLAIRE`
-          : `${sup.minted}/${sup.max} possesseurs · ${remaining} restant${remaining>1?'s':''}`;
-      const supplyBar = `<div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;margin-bottom:3px"><div style="width:${pct}%;height:100%;background:${barColor};border-radius:2px;transition:width .6s"></div></div>
-        <div style="font-size:10px;color:${isSoldOut?'var(--pink)':isLastOne?'var(--orange)':'var(--muted)'};text-align:right;margin-bottom:6px">${supplyLabel}</div>`;
+        ? `${sup.minted}/${sup.max} · 🏁 Épuisé`
+        : isLastOne ? `${sup.minted}/${sup.max} · ⚠️ DERNIER`
+        : `${sup.minted}/${sup.max} possesseurs · ${remaining} restant${remaining>1?'s':''}`;
+      const supplyBar = `<div class="nft-supply-bar"><div class="nft-supply-fill" style="width:${pct}%;background:${barColor}"></div></div>
+        <div class="nft-supply-txt" style="color:${isSoldOut?'var(--pink)':isLastOne?'var(--orange)':'var(--muted)'}">${supplyLabel}</div>`;
       if (alreadyOwnsThis) {
-        statusEl.innerHTML = supplyBar + `<div style="padding:7px 10px;background:rgba(74,222,128,.08);border-radius:8px;border:1px solid rgba(74,222,128,.25);font-size:11px;color:var(--green);font-weight:700;text-align:center">✓ Tu fais partie des ${sup.minted} possesseur${sup.minted>1?'s':''} · 1 NFT de ce type maximum</div>`;
+        statusEl.innerHTML = supplyBar + `<div class="nft-status-zone" style="background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.22);text-align:center;font-size:11px;color:var(--green);font-weight:700">✓ Tu fais partie des ${sup.minted} possesseur${sup.minted>1?'s':''} · 1 max par joueur</div>`;
       } else if (isSoldOut) {
-        statusEl.innerHTML = supplyBar + `<div style="padding:7px;background:rgba(255,45,120,.08);border-radius:8px;border:1px solid rgba(255,45,120,.3);font-size:11px;color:var(--pink);font-weight:700;text-align:center">🏁 Édition épuisée · Cherche sur le marché secondaire</div>`;
-      } else if (creatorAuction) {
-        const tl = Math.max(0, creatorAuction.timeLeft);
-        const h = Math.floor(tl/3600000), m = Math.floor((tl%3600000)/60000);
-        const timeStr = h>0?`${h}h ${m}m`:`${m}m`;
-        const urgent = tl < 3600000;
-        const minBid = creatorAuction.currentBid > 0 ? (creatorAuction.currentBid+0.1).toFixed(1) : creatorAuction.startPrice.toFixed(1);
-        const isLeading = creatorAuction.currentBidder === _piUid;
-        const bidCount = creatorAuction.bids?.length || 0;
-        statusEl.innerHTML = supplyBar + `<div style="background:rgba(74,222,128,.08);border:1px solid ${isLastOne?'rgba(255,107,26,.5)':'rgba(74,222,128,.3)'};border-radius:10px;padding:10px">
-          <div style="font-size:11px;font-weight:700;color:${isLastOne?'var(--orange)':'var(--green)'};margin-bottom:6px">${isLastOne?'⚠️ DERNIER EXEMPLAIRE — ':''}🔨 DROP LIVE${isLeading?' · 🥇 TU MÈNES':''} · ⏱ <span style="color:${urgent?'var(--pink)':'inherit'}">${timeStr}</span>${bidCount>0?` · ${bidCount} offre${bidCount>1?'s':''}`:''}
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-            <div style="font-size:12px"><span style="color:var(--muted)">Offre :</span> <strong style="color:var(--gold)">${creatorAuction.currentBid>0?'π'+creatorAuction.currentBid:'—'}</strong></div>
-            <button onclick="openBidModal('${creatorAuction.auctionId}','${nft.name}','${nft.emoji}',${creatorAuction.currentBid},${creatorAuction.startPrice})" style="padding:7px 14px;border-radius:8px;border:none;background:linear-gradient(135deg,${nft.rarityColor},${nft.rarityColor}88);color:${nft.rarityColor==='#FFD700'?'#000':'#fff'};font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">Enchérir π${minBid}+</button>
-          </div>
-        </div>`;
+        statusEl.innerHTML = supplyBar + `<div class="nft-status-zone" style="background:rgba(255,45,120,.07);border:1px solid rgba(255,45,120,.25);text-align:center;font-size:11px;color:var(--pink);font-weight:700">🏁 Édition épuisée · Marché secondaire →</div>`;
       } else {
-        statusEl.innerHTML = supplyBar + `<div style="padding:7px;background:rgba(255,255,255,.03);border-radius:8px;border:1px solid rgba(255,255,255,.07);font-size:11px;color:var(--muted);text-align:center">🔒 Pas encore disponible · Drop décidé par le créateur</div>`;
+        const creatorAuction = auctions.find(a => a.nftId === nft.id && a.isCreatorDrop);
+        if (creatorAuction) {
+          const tl = Math.max(0, creatorAuction.timeLeft);
+          const h = Math.floor(tl/3600000), m = Math.floor((tl%3600000)/60000);
+          const timeStr = h>0?`${h}h ${m}m`:`${m}m`;
+          const urgent = tl < 3600000;
+          const minBid = creatorAuction.currentBid > 0 ? (creatorAuction.currentBid+0.1).toFixed(1) : creatorAuction.startPrice.toFixed(1);
+          const isLeading = creatorAuction.currentBidder === _piUid;
+          const bidCount = creatorAuction.bids?.length || 0;
+          statusEl.innerHTML = supplyBar + `<div class="nft-status-zone" style="background:rgba(74,222,128,.07);border:1px solid ${isLastOne?'rgba(255,107,26,.4)':'rgba(74,222,128,.25)'}">
+            <div style="font-size:11px;font-weight:700;color:${isLastOne?'var(--orange)':'var(--green)'};margin-bottom:8px">🔨 DROP LIVE${isLeading?' · 🥇 TU MÈNES':''} · <span style="color:${urgent?'var(--pink)':'inherit'}">⏱ ${timeStr}</span>${bidCount>0?` · ${bidCount} offre${bidCount>1?'s':''}`:''} ${isLastOne?'· ⚠️ DERNIER':''}</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+              <div style="font-size:12px"><span style="color:var(--muted)">Enchère :</span> <strong style="color:var(--gold)">${creatorAuction.currentBid>0?'π'+creatorAuction.currentBid:'—'}</strong></div>
+              <button class="nft-bid-btn" onclick="openBidModal('${creatorAuction.auctionId}','${nft.name}','${nft.emoji}',${creatorAuction.currentBid},${creatorAuction.startPrice})" style="background:linear-gradient(135deg,${nft.rarityColor},${nft.rarityColor}88);color:${nft.rarityColor==='#FFD700'?'#000':'#fff'}">Enchérir π${minBid}+</button>
+            </div>
+          </div>`;
+        } else {
+          statusEl.innerHTML = supplyBar + `<div class="nft-status-zone" style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);text-align:center;font-size:11px;color:var(--muted)">🔒 Pas encore disponible · Drop décidé par le créateur</div>`;
+        }
       }
     });
 
-    // Bannière enchères gagnées non payées
     const p2pEl = document.getElementById('nftP2PList');
     if (!p2pEl) return;
     let html = '';
     if (wonUnpaid.length) {
-      html += `<div style="background:linear-gradient(135deg,rgba(255,45,120,.15),rgba(155,47,255,.15));border:1px solid rgba(255,45,120,.5);border-radius:12px;padding:12px;margin-bottom:12px">
-        <div style="font-size:12px;font-weight:700;color:#FF2D78;margin-bottom:8px">🏆 ENCHÈRE(S) GAGNÉE(S) — PAIEMENT REQUIS</div>
-        ${wonUnpaid.map(a=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px;background:rgba(0,0,0,.3);border-radius:8px;margin-bottom:4px">
-          <div><span style="font-size:18px">${a.nftEmoji}</span> <strong>${a.nftName}</strong> <span style="font-size:11px;color:var(--muted)">par ${a.sellerUsername}</span></div>
-          <button onclick="payWonAuction('${a.auctionId}','${a.nftName}',${a.currentBid})" style="padding:8px 14px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--orange),var(--pink));color:#fff;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">Payer π${a.currentBid}</button>
+      html += `<div style="background:linear-gradient(135deg,rgba(255,45,120,.15),rgba(155,47,255,.15));border:1px solid rgba(255,45,120,.5);border-radius:14px;padding:14px;margin-bottom:14px">
+        <div style="font-size:12px;font-weight:700;color:#FF2D78;margin-bottom:10px">🏆 ENCHÈRE(S) GAGNÉE(S) — PAIEMENT REQUIS</div>
+        ${wonUnpaid.map(a=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;background:rgba(0,0,0,.3);border-radius:10px;margin-bottom:6px">
+          <div><span style="font-size:20px">${a.nftEmoji}</span> <strong>${a.nftName}</strong><div style="font-size:11px;color:var(--muted)">par ${a.sellerUsername}</div></div>
+          <button onclick="payWonAuction('${a.auctionId}','${a.nftName}',${a.currentBid})" style="padding:8px 14px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--orange),var(--pink));color:#fff;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">Payer π${a.currentBid}</button>
         </div>`).join('')}
       </div>`;
     }
     const secondary = auctions.filter(a => !a.isCreatorDrop);
     if (!secondary.length && !wonUnpaid.length) {
-      p2pEl.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:16px">Aucune revente active pour l\'instant</div>';
+      p2pEl.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:24px 0">Aucune revente active pour l\'instant</div>';
       return;
     }
     html += secondary.map(a => {
@@ -2795,39 +2942,34 @@ function renderMarket() {
       const timeStr = h>0?`${h}h ${m}m`:`${m}m`;
       const urgent = tl < 3600000;
       const minBid = a.currentBid>0?(a.currentBid+0.1).toFixed(1):a.startPrice.toFixed(1);
-      let actionBtn = '';
-      if (isMine) {
-        actionBtn = a.currentBid > 0
-          ? `<div style="font-size:11px;color:var(--muted);padding:6px">En cours…</div>`
-          : `<button onclick="cancelAuctionFromProfile('${a.auctionId}')" style="padding:8px 14px;border-radius:10px;border:1px solid rgba(255,45,120,.4);background:rgba(255,45,120,.1);color:#FF2D78;font-size:12px;font-weight:700;cursor:pointer">✕ Annuler</button>`;
-      } else {
-        actionBtn = `<button onclick="openBidModal('${a.auctionId}','${a.nftName}','${a.nftEmoji}',${a.currentBid},${a.startPrice})" style="padding:8px 14px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff;font-size:12px;font-weight:700;cursor:pointer">🔨 π${minBid}+</button>`;
-      }
-      return `<div class="market-item" style="border-color:rgba(155,47,255,.4)${isLeading?';box-shadow:0 0 12px rgba(74,222,128,.3)':''}">
-        <div class="market-item-top">
-          <div class="market-item-emoji">${a.nftEmoji}</div>
-          <div class="market-item-info" style="flex:1">
-            <div class="market-item-name">${a.nftName} <span style="font-size:10px;padding:2px 6px;border-radius:6px;background:rgba(155,47,255,.2);color:#CC77FF;font-weight:700">${a.nftRarity}</span>${isLeading?'<span style="font-size:10px;padding:2px 6px;border-radius:6px;background:rgba(74,222,128,.2);color:var(--green);font-weight:700;margin-left:4px">🥇 TU MÈNES</span>':''}</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px">par ${a.sellerUsername}</div>
-            <div style="display:flex;gap:14px;margin-top:6px">
-              <div style="font-size:12px"><span style="color:var(--muted)">Offre :</span> <strong style="color:var(--gold)">${a.currentBid>0?'π'+a.currentBid:'—'}</strong></div>
-              <div style="font-size:12px">⏱ <strong style="color:${urgent?'var(--pink)':'var(--text)'}">${timeStr}</strong></div>
-            </div>
+      return `<div class="p2p-card" ${isLeading?'style="border-color:rgba(74,222,128,.45);box-shadow:0 0 14px rgba(74,222,128,.12)"':''}>
+        <div class="p2p-header">
+          <div class="p2p-emoji">${a.nftEmoji}</div>
+          <div style="flex:1">
+            <div class="p2p-name">${a.nftName} <span style="font-size:10px;padding:2px 7px;border-radius:6px;background:rgba(155,47,255,.18);color:#CC77FF;font-weight:700">${a.nftRarity}</span>${isLeading?'<span style="font-size:10px;padding:2px 6px;border-radius:6px;background:rgba(74,222,128,.18);color:var(--green);font-weight:700;margin-left:4px">🥇 TU MÈNES</span>':''}</div>
+            <div class="p2p-seller">par ${a.sellerUsername}</div>
           </div>
-          ${actionBtn}
+        </div>
+        <div class="p2p-footer">
+          <div style="display:flex;gap:16px">
+            <div><div style="font-size:10px;color:var(--muted)">Offre</div><div style="font-size:13px;font-weight:800;color:var(--gold)">${a.currentBid>0?'π'+a.currentBid:'—'}</div></div>
+            <div><div style="font-size:10px;color:var(--muted)">Temps</div><div style="font-size:13px;font-weight:800;color:${urgent?'var(--pink)':'var(--text)'}">${timeStr}</div></div>
+          </div>
+          ${isMine
+            ? (a.currentBid>0
+              ? `<div style="font-size:11px;color:var(--muted)">En cours…</div>`
+              : `<button onclick="cancelAuctionFromProfile('${a.auctionId}')" style="padding:8px 14px;border-radius:10px;border:1px solid rgba(255,45,120,.4);background:rgba(255,45,120,.1);color:#FF2D78;font-size:12px;font-weight:700;cursor:pointer">✕ Annuler</button>`)
+            : `<button onclick="openBidModal('${a.auctionId}','${a.nftName}','${a.nftEmoji}',${a.currentBid},${a.startPrice})" style="padding:8px 16px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff;font-size:12px;font-weight:700;cursor:pointer">🔨 π${minBid}+</button>`}
         </div>
       </div>`;
     }).join('');
     p2pEl.innerHTML = html;
   }).catch(() => {
     NFT_CATALOG.forEach(nft => {
-      const el = document.getElementById(`nft-status-${nft.id}`);
-      if (el) el.innerHTML = `<div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;margin-bottom:3px"></div><div style="font-size:10px;color:var(--muted);text-align:right;margin-bottom:4px">0/${nft.maxSupply} vendus</div><div style="font-size:11px;color:var(--muted);text-align:center;padding:6px">🔒 Backend hors ligne</div>`;
+      const statusEl = document.getElementById(`nft-status-${nft.id}`);
+      if (statusEl) statusEl.innerHTML = `<div class="nft-supply-bar"></div><div class="nft-supply-txt">0/${nft.maxSupply}</div><div class="nft-status-zone" style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);text-align:center;font-size:11px;color:var(--muted)">🔒 Backend hors ligne</div>`;
     });
   });
-  p2pHTML += `<div id="nftP2PList"><div style="text-align:center;color:var(--muted);font-size:12px;padding:16px">Chargement...</div></div>`;
-
-  el.innerHTML = s2Banner + seasonalHTML + standardHTML + neonHTML + nftHTML + p2pHTML;
 }
 
 function buyPiItem(itemId) {
