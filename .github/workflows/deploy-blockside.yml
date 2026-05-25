@@ -7,6 +7,7 @@ on:
       - main
     paths:
       - '_blockside_update/game/**'
+      - '_blockside_update/backend/**'
 
 jobs:
   deploy:
@@ -27,12 +28,13 @@ jobs:
       - name: Copy game files
         run: |
           cp Pi-eBook-Store/_blockside_update/game/index.html blockside-game/game/index.html
+          cp -r Pi-eBook-Store/_blockside_update/backend/. blockside-game/backend/
 
       - name: Commit and push
         run: |
           cd blockside-game
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add game/index.html
+          git add game/index.html backend/
           git diff --staged --quiet || git commit -m "chore: auto-deploy from Pi-eBook-Store [$(date +'%Y-%m-%d %H:%M')]"
           git push origin main
