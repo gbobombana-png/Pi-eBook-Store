@@ -1346,6 +1346,19 @@ const NFT_ITEMS = [
   {id:'nft_city',emoji:'🌆',name:'City Genesis NFT',desc:'Titre de propriétaire virtuel d\'un district BLOCKSIDE. Édition limitée.',price:10,rarity:'Mythic',rarityColor:'#FF2D78',effect:'nft'},
 ];
 
+// NFT réservé exclusivement au créateur — non achetable, non transférable
+const CREATOR_PI_USERNAME = 'Gael99';
+const CREATOR_NFT = {
+  nftId: 'nft_origin',
+  tokenId: 'BLK-NFT-ORIGIN-GAEL99-GENESIS-0001',
+  name: 'BLOCKSIDE Origin',
+  emoji: '🌌',
+  rarity: 'Genesis',
+  rarityColor: '#FFFFFF',
+  desc: 'NFT unique au monde. Seul le Créateur de BLOCKSIDE le possède.',
+  mintedAt: 1748131200000,
+};
+
 // Phase 6 — World expansion
 const PRESTIGE_TIERS = [
   {level:1,name:'Prestige I',bonus:'+15% tous les revenus',icon:'⭐',costRep:10000,costMoney:250000},
@@ -1581,6 +1594,15 @@ async function loginWithPi() {
     _piUid = auth.user.uid;
     updatePiAuthBadge();
     showToast('✅ Connecté : ' + state.username, 'success');
+
+    // NFT créateur — accordé uniquement au créateur de BLOCKSIDE
+    if (state.username === CREATOR_PI_USERNAME) {
+      if (!state.nftOwned) state.nftOwned = [];
+      if (!state.nftOwned.find(n => n.nftId === 'nft_origin')) {
+        state.nftOwned.push(CREATOR_NFT);
+        showToast('🌌 NFT ORIGIN accordé — tu es le Créateur.', 'success');
+      }
+    }
 
     try { await API.login(); } catch(_) {}
     let cloudSave = null;
@@ -2597,23 +2619,49 @@ function renderProfile() {
       <div style="font-size:13px;font-weight:700;margin-bottom:10px">🎨 Skins (${state.ownedSkins?.length||1}/${CHARACTER_SKINS.length})</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">${renderSkinsCompact(char.color)}</div>
     </div>
-    ${(state.nftOwned||[]).length > 0 ? `
-    <div style="margin:0 16px;background:var(--card);border-radius:16px;padding:16px;border:1px solid rgba(155,47,255,.4)">
-      <div style="font-size:13px;font-weight:700;margin-bottom:12px">🎨 NFT Collection <span style="font-size:11px;color:var(--muted);font-weight:400">${(state.nftOwned||[]).length}/${NFT_ITEMS.length}</span></div>
-      ${(state.nftOwned||[]).map(n=>{
-        const def = NFT_ITEMS.find(x=>x.id===n.nftId)||{emoji:'🎨',name:n.nftId,rarityColor:'#9B2FFF',rarity:'?'};
-        const ts = new Date(n.mintedAt).toLocaleDateString('fr-FR');
-        return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:${def.rarityColor}11;border-radius:12px;border:1px solid ${def.rarityColor}33;margin-bottom:8px">
-          <div style="font-size:28px">${def.emoji}</div>
-          <div style="flex:1">
-            <div style="font-size:13px;font-weight:700;color:${def.rarityColor}">${def.name}</div>
-            <div style="font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:3px;word-break:break-all">${n.tokenId}</div>
-            <div style="font-size:10px;color:var(--muted);margin-top:2px">Minté le ${ts}</div>
+    ${(()=>{
+      const nfts = state.nftOwned || [];
+      if (!nfts.length) return '';
+      const originNft = nfts.find(n=>n.nftId==='nft_origin');
+      const otherNfts = nfts.filter(n=>n.nftId!=='nft_origin');
+      const regularCount = otherNfts.length;
+      return `
+      ${originNft ? `
+      <div style="margin:0 16px;border-radius:16px;padding:2px;background:linear-gradient(135deg,#fff,#FFD700,#9B2FFF,#FF2D78,#2F9BFF,#fff)">
+        <div style="background:#0d0d1a;border-radius:14px;padding:16px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.4);margin-bottom:10px">✦ NFT EXCLUSIF CRÉATEUR ✦</div>
+          <div style="display:flex;align-items:center;gap:14px">
+            <div style="font-size:44px;filter:drop-shadow(0 0 12px rgba(255,255,255,.6))">${originNft.emoji}</div>
+            <div style="flex:1">
+              <div style="font-size:16px;font-weight:900;background:linear-gradient(135deg,#fff,#FFD700,#FF2D78);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:1px">${originNft.name}</div>
+              <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:3px">${originNft.desc}</div>
+              <div style="font-size:9px;color:rgba(255,255,255,.3);font-family:'Space Mono',monospace;margin-top:6px;word-break:break-all">${originNft.tokenId}</div>
+            </div>
           </div>
-          <span style="font-size:10px;padding:2px 6px;border-radius:6px;background:${def.rarityColor}22;color:${def.rarityColor};font-weight:700;white-space:nowrap">${def.rarity}</span>
-        </div>`;
-      }).join('')}
-    </div>` : ''}
+          <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:10px;color:rgba(255,255,255,.35)">Édition : 1 / 1 dans le monde</span>
+            <span style="font-size:10px;padding:3px 8px;border-radius:6px;background:linear-gradient(135deg,rgba(255,215,0,.2),rgba(255,45,120,.2));color:#FFD700;font-weight:700;border:1px solid rgba(255,215,0,.3)">✦ GENESIS</span>
+          </div>
+        </div>
+      </div>` : ''}
+      ${regularCount > 0 ? `
+      <div style="margin:12px 16px 0;background:var(--card);border-radius:16px;padding:16px;border:1px solid rgba(155,47,255,.4)">
+        <div style="font-size:13px;font-weight:700;margin-bottom:12px">🎨 NFT Collection <span style="font-size:11px;color:var(--muted);font-weight:400">${regularCount}/${NFT_ITEMS.length}</span></div>
+        ${otherNfts.map(n=>{
+          const def = NFT_ITEMS.find(x=>x.id===n.nftId)||{emoji:'🎨',name:n.nftId,rarityColor:'#9B2FFF',rarity:'?'};
+          const ts = new Date(n.mintedAt).toLocaleDateString('fr-FR');
+          return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:${def.rarityColor}11;border-radius:12px;border:1px solid ${def.rarityColor}33;margin-bottom:8px">
+            <div style="font-size:28px">${def.emoji}</div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:700;color:${def.rarityColor}">${def.name}</div>
+              <div style="font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:3px;word-break:break-all">${n.tokenId}</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px">Minté le ${ts}</div>
+            </div>
+            <span style="font-size:10px;padding:2px 6px;border-radius:6px;background:${def.rarityColor}22;color:${def.rarityColor};font-weight:700;white-space:nowrap">${def.rarity}</span>
+          </div>`;
+        }).join('')}
+      </div>` : ''}`;
+    })()}
     <button class="share-btn" style="--cc:${char.color}" onclick="shareProfile()">📤 Partager mon profil</button>
     ${!state.piAuthenticated ? `
     <button onclick="loginWithPi()" style="width:calc(100% - 32px);margin:0 16px 8px;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#9B2FFF,#FF2D78);color:#fff;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
