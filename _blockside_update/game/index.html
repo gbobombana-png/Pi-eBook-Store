@@ -1491,16 +1491,20 @@ const API = {
     return await this.get('/events');
   },
 
-  async getNFTListings() {
-    return await this.get('/nft/listings');
+  async getNFTAuctions() {
+    return await this.get('/nft/auctions');
   },
 
-  async listNFT(nftId, tokenId, nftName, nftEmoji, nftRarity, price) {
-    return await this.post('/nft/list', { nftId, tokenId, nftName, nftEmoji, nftRarity, price });
+  async createAuction(nftId, tokenId, nftName, nftEmoji, nftRarity, startPrice, durationHours) {
+    return await this.post('/nft/auction', { nftId, tokenId, nftName, nftEmoji, nftRarity, startPrice, durationHours });
   },
 
-  async delistNFT(listingId) {
-    return await this.post('/nft/delist', { listingId });
+  async placeBid(auctionId, amount) {
+    return await this.post('/nft/bid', { auctionId, amount });
+  },
+
+  async cancelAuction(auctionId) {
+    return await this.post('/nft/auction/cancel', { auctionId });
   },
 };
 
@@ -1584,70 +1588,118 @@ function getNFTRepBonus() {
   return mult;
 }
 
-function openSellNFTModal(nftId, tokenId, nftName, nftEmoji, nftRarity) {
-  const existing = document.getElementById('sellNFTModal');
+function openAuctionModal(nftId, tokenId, nftName, nftEmoji, nftRarity, rarityColor) {
+  const existing = document.getElementById('auctionModal');
   if (existing) existing.remove();
   const overlay = document.createElement('div');
-  overlay.id = 'sellNFTModal';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px';
+  overlay.id = 'auctionModal';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px';
   const box = document.createElement('div');
-  box.style.cssText = 'background:#1a1a2e;border:1px solid rgba(155,47,255,.5);border-radius:20px;padding:24px;max-width:320px;width:100%';
-  box.innerHTML = `<div style="font-size:32px;text-align:center;margin-bottom:8px">${nftEmoji}</div>
-    <div style="font-size:16px;font-weight:800;text-align:center;margin-bottom:4px">${nftName}</div>
-    <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:16px">${nftRarity}</div>
-    <div style="font-size:13px;font-weight:700;margin-bottom:8px">Prix de vente (en π)</div>
-    <input id="sellNFTPrice" type="number" min="0.1" step="0.1" placeholder="ex: 5.0" style="width:100%;padding:12px;border-radius:10px;border:1px solid rgba(155,47,255,.4);background:rgba(155,47,255,.1);color:#fff;font-size:16px;font-family:inherit;box-sizing:border-box">
-    <div style="font-size:11px;color:var(--muted);margin-top:6px;margin-bottom:16px">Tu recevras l'équivalent en NEON (1π = 1000 NEON)</div>
+  box.style.cssText = 'background:#1a1a2e;border:1px solid '+rarityColor+'66;border-radius:20px;padding:24px;max-width:320px;width:100%';
+  box.innerHTML = `
+    <div style="text-align:center;margin-bottom:12px">
+      <div style="font-size:40px">${nftEmoji}</div>
+      <div style="font-size:16px;font-weight:800;margin-top:6px">${nftName}</div>
+      <div style="font-size:11px;color:${rarityColor};font-weight:700;margin-top:2px">${nftRarity}</div>
+    </div>
+    <div style="background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.2);border-radius:10px;padding:10px;font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.6">
+      🏦 <strong style="color:var(--gold)">Frais plateforme : 10%</strong><br>
+      Tu recevras <strong>90% du prix final</strong> en NEON (1π = 1000 NEON)
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;margin-bottom:6px">Prix de départ (π)</div>
+      <input id="auctionStartPrice" type="number" min="0.1" step="0.1" placeholder="ex: 2.0" style="width:100%;padding:10px;border-radius:10px;border:1px solid rgba(155,47,255,.4);background:rgba(155,47,255,.1);color:#fff;font-size:15px;font-family:inherit;box-sizing:border-box">
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;font-weight:700;margin-bottom:6px">Durée</div>
+      <div style="display:flex;gap:6px">
+        <button class="dur-btn" data-h="24" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(155,47,255,.4);background:transparent;color:rgba(255,255,255,.7);font-size:12px;cursor:pointer;font-family:inherit">24h</button>
+        <button class="dur-btn" data-h="48" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(155,47,255,.4);background:transparent;color:rgba(255,255,255,.7);font-size:12px;cursor:pointer;font-family:inherit">48h</button>
+        <button class="dur-btn" data-h="72" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(155,47,255,.4);background:transparent;color:rgba(255,255,255,.7);font-size:12px;cursor:pointer;font-family:inherit">72h</button>
+      </div>
+    </div>
     <div style="display:flex;gap:10px">
-      <button id="sellNFTCancel" style="flex:1;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.7);font-size:13px;cursor:pointer;font-family:inherit">Annuler</button>
-      <button id="sellNFTConfirm" style="flex:1;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#9B2FFF,#FF2D78);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Mettre en vente</button>
+      <button id="auctionCancel" style="flex:1;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.7);font-size:13px;cursor:pointer;font-family:inherit">Annuler</button>
+      <button id="auctionConfirm" style="flex:1;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,${rarityColor},${rarityColor}88);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🔨 Lancer</button>
     </div>`;
   overlay.appendChild(box);
   document.body.appendChild(overlay);
-  document.getElementById('sellNFTCancel').addEventListener('click', () => overlay.remove());
-  document.getElementById('sellNFTConfirm').addEventListener('click', async () => {
-    const price = parseFloat(document.getElementById('sellNFTPrice').value);
-    if (!price || price < 0.1) { showToast('Prix invalide (min 0.1π)', 'error'); return; }
-    const nft = (state.nftOwned||[]).find(n=>n.nftId===nftId&&n.tokenId===tokenId);
-    if (!nft) { showToast('NFT introuvable', 'error'); overlay.remove(); return; }
-    const res = await API.listNFT(nftId, tokenId, nftName, nftEmoji, nftRarity, price);
+
+  let selectedDuration = 24;
+  box.querySelectorAll('.dur-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedDuration = parseInt(btn.dataset.h);
+      box.querySelectorAll('.dur-btn').forEach(b => b.style.background = 'transparent');
+      btn.style.background = rarityColor + '44';
+      btn.style.color = '#fff';
+    });
+  });
+  document.getElementById('auctionCancel').addEventListener('click', () => overlay.remove());
+  document.getElementById('auctionConfirm').addEventListener('click', async () => {
+    const startPrice = parseFloat(document.getElementById('auctionStartPrice').value);
+    if (!startPrice || startPrice < 0.1) { showToast('Prix invalide (min 0.1π)', 'error'); return; }
+    const res = await API.createAuction(nftId, tokenId, nftName, nftEmoji, nftRarity, startPrice, selectedDuration);
     if (res?.success) {
-      nft.listed = true;
-      nft.listingPrice = price;
-      nft.listingId = res.listing.listingId;
+      const nft = (state.nftOwned||[]).find(n=>n.nftId===nftId&&n.tokenId===tokenId);
+      if (nft) { nft.listed = true; nft.listingPrice = startPrice; nft.auctionId = res.auction.auctionId; }
       saveGame();
       overlay.remove();
-      showToast(`🎨 ${nftName} mis en vente pour π${price}`, 'success');
+      showToast(`🔨 Enchère lancée : ${nftName} à partir de π${startPrice}`, 'success');
       renderProfile();
     } else {
-      showToast(res?.error || 'Erreur lors de la mise en vente', 'error');
+      showToast(res?.error || 'Erreur lors du lancement', 'error');
     }
   });
 }
 
-async function delistNFT(nftId) {
-  const nft = (state.nftOwned||[]).find(n=>n.nftId===nftId&&n.listed);
-  if (!nft?.listingId) return;
-  const res = await API.delistNFT(nft.listingId);
+async function cancelAuctionFromProfile(auctionId) {
+  const res = await API.cancelAuction(auctionId);
   if (res?.success) {
-    nft.listed = false; nft.listingPrice = 0; nft.listingId = null;
+    const nft = (state.nftOwned||[]).find(n=>n.auctionId===auctionId);
+    if (nft) { nft.listed = false; nft.listingPrice = 0; nft.auctionId = null; }
     saveGame();
-    showToast('NFT retiré de la vente', 'success');
+    showToast('Enchère annulée', 'success');
     renderProfile();
-  } else { showToast('Erreur lors du retrait', 'error'); }
+  } else { showToast(res?.error || 'Impossible d\'annuler (offres existantes)', 'error'); }
 }
 
-async function delistNFTFromMarket(listingId) {
-  const nft = (state.nftOwned||[]).find(n=>n.listingId===listingId);
-  if (nft) { nft.listed = false; nft.listingPrice = 0; nft.listingId = null; saveGame(); }
-  await API.delistNFT(listingId);
-  showToast('NFT retiré de la vente', 'success');
-  renderMarket();
+function openBidModal(auctionId, nftName, nftEmoji, currentBid, startPrice) {
+  const minBid = currentBid > 0 ? (currentBid + 0.1).toFixed(1) : startPrice;
+  const existing = document.getElementById('bidModal');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'bidModal';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px';
+  const box = document.createElement('div');
+  box.style.cssText = 'background:#1a1a2e;border:1px solid rgba(155,47,255,.5);border-radius:20px;padding:24px;max-width:300px;width:100%';
+  box.innerHTML = `
+    <div style="text-align:center;font-size:32px;margin-bottom:8px">${nftEmoji}</div>
+    <div style="font-size:15px;font-weight:800;text-align:center;margin-bottom:14px">${nftName}</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Offre minimum : <strong style="color:var(--gold)">π${minBid}</strong></div>
+    <input id="bidAmount" type="number" min="${minBid}" step="0.1" placeholder="π${minBid}" style="width:100%;padding:10px;border-radius:10px;border:1px solid rgba(155,47,255,.4);background:rgba(155,47,255,.1);color:#fff;font-size:15px;font-family:inherit;box-sizing:border-box;margin-bottom:6px">
+    <div style="font-size:10px;color:var(--muted);margin-bottom:14px">Ton offre est une promesse de paiement. Si tu gagnes, Pi sera débité.</div>
+    <div style="display:flex;gap:10px">
+      <button id="bidCancel" style="flex:1;padding:11px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.7);font-size:13px;cursor:pointer;font-family:inherit">Annuler</button>
+      <button id="bidConfirm" style="flex:1;padding:11px;border-radius:10px;border:none;background:linear-gradient(135deg,#9B2FFF,#FFD700);color:#000;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit">🔨 Enchérir</button>
+    </div>`;
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  document.getElementById('bidCancel').addEventListener('click', () => overlay.remove());
+  document.getElementById('bidConfirm').addEventListener('click', async () => {
+    const amount = parseFloat(document.getElementById('bidAmount').value);
+    if (!amount || amount < parseFloat(minBid)) { showToast(`Offre minimum π${minBid}`, 'error'); return; }
+    const res = await API.placeBid(auctionId, amount);
+    if (res?.success) {
+      overlay.remove();
+      showToast(`🔨 Offre de π${amount} placée !`, 'success');
+      renderMarket();
+    } else { showToast(res?.error || 'Erreur enchère', 'error'); }
+  });
 }
 
-async function buyListedNFT(listingId, nftName, price) {
-  if (!isPiAvailable()) { showToast('Pi Browser requis pour acheter un NFT', 'error'); return; }
-  paymentItem = { id: `nft_trade_${listingId}`, name: nftName, emoji: '🎨', price, effect: 'nft_trade', listingId };
+async function payWonAuction(auctionId, nftName, price) {
+  if (!isPiAvailable()) { showToast('Pi Browser requis', 'error'); return; }
+  paymentItem = { id: `nft_auction_${auctionId}`, name: `Enchère gagnée : ${nftName}`, emoji: '🏆', price, effect: 'nft_auction', auctionId };
   showPaymentModal('confirm');
   openModal('paymentModal');
 }
@@ -2557,37 +2609,69 @@ function renderMarket() {
       </div>`;
     }).join('');
 
-  // Section Marché P2P
-  let p2pHTML = `<div class="section-title mb8 mt4">🔄 Marché P2P <span class="flash-badge">NFT</span></div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;padding:0 2px">NFTs mis en vente par les joueurs · Tu reçois des NEON à la vente</div>`;
-  API.getNFTListings().then(res => {
-    const listings = res?.listings || [];
+  // Section Enchères NFT P2P
+  let p2pHTML = `<div class="section-title mb8 mt4">🔨 Enchères NFT <span class="flash-badge">P2P</span></div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;padding:0 2px">Enchères en temps réel · Vendeur reçoit 90% en NEON · 10% commission plateforme</div>`;
+  API.getNFTAuctions().then(res => {
+    const auctions = res?.auctions || [];
+    const wonUnpaid = res?.wonUnpaid || [];
     const p2pEl = document.getElementById('nftP2PList');
     if (!p2pEl) return;
-    if (!listings.length) {
-      p2pEl.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:16px">Aucun NFT en vente pour l\'instant</div>';
+    let html = '';
+    // Bannière enchères gagnées non payées
+    if (wonUnpaid.length) {
+      html += `<div style="background:linear-gradient(135deg,rgba(255,45,120,.15),rgba(155,47,255,.15));border:1px solid rgba(255,45,120,.5);border-radius:12px;padding:12px;margin-bottom:12px">
+        <div style="font-size:12px;font-weight:700;color:#FF2D78;margin-bottom:8px">🏆 ENCHÈRE(S) GAGNÉE(S) — PAIEMENT REQUIS</div>
+        ${wonUnpaid.map(a => `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px;background:rgba(0,0,0,.3);border-radius:8px;margin-bottom:4px">
+          <div><span style="font-size:18px">${a.nftEmoji}</span> <strong>${a.nftName}</strong> <span style="font-size:11px;color:var(--muted)">par ${a.sellerUsername}</span></div>
+          <button onclick="payWonAuction('${a.auctionId}','${a.nftName}',${a.currentBid})" style="padding:8px 14px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--orange),var(--pink));color:#fff;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">Payer π${a.currentBid}</button>
+        </div>`).join('')}
+      </div>`;
+    }
+    if (!auctions.length && !wonUnpaid.length) {
+      p2pEl.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:16px">Aucune enchère active pour l\'instant</div>';
       return;
     }
-    p2pEl.innerHTML = listings.map(l => {
-      const isMine = l.sellerUid === _piUid;
-      return `<div class="market-item" style="border-color:rgba(155,47,255,.4)">
+    html += auctions.map(a => {
+      const isMine = a.sellerUid === _piUid;
+      const isLeading = a.currentBidder === _piUid;
+      const tl = Math.max(0, a.timeLeft);
+      const hours = Math.floor(tl / 3600000);
+      const mins = Math.floor((tl % 3600000) / 60000);
+      const timeStr = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+      const urgent = tl < 3600000;
+      const minBid = a.currentBid > 0 ? (a.currentBid + 0.1).toFixed(1) : a.startPrice.toFixed(1);
+      let actionBtn = '';
+      if (isMine) {
+        actionBtn = a.currentBid > 0
+          ? `<div style="font-size:11px;color:var(--muted);padding:6px">En cours…</div>`
+          : `<button onclick="cancelAuctionFromProfile('${a.auctionId}')" style="padding:8px 14px;border-radius:10px;border:1px solid rgba(255,45,120,.4);background:rgba(255,45,120,.1);color:#FF2D78;font-size:12px;font-weight:700;cursor:pointer">✕ Annuler</button>`;
+      } else {
+        actionBtn = `<button onclick="openBidModal('${a.auctionId}','${a.nftName}','${a.nftEmoji}',${a.currentBid},${a.startPrice})" style="padding:8px 14px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff;font-size:12px;font-weight:700;cursor:pointer">🔨 π${minBid}+</button>`;
+      }
+      return `<div class="market-item" style="border-color:rgba(155,47,255,.4)${isLeading ? ';box-shadow:0 0 12px rgba(74,222,128,.3)' : ''}">
         <div class="market-item-top">
-          <div class="market-item-emoji">${l.nftEmoji}</div>
-          <div class="market-item-info">
-            <div class="market-item-name">${l.nftName} <span style="font-size:10px;padding:2px 6px;border-radius:6px;background:rgba(155,47,255,.2);color:#CC77FF;font-weight:700">${l.nftRarity}</span></div>
-            <div class="market-item-desc" style="font-size:9px;font-family:'Space Mono',monospace;margin-top:2px">${l.tokenId}</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:4px">Vendeur : ${l.sellerUsername}</div>
+          <div class="market-item-emoji">${a.nftEmoji}</div>
+          <div class="market-item-info" style="flex:1">
+            <div class="market-item-name">${a.nftName}
+              <span style="font-size:10px;padding:2px 6px;border-radius:6px;background:rgba(155,47,255,.2);color:#CC77FF;font-weight:700">${a.nftRarity}</span>
+              ${isLeading ? '<span style="font-size:10px;padding:2px 6px;border-radius:6px;background:rgba(74,222,128,.2);color:var(--green);font-weight:700;margin-left:4px">🥇 TU MÈNES</span>' : ''}
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">par ${a.sellerUsername}</div>
+            <div style="display:flex;gap:14px;margin-top:6px;align-items:center">
+              <div style="font-size:12px"><span style="color:var(--muted)">Offre :</span> <strong style="color:var(--gold)">${a.currentBid > 0 ? 'π' + a.currentBid : '—'}</strong></div>
+              <div style="font-size:12px">⏱ <strong style="color:${urgent ? 'var(--pink)' : 'var(--text)'}">${timeStr}</strong></div>
+            </div>
           </div>
-        </div>
-        <div class="market-item-price">
-          <div class="pi-price"><span class="pi-symbol">π</span>${l.price}</div>
-          ${isMine
-            ? `<button onclick="delistNFTFromMarket('${l.listingId}')" style="padding:8px 14px;border-radius:10px;border:1px solid rgba(255,45,120,.4);background:rgba(255,45,120,.1);color:#FF2D78;font-size:12px;font-weight:700;cursor:pointer">Retirer</button>`
-            : `<button class="buy-pi-btn" onclick="buyListedNFT('${l.listingId}','${l.nftName}',${l.price})">Acheter π${l.price}</button>`}
+          ${actionBtn}
         </div>
       </div>`;
     }).join('');
-  }).catch(() => {});
+    p2pEl.innerHTML = html;
+  }).catch(() => {
+    const el = document.getElementById('nftP2PList');
+    if (el) el.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:16px">Enchères indisponibles (backend hors ligne)</div>';
+  });
   p2pHTML += `<div id="nftP2PList"><div style="text-align:center;color:var(--muted);font-size:12px;padding:16px">Chargement...</div></div>`;
 
   el.innerHTML = s2Banner + seasonalHTML + standardHTML + neonHTML + nftHTML + p2pHTML;
@@ -2632,6 +2716,8 @@ function showPaymentModal(state_name) {
       const mintedNft = (state.nftOwned||[]).find(n=>n.nftId===paymentItem.id);
       successDesc = `${paymentItem.name} minté avec succès !`;
       successExtra = mintedNft ? `<div style="font-size:10px;color:var(--muted);margin-top:8px;font-family:'Space Mono',monospace;word-break:break-all">${mintedNft.tokenId}</div>` : '';
+    } else if (paymentItem.effect === 'nft_auction') {
+      successDesc = `NFT transféré dans ton inventaire ! Le vendeur a reçu 90% en NEON.`;
     } else {
       successDesc = `${paymentItem.name} est maintenant actif !`;
     }
@@ -2671,8 +2757,10 @@ async function processPiPayment() {
             if (!state.nftOwned.find(n=>n.nftId===paymentItem.id)) {
               state.nftOwned.push({nftId:paymentItem.id, tokenId, mintedAt:Date.now(), txid});
             }
+          } else if (paymentItem.effect === 'nft_auction') {
+            // Backend a transféré le NFT via enchère — recharger depuis le cloud
+            try { const s = await API.pullSave(); if (s?.nftOwned) state.nftOwned = s.nftOwned; if (s?.neonBalance !== undefined) state.neonBalance = s.neonBalance; } catch(_) {}
           } else if (paymentItem.effect === 'nft_trade') {
-            // Le backend a transféré le NFT — on recharge la sauvegarde cloud
             try { const s = await API.pullSave(); if (s?.nftOwned) state.nftOwned = s.nftOwned; } catch(_) {}
           } else {
             if (!state.premiumOwned.includes(paymentItem.id)) state.premiumOwned.push(paymentItem.id);
@@ -2858,9 +2946,9 @@ function renderProfile() {
             </div>
             <div style="padding:0 10px 10px;display:flex;gap:6px">
               ${isListed
-                ? `<button onclick="delistNFT('${n.nftId}')" style="flex:1;padding:7px;border-radius:8px;border:1px solid rgba(255,45,120,.4);background:rgba(255,45,120,.1);color:#FF2D78;font-size:11px;font-weight:700;cursor:pointer">✕ Retirer la vente</button>
-                   <div style="flex:1;padding:7px;border-radius:8px;background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.3);color:var(--gold);font-size:11px;font-weight:700;text-align:center">π${n.listingPrice} en vente</div>`
-                : `<button onclick="openSellNFTModal('${n.nftId}','${n.tokenId}','${def.name}','${def.emoji}','${def.rarity}')" style="flex:1;padding:7px;border-radius:8px;border:none;background:linear-gradient(135deg,${def.rarityColor},${def.rarityColor}88);color:#fff;font-size:11px;font-weight:700;cursor:pointer">💰 Mettre en vente</button>`}
+                ? `<button onclick="cancelAuctionFromProfile('${n.auctionId}')" style="flex:1;padding:7px;border-radius:8px;border:1px solid rgba(255,45,120,.4);background:rgba(255,45,120,.1);color:#FF2D78;font-size:11px;font-weight:700;cursor:pointer">✕ Annuler enchère</button>
+                   <div style="flex:1;padding:7px;border-radius:8px;background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.3);color:var(--gold);font-size:11px;font-weight:700;text-align:center">🔨 π${n.listingPrice}+ en cours</div>`
+                : `<button onclick="openAuctionModal('${n.nftId}','${n.tokenId}','${def.name}','${def.emoji}','${def.rarity}','${def.rarityColor}')" style="flex:1;padding:7px;border-radius:8px;border:none;background:linear-gradient(135deg,${def.rarityColor},${def.rarityColor}88);color:#fff;font-size:11px;font-weight:700;cursor:pointer">🔨 Mettre aux enchères</button>`}
             </div>
           </div>`;
         }).join('')}
