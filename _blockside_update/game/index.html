@@ -711,6 +711,35 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
 .p2p-seller{font-size:11px;color:var(--muted);margin-top:2px}
 .p2p-footer{display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid rgba(255,255,255,.06)}
 
+/* ===== VFX — BUTTON RIPPLE ===== */
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.22);transform:scale(0);animation:ripple-out .55s ease-out forwards;pointer-events:none;z-index:10}
+@keyframes ripple-out{to{transform:scale(5);opacity:0}}
+
+/* ===== VFX — NFT CARD SHINE ===== */
+.nft-hero{overflow:hidden}
+.nft-hero::after{content:'';position:absolute;top:0;left:-120%;width:55%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.055),transparent);animation:nft-shine 5s ease-in-out infinite;pointer-events:none;z-index:3}
+@keyframes nft-shine{0%,65%{left:-120%}100%{left:220%}}
+
+/* ===== VFX — INCOME READY GLOW ===== */
+@keyframes income-ready{0%,100%{box-shadow:0 0 0 0 rgba(74,222,128,0),inset 0 0 0 0 rgba(74,222,128,0)}55%{box-shadow:0 0 0 5px rgba(74,222,128,.2),inset 0 0 14px rgba(74,222,128,.1)}}
+.slot.income-ready{animation:income-ready 2s ease-in-out infinite;border-color:rgba(74,222,128,.35)!important}
+
+/* ===== VFX — BUILD FLASH ===== */
+@keyframes build-flash{0%{transform:scale(.88);opacity:.6}50%{transform:scale(1.06);box-shadow:0 0 24px rgba(255,107,26,.6)}100%{transform:scale(1);opacity:1;box-shadow:none}}
+.slot.just-built{animation:build-flash .6s cubic-bezier(.22,1,.36,1)}
+
+/* ===== VFX — HUD STAT POP ===== */
+@keyframes stat-pop{0%{transform:scale(1)}35%{transform:scale(1.22);color:var(--gold)}70%{transform:scale(.96)}100%{transform:scale(1)}}
+.popping{animation:stat-pop .38s ease}
+
+/* ===== VFX — NEON BURST ===== */
+.neon-burst-pt{position:fixed;pointer-events:none;z-index:9999;font-weight:800;font-family:'Space Mono',monospace;text-shadow:0 0 10px currentColor;animation:neon-burst .85s ease-out forwards}
+@keyframes neon-burst{0%{opacity:1;transform:translate(0,0) scale(1.1)}100%{opacity:0;transform:translate(var(--bx),var(--by)) scale(.7)}}
+
+/* ===== VFX — DISTRICT PRESS ===== */
+.district-card:active{transform:scale(.97)}
+.slot:active{transform:scale(.94)}
+
 /* ===== DROP ALERT OVERLAY ===== */
 #dropAlertOverlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.88);backdrop-filter:blur(14px);opacity:0;pointer-events:none;transition:opacity .4s}
 #dropAlertOverlay.active{opacity:1;pointer-events:all}
@@ -2147,9 +2176,11 @@ function buyBuilding(districtId, buildingId, slotIndex) {
   checkDistrictUnlocks();
   checkAchievements();
   saveGame();
-  Sound.play('build');
+  SFX.play('build');
   closeModal('buildModal');
   renderDistrictView(districtId);
+  const _newSlot = document.getElementById('buildingGrid')?.children[slotIndex];
+  if (_newSlot) { _newSlot.classList.add('just-built'); _newSlot.addEventListener('animationend', () => _newSlot.classList.remove('just-built'), {once:true}); }
   updateHUDStats();
   showToast('✅ ' + def.name + ' construit!', 'success');
 }
@@ -2169,7 +2200,7 @@ function upgradeBuilding(districtId, slotIndex) {
   trackMission('upgrade', 1);
   checkAchievements();
   saveGame();
-  Sound.play('upgrade');
+  SFX.play('upgrade');
   closeModal('detailModal');
   renderDistrictView(districtId);
   updateHUDStats();
@@ -2389,11 +2420,19 @@ function updateHUDStats() {
   if(el('hubUsername')) el('hubUsername').textContent = state.username;
   if(el('hubRepTitle')) { el('hubRepTitle').textContent = getRepTitle(state.rep); el('hubRepTitle').style.color = char.color; }
   updatePiAuthBadge();
-  if(el('hubMoney')) el('hubMoney').textContent = fmt(state.money);
-  if(el('hubRep')) el('hubRep').textContent = fmt(state.rep);
+  if(el('hubMoney')) {
+    if (state.money > _prevMoney) popStat('hubMoney');
+    el('hubMoney').textContent = fmt(state.money);
+  }
+  if(el('hubRep')) {
+    if (state.rep > _prevRep) popStat('hubRep');
+    el('hubRep').textContent = fmt(state.rep);
+  }
   if(el('hubBuildings')) el('hubBuildings').textContent = state.totalBuildings;
   if(el('hubNeon')) el('hubNeon').textContent = fmt(state.neonBalance || 0);
   if(el('hubPendingIncome')) el('hubPendingIncome').textContent = fmt(getTotalPendingIncome());
+  _prevMoney = state.money;
+  _prevRep = state.rep;
 }
 
 function addActivity(text) {
@@ -2483,7 +2522,7 @@ function renderDistrictView(districtId) {
     if (b) {
       const def = BUILDINGS.find(x=>x.id===b.buildingId);
       const pend = calcPendingIncome(b);
-      slot.className = 'slot occupied';
+      slot.className = 'slot occupied' + (pend>0?' income-ready':'');
       slot.innerHTML = `
         ${pend>0?'<div class="slot-income-dot"></div>':''}
         <div class="slot-emoji">${def?def.emoji:'🏗️'}</div>
@@ -4279,6 +4318,52 @@ function toggleSound() { SFX.toggle(); }
 
 // ── VIBRATION ─────────────────────────────────────────────────
 function vib(ms=20) { if (navigator.vibrate) navigator.vibrate(ms); }
+
+// ── RIPPLE ────────────────────────────────────────────────────
+(function initRipple() {
+  const TARGETS = '.btn,.buy-pi-btn,.prem-buy-btn,.nft-bid-btn,.drop-alert-cta,.quick-btn,.nav-item,.district-card,.slot,.mkt-tab,.neon-card,.prem-card,.faction-card';
+  document.addEventListener('pointerdown', e => {
+    const el = e.target.closest(TARGETS);
+    if (!el) return;
+    const style = getComputedStyle(el);
+    if (style.position === 'static') el.style.position = 'relative';
+    const r = document.createElement('span');
+    r.className = 'ripple';
+    const rect = el.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height) * 1.5;
+    r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+    el.appendChild(r);
+    r.addEventListener('animationend', () => r.remove());
+  }, { passive: true });
+})();
+
+// ── NEON BURST ────────────────────────────────────────────────
+function spawnNeonBurst(x, y, amount) {
+  const count = Math.min(6, Math.ceil(Math.log10(amount + 1)) + 1);
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'neon-burst-pt';
+      const angle = (Math.random() * 260 - 130) * (Math.PI / 180);
+      const dist = 40 + Math.random() * 60;
+      el.style.cssText = `left:${x}px;top:${y}px;font-size:${12+Math.random()*6}px;color:#2F9BFF;--bx:${Math.cos(angle)*dist}px;--by:${-Math.abs(Math.sin(angle)*dist)-20}px;animation-delay:${i*0.06}s`;
+      el.textContent = `+${Math.floor(amount / count)}⚡`;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1000);
+    }, i * 50);
+  }
+}
+
+// ── HUD STAT POP ──────────────────────────────────────────────
+let _prevMoney = 0, _prevRep = 0;
+function popStat(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove('popping');
+  void el.offsetWidth;
+  el.classList.add('popping');
+  el.addEventListener('animationend', () => el.classList.remove('popping'), { once: true });
+}
 
 // ── FLOAT TEXT ────────────────────────────────────────────────
 let _comboCount = 0, _comboTimer = null;
