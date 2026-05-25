@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: blockside-api
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: .
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PI_API_KEY
+        sync: false
+      - key: ALLOWED_ORIGINS
+        value: https://gbobombana-png.github.io
