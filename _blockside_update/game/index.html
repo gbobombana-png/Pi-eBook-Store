@@ -1348,6 +1348,7 @@ const NFT_ITEMS = [
 
 // NFT réservé exclusivement au créateur — non achetable, non transférable
 const CREATOR_PI_USERNAME = 'Gael99';
+const CREATOR_PI_UID = '64585852-7e08-42ff-a02d-1f74152b2423';
 const CREATOR_NFT = {
   nftId: 'nft_origin',
   tokenId: 'BLK-NFT-ORIGIN-GAEL99-GENESIS-0001',
@@ -1433,16 +1434,23 @@ const API = {
     return h;
   },
 
+  _fetch(url, options = {}) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 4000);
+    return fetch(url, { ...options, signal: ctrl.signal })
+      .finally(() => clearTimeout(timer));
+  },
+
   async post(path, body) {
     try {
-      const r = await fetch(API_BASE + path, { method:'POST', headers:this._headers(), body:JSON.stringify(body) });
+      const r = await this._fetch(API_BASE + path, { method:'POST', headers:this._headers(), body:JSON.stringify(body) });
       return await r.json();
     } catch { return null; }
   },
 
   async get(path) {
     try {
-      const r = await fetch(API_BASE + path, { headers:this._headers() });
+      const r = await this._fetch(API_BASE + path, { headers:this._headers() });
       return await r.json();
     } catch { return null; }
   },
@@ -1595,8 +1603,8 @@ async function loginWithPi() {
     updatePiAuthBadge();
     showToast('✅ Connecté : ' + state.username, 'success');
 
-    // NFT créateur — accordé uniquement au créateur de BLOCKSIDE
-    if (state.username === CREATOR_PI_USERNAME) {
+    // NFT créateur — accordé uniquement au créateur de BLOCKSIDE (vérifié par UID + username)
+    if (state.username === CREATOR_PI_USERNAME && _piUid === CREATOR_PI_UID) {
       if (!state.nftOwned) state.nftOwned = [];
       if (!state.nftOwned.find(n => n.nftId === 'nft_origin')) {
         state.nftOwned.push(CREATOR_NFT);
