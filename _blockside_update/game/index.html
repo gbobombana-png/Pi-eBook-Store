@@ -1490,6 +1490,18 @@ const API = {
   async getEvents() {
     return await this.get('/events');
   },
+
+  async getNFTListings() {
+    return await this.get('/nft/listings');
+  },
+
+  async listNFT(nftId, tokenId, nftName, nftEmoji, nftRarity, price) {
+    return await this.post('/nft/list', { nftId, tokenId, nftName, nftEmoji, nftRarity, price });
+  },
+
+  async delistNFT(listingId) {
+    return await this.post('/nft/delist', { listingId });
+  },
 };
 
 // ============================================================
@@ -1570,6 +1582,74 @@ function getNFTRepBonus() {
   if (hasNFT('nft_legend'))  mult += 0.30;  // +30% rep
   if (hasNFT('nft_origin'))  mult *= 2;     // ×2 tout
   return mult;
+}
+
+function openSellNFTModal(nftId, tokenId, nftName, nftEmoji, nftRarity) {
+  const existing = document.getElementById('sellNFTModal');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'sellNFTModal';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px';
+  const box = document.createElement('div');
+  box.style.cssText = 'background:#1a1a2e;border:1px solid rgba(155,47,255,.5);border-radius:20px;padding:24px;max-width:320px;width:100%';
+  box.innerHTML = `<div style="font-size:32px;text-align:center;margin-bottom:8px">${nftEmoji}</div>
+    <div style="font-size:16px;font-weight:800;text-align:center;margin-bottom:4px">${nftName}</div>
+    <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:16px">${nftRarity}</div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:8px">Prix de vente (en π)</div>
+    <input id="sellNFTPrice" type="number" min="0.1" step="0.1" placeholder="ex: 5.0" style="width:100%;padding:12px;border-radius:10px;border:1px solid rgba(155,47,255,.4);background:rgba(155,47,255,.1);color:#fff;font-size:16px;font-family:inherit;box-sizing:border-box">
+    <div style="font-size:11px;color:var(--muted);margin-top:6px;margin-bottom:16px">Tu recevras l'équivalent en NEON (1π = 1000 NEON)</div>
+    <div style="display:flex;gap:10px">
+      <button id="sellNFTCancel" style="flex:1;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.7);font-size:13px;cursor:pointer;font-family:inherit">Annuler</button>
+      <button id="sellNFTConfirm" style="flex:1;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#9B2FFF,#FF2D78);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Mettre en vente</button>
+    </div>`;
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  document.getElementById('sellNFTCancel').addEventListener('click', () => overlay.remove());
+  document.getElementById('sellNFTConfirm').addEventListener('click', async () => {
+    const price = parseFloat(document.getElementById('sellNFTPrice').value);
+    if (!price || price < 0.1) { showToast('Prix invalide (min 0.1π)', 'error'); return; }
+    const nft = (state.nftOwned||[]).find(n=>n.nftId===nftId&&n.tokenId===tokenId);
+    if (!nft) { showToast('NFT introuvable', 'error'); overlay.remove(); return; }
+    const res = await API.listNFT(nftId, tokenId, nftName, nftEmoji, nftRarity, price);
+    if (res?.success) {
+      nft.listed = true;
+      nft.listingPrice = price;
+      nft.listingId = res.listing.listingId;
+      saveGame();
+      overlay.remove();
+      showToast(`🎨 ${nftName} mis en vente pour π${price}`, 'success');
+      renderProfile();
+    } else {
+      showToast(res?.error || 'Erreur lors de la mise en vente', 'error');
+    }
+  });
+}
+
+async function delistNFT(nftId) {
+  const nft = (state.nftOwned||[]).find(n=>n.nftId===nftId&&n.listed);
+  if (!nft?.listingId) return;
+  const res = await API.delistNFT(nft.listingId);
+  if (res?.success) {
+    nft.listed = false; nft.listingPrice = 0; nft.listingId = null;
+    saveGame();
+    showToast('NFT retiré de la vente', 'success');
+    renderProfile();
+  } else { showToast('Erreur lors du retrait', 'error'); }
+}
+
+async function delistNFTFromMarket(listingId) {
+  const nft = (state.nftOwned||[]).find(n=>n.listingId===listingId);
+  if (nft) { nft.listed = false; nft.listingPrice = 0; nft.listingId = null; saveGame(); }
+  await API.delistNFT(listingId);
+  showToast('NFT retiré de la vente', 'success');
+  renderMarket();
+}
+
+async function buyListedNFT(listingId, nftName, price) {
+  if (!isPiAvailable()) { showToast('Pi Browser requis pour acheter un NFT', 'error'); return; }
+  paymentItem = { id: `nft_trade_${listingId}`, name: nftName, emoji: '🎨', price, effect: 'nft_trade', listingId };
+  showPaymentModal('confirm');
+  openModal('paymentModal');
 }
 
 function applyNFTCityUnlock() {
@@ -2477,7 +2557,40 @@ function renderMarket() {
       </div>`;
     }).join('');
 
-  el.innerHTML = s2Banner + seasonalHTML + standardHTML + neonHTML + nftHTML;
+  // Section Marché P2P
+  let p2pHTML = `<div class="section-title mb8 mt4">🔄 Marché P2P <span class="flash-badge">NFT</span></div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;padding:0 2px">NFTs mis en vente par les joueurs · Tu reçois des NEON à la vente</div>`;
+  API.getNFTListings().then(res => {
+    const listings = res?.listings || [];
+    const p2pEl = document.getElementById('nftP2PList');
+    if (!p2pEl) return;
+    if (!listings.length) {
+      p2pEl.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:16px">Aucun NFT en vente pour l\'instant</div>';
+      return;
+    }
+    p2pEl.innerHTML = listings.map(l => {
+      const isMine = l.sellerUid === _piUid;
+      return `<div class="market-item" style="border-color:rgba(155,47,255,.4)">
+        <div class="market-item-top">
+          <div class="market-item-emoji">${l.nftEmoji}</div>
+          <div class="market-item-info">
+            <div class="market-item-name">${l.nftName} <span style="font-size:10px;padding:2px 6px;border-radius:6px;background:rgba(155,47,255,.2);color:#CC77FF;font-weight:700">${l.nftRarity}</span></div>
+            <div class="market-item-desc" style="font-size:9px;font-family:'Space Mono',monospace;margin-top:2px">${l.tokenId}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Vendeur : ${l.sellerUsername}</div>
+          </div>
+        </div>
+        <div class="market-item-price">
+          <div class="pi-price"><span class="pi-symbol">π</span>${l.price}</div>
+          ${isMine
+            ? `<button onclick="delistNFTFromMarket('${l.listingId}')" style="padding:8px 14px;border-radius:10px;border:1px solid rgba(255,45,120,.4);background:rgba(255,45,120,.1);color:#FF2D78;font-size:12px;font-weight:700;cursor:pointer">Retirer</button>`
+            : `<button class="buy-pi-btn" onclick="buyListedNFT('${l.listingId}','${l.nftName}',${l.price})">Acheter π${l.price}</button>`}
+        </div>
+      </div>`;
+    }).join('');
+  }).catch(() => {});
+  p2pHTML += `<div id="nftP2PList"><div style="text-align:center;color:var(--muted);font-size:12px;padding:16px">Chargement...</div></div>`;
+
+  el.innerHTML = s2Banner + seasonalHTML + standardHTML + neonHTML + nftHTML + p2pHTML;
 }
 
 function buyPiItem(itemId) {
@@ -2558,6 +2671,9 @@ async function processPiPayment() {
             if (!state.nftOwned.find(n=>n.nftId===paymentItem.id)) {
               state.nftOwned.push({nftId:paymentItem.id, tokenId, mintedAt:Date.now(), txid});
             }
+          } else if (paymentItem.effect === 'nft_trade') {
+            // Le backend a transféré le NFT — on recharge la sauvegarde cloud
+            try { const s = await API.pullSave(); if (s?.nftOwned) state.nftOwned = s.nftOwned; } catch(_) {}
           } else {
             if (!state.premiumOwned.includes(paymentItem.id)) state.premiumOwned.push(paymentItem.id);
           }
@@ -2729,14 +2845,23 @@ function renderProfile() {
         ${otherNfts.map(n=>{
           const def = NFT_ITEMS.find(x=>x.id===n.nftId)||{emoji:'🎨',name:n.nftId,rarityColor:'#9B2FFF',rarity:'?'};
           const ts = new Date(n.mintedAt).toLocaleDateString('fr-FR');
-          return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:${def.rarityColor}11;border-radius:12px;border:1px solid ${def.rarityColor}33;margin-bottom:8px">
-            <div style="font-size:28px">${def.emoji}</div>
-            <div style="flex:1">
-              <div style="font-size:13px;font-weight:700;color:${def.rarityColor}">${def.name}</div>
-              <div style="font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:3px;word-break:break-all">${n.tokenId}</div>
-              <div style="font-size:10px;color:var(--muted);margin-top:2px">Minté le ${ts}</div>
+          const isListed = n.listed;
+          return `<div style="background:${def.rarityColor}11;border-radius:12px;border:1px solid ${def.rarityColor}33;margin-bottom:8px;overflow:hidden">
+            <div style="display:flex;align-items:center;gap:10px;padding:10px">
+              <div style="font-size:28px">${def.emoji}</div>
+              <div style="flex:1">
+                <div style="font-size:13px;font-weight:700;color:${def.rarityColor}">${def.name}</div>
+                <div style="font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:3px;word-break:break-all">${n.tokenId}</div>
+                <div style="font-size:10px;color:var(--muted);margin-top:2px">Minté le ${ts}</div>
+              </div>
+              <span style="font-size:10px;padding:2px 6px;border-radius:6px;background:${def.rarityColor}22;color:${def.rarityColor};font-weight:700;white-space:nowrap">${def.rarity}</span>
             </div>
-            <span style="font-size:10px;padding:2px 6px;border-radius:6px;background:${def.rarityColor}22;color:${def.rarityColor};font-weight:700;white-space:nowrap">${def.rarity}</span>
+            <div style="padding:0 10px 10px;display:flex;gap:6px">
+              ${isListed
+                ? `<button onclick="delistNFT('${n.nftId}')" style="flex:1;padding:7px;border-radius:8px;border:1px solid rgba(255,45,120,.4);background:rgba(255,45,120,.1);color:#FF2D78;font-size:11px;font-weight:700;cursor:pointer">✕ Retirer la vente</button>
+                   <div style="flex:1;padding:7px;border-radius:8px;background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.3);color:var(--gold);font-size:11px;font-weight:700;text-align:center">π${n.listingPrice} en vente</div>`
+                : `<button onclick="openSellNFTModal('${n.nftId}','${n.tokenId}','${def.name}','${def.emoji}','${def.rarity}')" style="flex:1;padding:7px;border-radius:8px;border:none;background:linear-gradient(135deg,${def.rarityColor},${def.rarityColor}88);color:#fff;font-size:11px;font-weight:700;cursor:pointer">💰 Mettre en vente</button>`}
+            </div>
           </div>`;
         }).join('')}
       </div>` : ''}`;
