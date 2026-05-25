@@ -1213,7 +1213,13 @@ const BUILDINGS = [
   {id:'tattoo',emoji:'🎨',name:'Tattoo Studio',cost:3000,income:50,rep:25,districts:['lowside','underblock'],rarity:'rare'},
   {id:'gym',emoji:'💪',name:'Street Gym',cost:5000,income:75,rep:35,districts:['lowside','neon_market'],rarity:'rare'},
   {id:'casino',emoji:'🎰',name:'Underground Casino',cost:35000,income:700,rep:300,districts:['underblock','the_edge'],rarity:'legendary'},
-  {id:'skyscraper',emoji:'🏗️',name:'Skyscraper Corp',cost:100000,income:2000,rep:800,districts:['sky_district'],rarity:'mythic'}
+  {id:'skyscraper',emoji:'🏗️',name:'Skyscraper Corp',cost:100000,income:2000,rep:800,districts:['sky_district'],rarity:'mythic'},
+  // Bâtiments exclusifs NFT — accessibles uniquement aux détenteurs
+  {id:'founder_vault',emoji:'🏦',name:'Founder Vault',cost:10000,income:500,rep:150,districts:['lowside','neon_market','sky_district','underblock','the_edge'],rarity:'nft',nftRequired:'nft_founder'},
+  {id:'legend_hall',emoji:'🌟',name:'Legend Hall',cost:25000,income:1200,rep:400,districts:['lowside','neon_market','sky_district','underblock','the_edge'],rarity:'nft',nftRequired:'nft_legend'},
+  {id:'dragon_lair',emoji:'🐉',name:'Dragon Lair',cost:50000,income:3000,rep:800,districts:['lowside','neon_market','sky_district','underblock','the_edge'],rarity:'nft',nftRequired:'nft_dragon'},
+  {id:'genesis_tower',emoji:'🌆',name:'Genesis Tower',cost:100000,income:8000,rep:2000,districts:['lowside','neon_market','sky_district','underblock','the_edge'],rarity:'nft',nftRequired:'nft_city'},
+  {id:'origin_nexus',emoji:'🌌',name:'Origin Nexus',cost:0,income:25000,rep:10000,districts:['lowside','neon_market','sky_district','underblock','the_edge'],rarity:'genesis',nftRequired:'nft_origin'},
 ];
 
 const REP_TITLES = [
@@ -1545,9 +1551,35 @@ let gameTickInterval = null;
 // ============================================================
 // SAVE / LOAD
 // ============================================================
+// ============================================================
+// NFT BONUS SYSTEM
+// ============================================================
+function hasNFT(id) { return (state.nftOwned||[]).some(n=>n.nftId===id); }
+
+function getNFTRevenueBonus() {
+  let mult = 1;
+  if (hasNFT('nft_founder')) mult += 0.15;  // +15%
+  if (hasNFT('nft_dragon'))  mult += 0.50;  // +50%
+  if (hasNFT('nft_city'))    mult += 1.00;  // +100%
+  if (hasNFT('nft_origin'))  mult *= 2;     // ×2 tout
+  return mult;
+}
+
+function getNFTRepBonus() {
+  let mult = 1;
+  if (hasNFT('nft_legend'))  mult += 0.30;  // +30% rep
+  if (hasNFT('nft_origin'))  mult *= 2;     // ×2 tout
+  return mult;
+}
+
+function applyNFTCityUnlock() {
+  if (hasNFT('nft_city') || hasNFT('nft_origin')) {
+    DISTRICTS.forEach(d => { if (state.districts[d.id]) state.districts[d.id].unlocked = true; });
+  }
+}
+
 function saveGame() {
   try { localStorage.setItem('blockside_save', JSON.stringify(state)); } catch(e){}
-  // Sync cloud en arrière-plan si le joueur est connecté
   if (_piUid) API.pushSave().catch(() => {});
 }
 function loadGame() {
@@ -1562,6 +1594,7 @@ function initDistricts() {
     if (!state.districts[d.id]) state.districts[d.id] = {unlocked: d.req===0};
     if (!state.buildings[d.id]) state.buildings[d.id] = [];
   });
+  applyNFTCityUnlock();
 }
 
 // ============================================================
@@ -1694,6 +1727,7 @@ function calcPendingIncome(b, districtId) {
   if (state.character==='zay') income *= 1.2;
   if (districtId) income *= getVehicleBonus(districtId);
   if (state.prestigeBonus && state.prestigeBonus > 1) income *= state.prestigeBonus;
+  income *= getNFTRevenueBonus();
   // Weather bonus
   const w = CITY_WEATHER.find(x=>x.id===state.currentWeather);
   if (w && w.mult > 1) {
@@ -1718,6 +1752,7 @@ function getDistrictIncome(districtId) {
       let inc = def.income * b.level;
       if (state.premiumOwned.includes('vip')) inc *= 2;
       if (state.character==='zay') inc *= 1.2;
+      inc *= getNFTRevenueBonus();
       perMin += inc;
     }
   });
@@ -1770,7 +1805,7 @@ function buyBuilding(districtId, buildingId, slotIndex) {
   const cost = getBuildingCost(def);
   if (state.money < cost) { showToast('Pas assez d\'argent!', 'error'); return; }
   state.money -= cost;
-  state.rep += def.rep;
+  state.rep += Math.floor(def.rep * getNFTRepBonus());
   const b = {buildingId, level:1, lastCollect:Date.now(), slotIndex};
   state.buildings[districtId] = state.buildings[districtId]||[];
   state.buildings[districtId].push(b);
@@ -2150,24 +2185,35 @@ function filterBuildings(districtId, rarity, btn) {
 
 function renderBuildingList(districtId, rarity) {
   const list = document.getElementById('buildingListModal');
-  const available = BUILDINGS.filter(b => b.districts.includes(districtId) && (rarity==='Tous'||b.rarity===rarity));
+  const available = BUILDINGS.filter(b => {
+    if (!b.districts.includes(districtId)) return false;
+    if (rarity !== 'Tous' && b.rarity !== rarity) return false;
+    return true;
+  });
   if (!available.length) { list.innerHTML = '<div class="text-muted fs13" style="text-align:center;padding:20px">Aucun bâtiment disponible</div>'; return; }
   list.innerHTML = available.map(b => {
     const cost = getBuildingCost(b);
-    const canBuy = state.money >= cost;
-    return `<div class="building-item">
+    const isNFTBuilding = b.nftRequired;
+    const nftUnlocked = !isNFTBuilding || hasNFT(b.nftRequired);
+    const canBuy = nftUnlocked && state.money >= cost;
+    const rarityLabel = b.rarity === 'nft' ? '🎨 NFT' : b.rarity === 'genesis' ? '🌌 GENESIS' : b.rarity.toUpperCase();
+    const rarityStyle = b.rarity === 'nft' ? 'background:rgba(155,47,255,.2);color:#CC77FF;border:1px solid rgba(155,47,255,.4)'
+      : b.rarity === 'genesis' ? 'background:linear-gradient(135deg,rgba(255,215,0,.2),rgba(255,45,120,.2));color:#FFD700;border:1px solid rgba(255,215,0,.4)'
+      : '';
+    return `<div class="building-item" style="${isNFTBuilding && !nftUnlocked ? 'opacity:.5' : ''}">
       <div class="building-emoji">${b.emoji}</div>
       <div class="building-info">
         <div class="building-name">${b.name}</div>
-        <div style="margin:4px 0"><span class="badge badge-${b.rarity}">${b.rarity.toUpperCase()}</span></div>
+        <div style="margin:4px 0"><span class="badge badge-${b.rarity}" style="${rarityStyle}">${rarityLabel}</span></div>
         <div class="building-stats">
           <span class="building-stat">💰 +${b.income}/min</span>
           <span class="building-stat">⭐ +${b.rep} rep</span>
         </div>
+        ${isNFTBuilding && !nftUnlocked ? `<div style="font-size:10px;color:#9B2FFF;margin-top:4px">🔒 Requiert NFT ${b.nftRequired.replace('nft_','').toUpperCase()}</div>` : ''}
       </div>
       <div class="building-buy">
-        <div class="building-cost ${canBuy?'':'unaffordable'}">$${fmt(cost)}</div>
-        <button class="buy-btn" ${canBuy?'':'disabled'} onclick="buyBuilding('${currentDistrictId}','${b.id}',${buildModalSlotIndex})">Acheter</button>
+        <div class="building-cost ${canBuy?'':'unaffordable'}">${cost===0?'GRATUIT':'$'+fmt(cost)}</div>
+        <button class="buy-btn" ${canBuy?'':'disabled'} onclick="buyBuilding('${currentDistrictId}','${b.id}',${buildModalSlotIndex})">${nftUnlocked?'Acheter':'🔒 NFT'}</button>
       </div>
     </div>`;
   }).join('');
@@ -2627,6 +2673,31 @@ function renderProfile() {
       <div style="font-size:13px;font-weight:700;margin-bottom:10px">🎨 Skins (${state.ownedSkins?.length||1}/${CHARACTER_SKINS.length})</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">${renderSkinsCompact(char.color)}</div>
     </div>
+    ${(()=>{
+      const revBonus = getNFTRevenueBonus();
+      const repBonus = getNFTRepBonus();
+      if (revBonus === 1 && repBonus === 1) return '';
+      const bonuses = [];
+      if (hasNFT('nft_founder')) bonuses.push({icon:'🏆',label:'+15% Revenus (Founder)'});
+      if (hasNFT('nft_legend'))  bonuses.push({icon:'👑',label:'+30% Réputation (Legend)'});
+      if (hasNFT('nft_dragon'))  bonuses.push({icon:'🐉',label:'+50% Revenus (Dragon)'});
+      if (hasNFT('nft_city'))    bonuses.push({icon:'🌆',label:'+100% Revenus + Villes (City)'});
+      if (hasNFT('nft_origin'))  bonuses.push({icon:'🌌',label:'×2 Tout (Origin — Créateur)'});
+      return `<div style="margin:0 16px;background:var(--card);border-radius:16px;padding:16px;border:1px solid rgba(155,47,255,.4)">
+        <div style="font-size:13px;font-weight:700;margin-bottom:10px">⚡ Bonus NFT Actifs</div>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <div style="flex:1;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);border-radius:10px;padding:10px;text-align:center">
+            <div style="font-size:18px;font-weight:900;color:var(--green)">×${revBonus.toFixed(2)}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px">Revenus</div>
+          </div>
+          <div style="flex:1;background:rgba(155,47,255,.1);border:1px solid rgba(155,47,255,.3);border-radius:10px;padding:10px;text-align:center">
+            <div style="font-size:18px;font-weight:900;color:#CC77FF">×${repBonus.toFixed(2)}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px">Réputation</div>
+          </div>
+        </div>
+        ${bonuses.map(b=>`<div style="font-size:12px;color:var(--text);padding:6px 0;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center"><span>${b.icon}</span><span>${b.label}</span></div>`).join('')}
+      </div>`;
+    })()}
     ${(()=>{
       const nfts = state.nftOwned || [];
       if (!nfts.length) return '';
