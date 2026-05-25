@@ -1348,16 +1348,20 @@ const NEON_PACKAGES = [
 const NFT_CATALOG = [
   {id:'nft_founder',emoji:'🏆',name:'Founder Badge',rarity:'Rare',rarityColor:'#2F9BFF',maxSupply:10,effect:'nft',
    desc:'Les 10 premiers bâtisseurs de BLOCKSIDE.',
-   perks:['+15% revenus en jeu','Bâtiment exclusif : Founder Vault (500 NEON/cycle)','Badge Fondateur permanent sur ton profil','Accès prioritaire aux prochains drops']},
+   perks:['+15% revenus en jeu','Bâtiment exclusif : Founder Vault (500 NEON/cycle)','Badge Fondateur permanent sur ton profil','Accès prioritaire aux prochains drops'],
+   rivalry:'Seuls 10 Fondateurs dans tout BLOCKSIDE. Pour toujours. Es-tu l\'un d\'eux ?'},
   {id:'nft_legend',emoji:'👑',name:'Legend Tag',rarity:'Epic',rarityColor:'#9B2FFF',maxSupply:5,effect:'nft',
    desc:'Tag LÉGENDE visible par toute la communauté.',
-   perks:['+30% réputation dans toutes les actions','Bâtiment exclusif : Legend Hall (1 200 NEON/cycle)','Tag "LÉGENDE" dans le classement global','Quêtes légendaires exclusives (à venir)']},
+   perks:['+30% réputation dans toutes les actions','Bâtiment exclusif : Legend Hall (1 200 NEON/cycle)','Tag "LÉGENDE" dans le classement global','Quêtes légendaires exclusives (à venir)'],
+   rivalry:'5 Légendes. Pas plus. Jamais. Il reste des places — mais pas longtemps.'},
   {id:'nft_dragon',emoji:'🐉',name:'Dragon Skin NFT',rarity:'Legendary',rarityColor:'#FFD700',maxSupply:3,effect:'nft',
    desc:'3 exemplaires seulement dans tout BLOCKSIDE.',
-   perks:['+50% revenus en jeu','Skin Dragon exclusif (personnage + interface)','Bâtiment exclusif : Dragon Lair (3 000 NEON/cycle)','Titre "Dragon Master" sur le profil']},
+   perks:['+50% revenus en jeu','Skin Dragon exclusif (personnage + interface)','Bâtiment exclusif : Dragon Lair (3 000 NEON/cycle)','Titre "Dragon Master" sur le profil'],
+   rivalry:'3 Dragons dans le monde entier. La guerre pour les posséder a déjà commencé.'},
   {id:'nft_city',emoji:'🌆',name:'City Genesis NFT',rarity:'Mythic',rarityColor:'#FF2D78',maxSupply:1,effect:'nft',
    desc:'UN seul exemplaire dans le monde entier.',
-   perks:['+100% revenus permanents (×2)','Tous les districts débloqués instantanément','Bâtiment exclusif : Genesis Tower (8 000 NEON/cycle)','Ton nom gravé dans le jeu (à venir)']},
+   perks:['+100% revenus permanents (×2)','Tous les districts débloqués instantanément','Bâtiment exclusif : Genesis Tower (8 000 NEON/cycle)','Ton nom gravé dans le jeu (à venir)'],
+   rivalry:'Le NFT le plus rare du jeu. 1 seul Maître de la Ville pour l\'éternité. Qui sera-ce ?'},
 ];
 const NFT_ITEMS = NFT_CATALOG; // alias backward compat
 
@@ -2654,9 +2658,40 @@ function renderMarket() {
     </div>`).join('');
 
   const nftOwned = state.nftOwned || [];
+
+  // Carte spéciale NFT Origin — visible par tous, jamais disponible
+  const originCard = `<div style="margin-bottom:12px;padding:2px;background:linear-gradient(135deg,#ffffff,#FFD700,#9B2FFF,#FF2D78,#2F9BFF,#ffffff);border-radius:18px;animation:border-rotate 4s linear infinite">
+    <div style="background:#07070F;border-radius:16px;padding:16px">
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.25);margin-bottom:12px;text-align:center">✦ &nbsp; NFT GENESIS — 1 SEUL DANS L'UNIVERS &nbsp; ✦</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div style="font-size:46px;filter:drop-shadow(0 0 20px rgba(255,255,255,.5));flex-shrink:0">🌌</div>
+        <div style="flex:1">
+          <div style="font-size:17px;font-weight:900;background:linear-gradient(135deg,#fff,#FFD700,#FF2D78);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:.5px">BLOCKSIDE Origin</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:3px">Le NFT absolu. La puissance totale.</div>
+        </div>
+        <span style="font-size:10px;padding:3px 8px;border-radius:8px;background:linear-gradient(135deg,rgba(255,255,255,.1),rgba(255,215,0,.15));color:#FFD700;font-weight:700;border:1px solid rgba(255,215,0,.3);white-space:nowrap">✦ GENESIS</span>
+      </div>
+      <div style="background:rgba(255,255,255,.03);border-radius:10px;padding:10px;margin-bottom:12px">
+        <div style="font-size:11px;padding:2px 0;display:flex;gap:6px"><span style="color:#FFD700;font-weight:700">✦</span><span>×2 sur <strong>TOUS</strong> les revenus — permanent</span></div>
+        <div style="font-size:11px;padding:2px 0;display:flex;gap:6px"><span style="color:#FFD700;font-weight:700">✦</span><span>×2 sur <strong>TOUTE</strong> la réputation — permanent</span></div>
+        <div style="font-size:11px;padding:2px 0;display:flex;gap:6px"><span style="color:#FFD700;font-weight:700">✦</span><span>Bâtiment Origin Nexus (25 000 NEON/cycle)</span></div>
+        <div style="font-size:11px;padding:2px 0;display:flex;gap:6px"><span style="color:#FFD700;font-weight:700">✦</span><span>Tous les districts débloqués — définitivement</span></div>
+        <div style="font-size:11px;padding:2px 0;display:flex;gap:6px"><span style="color:#FFD700;font-weight:700">✦</span><span>Puissance absolue sur BLOCKSIDE — aucun autre NFT n'approche</span></div>
+      </div>
+      <div style="background:rgba(0,0,0,.4);border-radius:12px;border:1px solid rgba(255,255,255,.07);padding:14px;text-align:center">
+        <div style="font-size:24px;margin-bottom:8px">🔒</div>
+        <div style="font-size:13px;font-weight:900;color:#fff;letter-spacing:1px;margin-bottom:8px">CE NFT N'EST PAS À VENDRE</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.45);line-height:1.7">Ce NFT appartient au Créateur de BLOCKSIDE.<br>Il n'en existera jamais qu'<strong style="color:#FFD700">UN SEUL</strong> dans l'univers entier.<br>Il ne s'achète pas. Il ne se gagne pas.<br><em style="color:rgba(255,255,255,.6)">Il est.</em></div>
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);font-size:11px;color:rgba(255,255,255,.2);font-style:italic;line-height:1.6">"Mais qu'arriverait-il si un jour<br>le Créateur décidait de s'en séparer ?" 🌌</div>
+      </div>
+      <div style="margin-top:8px;text-align:center;font-size:9px;color:rgba(255,255,255,.15);font-family:'Space Mono',monospace">BLK-NFT-ORIGIN-GAEL99-GENESIS-0001</div>
+    </div>
+  </div>`;
+
   const nftHTML = `<div class="section-title mb8 mt4">🎨 NFT Collection <span class="flash-badge">BLOCKCHAIN</span></div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:4px;padding:0 2px">Drops contrôlés par le créateur · Éditions limitées · Migration Pi Mainnet prévue</div>
-    <div style="font-size:12px;color:#9B2FFF;margin-bottom:10px;padding:0 2px">📦 Ta collection : ${nftOwned.filter(n=>n.nftId!=='nft_origin').length}/${NFT_CATALOG.length} NFT</div>` +
+    <div style="font-size:11px;color:var(--muted);margin-bottom:4px;padding:0 2px">Drops contrôlés par le créateur · 1 NFT par type par joueur · Éditions ultra-limitées</div>
+    <div style="font-size:12px;color:#9B2FFF;margin-bottom:10px;padding:0 2px">📦 Ta collection : ${nftOwned.filter(n=>n.nftId!=='nft_origin').length}/${NFT_CATALOG.length} NFT</div>
+    ${originCard}` +
     NFT_CATALOG.map(nft => {
       const owned = nftOwned.find(n=>n.nftId===nft.id);
       return `<div class="market-item" style="border-color:${nft.rarityColor}44;padding-bottom:10px">
@@ -2671,10 +2706,11 @@ function renderMarket() {
         <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.05)">
           ${nft.perks.map(p=>`<div style="font-size:11px;padding:2px 0;display:flex;gap:6px"><span style="color:${nft.rarityColor};font-weight:700;flex-shrink:0">✦</span><span>${p}</span></div>`).join('')}
         </div>
-        ${owned ? `<div style="margin-top:8px;padding:5px 8px;background:rgba(74,222,128,.1);border-radius:8px;border:1px solid rgba(74,222,128,.3);font-size:11px;color:var(--green);font-weight:600">✓ Tu possèdes ce NFT <span style="font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;margin-left:4px;word-break:break-all">${owned.tokenId}</span></div>` : ''}
+        <div style="margin-top:8px;font-size:11px;font-style:italic;color:${nft.rarityColor}99;padding:6px 8px;background:${nft.rarityColor}08;border-radius:8px;border-left:2px solid ${nft.rarityColor}44">⚔️ ${nft.rivalry}</div>
+        ${owned ? `<div style="margin-top:8px;padding:6px 10px;background:rgba(74,222,128,.1);border-radius:8px;border:1px solid rgba(74,222,128,.3);font-size:11px;color:var(--green);font-weight:700">✓ Tu fais partie des possesseurs de ce NFT <span style="font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;margin-left:4px;word-break:break-all">${owned.tokenId}</span></div>` : ''}
         <div id="nft-status-${nft.id}" style="margin-top:8px">
           <div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;margin-bottom:3px"><div style="width:0%;height:100%;background:${nft.rarityColor};border-radius:2px"></div></div>
-          <div style="font-size:10px;color:var(--muted);text-align:right;margin-bottom:4px">0/${nft.maxSupply} vendus · 🔒 Drop en attente</div>
+          <div style="font-size:10px;color:var(--muted);text-align:right;margin-bottom:4px">0/${nft.maxSupply} possesseurs · 🔒 Drop en attente</div>
         </div>
       </div>`;
     }).join('');
@@ -2696,10 +2732,21 @@ function renderMarket() {
       const sup = supply[nft.id] || { minted: 0, max: nft.maxSupply };
       const pct = Math.min(100, (sup.minted / sup.max) * 100);
       const isSoldOut = sup.minted >= sup.max;
+      const isLastOne = !isSoldOut && sup.minted === sup.max - 1 && sup.max > 1;
       const creatorAuction = auctions.find(a => a.nftId === nft.id && a.isCreatorDrop);
-      const supplyBar = `<div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;margin-bottom:3px"><div style="width:${pct}%;height:100%;background:${nft.rarityColor};border-radius:2px"></div></div>
-        <div style="font-size:10px;color:${isSoldOut?'var(--pink)':'var(--muted)'};text-align:right;margin-bottom:6px">${sup.minted}/${sup.max} vendus${isSoldOut?' · 🏁 Épuisé':''}</div>`;
-      if (isSoldOut) {
+      const alreadyOwnsThis = nftOwned.some(n => n.nftId === nft.id);
+      const remaining = sup.max - sup.minted;
+      const barColor = isSoldOut ? 'var(--pink)' : isLastOne ? 'var(--orange)' : nft.rarityColor;
+      const supplyLabel = isSoldOut
+        ? `${sup.minted}/${sup.max} possesseurs · 🏁 Épuisé`
+        : isLastOne
+          ? `${sup.minted}/${sup.max} possesseurs · ⚠️ DERNIER EXEMPLAIRE`
+          : `${sup.minted}/${sup.max} possesseurs · ${remaining} restant${remaining>1?'s':''}`;
+      const supplyBar = `<div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;margin-bottom:3px"><div style="width:${pct}%;height:100%;background:${barColor};border-radius:2px;transition:width .6s"></div></div>
+        <div style="font-size:10px;color:${isSoldOut?'var(--pink)':isLastOne?'var(--orange)':'var(--muted)'};text-align:right;margin-bottom:6px">${supplyLabel}</div>`;
+      if (alreadyOwnsThis) {
+        statusEl.innerHTML = supplyBar + `<div style="padding:7px 10px;background:rgba(74,222,128,.08);border-radius:8px;border:1px solid rgba(74,222,128,.25);font-size:11px;color:var(--green);font-weight:700;text-align:center">✓ Tu fais partie des ${sup.minted} possesseur${sup.minted>1?'s':''} · 1 NFT de ce type maximum</div>`;
+      } else if (isSoldOut) {
         statusEl.innerHTML = supplyBar + `<div style="padding:7px;background:rgba(255,45,120,.08);border-radius:8px;border:1px solid rgba(255,45,120,.3);font-size:11px;color:var(--pink);font-weight:700;text-align:center">🏁 Édition épuisée · Cherche sur le marché secondaire</div>`;
       } else if (creatorAuction) {
         const tl = Math.max(0, creatorAuction.timeLeft);
@@ -2708,8 +2755,10 @@ function renderMarket() {
         const urgent = tl < 3600000;
         const minBid = creatorAuction.currentBid > 0 ? (creatorAuction.currentBid+0.1).toFixed(1) : creatorAuction.startPrice.toFixed(1);
         const isLeading = creatorAuction.currentBidder === _piUid;
-        statusEl.innerHTML = supplyBar + `<div style="background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.3);border-radius:10px;padding:10px">
-          <div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:6px">🔨 DROP LIVE${isLeading?' <span style="color:var(--green)">· 🥇 TU MÈNES</span>':''} · ⏱ <span style="color:${urgent?'var(--pink)':'inherit'}">${timeStr}</span></div>
+        const bidCount = creatorAuction.bids?.length || 0;
+        statusEl.innerHTML = supplyBar + `<div style="background:rgba(74,222,128,.08);border:1px solid ${isLastOne?'rgba(255,107,26,.5)':'rgba(74,222,128,.3)'};border-radius:10px;padding:10px">
+          <div style="font-size:11px;font-weight:700;color:${isLastOne?'var(--orange)':'var(--green)'};margin-bottom:6px">${isLastOne?'⚠️ DERNIER EXEMPLAIRE — ':''}🔨 DROP LIVE${isLeading?' · 🥇 TU MÈNES':''} · ⏱ <span style="color:${urgent?'var(--pink)':'inherit'}">${timeStr}</span>${bidCount>0?` · ${bidCount} offre${bidCount>1?'s':''}`:''}
+          </div>
           <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
             <div style="font-size:12px"><span style="color:var(--muted)">Offre :</span> <strong style="color:var(--gold)">${creatorAuction.currentBid>0?'π'+creatorAuction.currentBid:'—'}</strong></div>
             <button onclick="openBidModal('${creatorAuction.auctionId}','${nft.name}','${nft.emoji}',${creatorAuction.currentBid},${creatorAuction.startPrice})" style="padding:7px 14px;border-radius:8px;border:none;background:linear-gradient(135deg,${nft.rarityColor},${nft.rarityColor}88);color:${nft.rarityColor==='#FFD700'?'#000':'#fff'};font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">Enchérir π${minBid}+</button>

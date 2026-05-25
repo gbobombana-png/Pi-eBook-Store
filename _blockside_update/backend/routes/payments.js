@@ -135,6 +135,11 @@ router.post('/complete', authMiddleware, async (req, res) => {
       const buyerSave = db.getSave(req.piUser.uid) || {};
       if (!buyerSave.nftOwned) buyerSave.nftOwned = [];
 
+      // Règle : 1 seul NFT de chaque type par joueur
+      if (buyerSave.nftOwned.find(n => n.nftId === auction.nftId)) {
+        return res.status(400).json({ error: 'Tu possèdes déjà ce NFT — 1 exemplaire maximum par joueur' });
+      }
+
       if (auction.isCreatorDrop) {
         // DROP CRÉATEUR : mint fresh — le NFT n'existait pas encore
         const tokenId = `BLK-NFT-${auction.nftId.replace('nft_','').toUpperCase()}-${req.piUser.uid.slice(0,6).toUpperCase()}-${txid.slice(-8).toUpperCase()}`;
