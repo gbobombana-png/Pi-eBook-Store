@@ -740,6 +740,23 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
 .district-card:active{transform:scale(.97)}
 .slot:active{transform:scale(.94)}
 
+/* ===== DAY/NIGHT CYCLE ===== */
+.dn-badge{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;font-family:'Space Mono',monospace;transition:background 2.5s ease,border-color 2.5s ease,color 2.5s ease;flex-shrink:0;white-space:nowrap}
+.district-card::before{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:2;opacity:0;transition:opacity 3s ease,background 3s ease}
+.district-header{transition:background 3s ease}
+body[data-phase="dawn"]  .district-card::before{background:linear-gradient(135deg,rgba(255,165,50,.08),rgba(255,80,20,.05));opacity:1}
+body[data-phase="dusk"]  .district-card::before{background:linear-gradient(135deg,rgba(255,60,120,.09),rgba(120,0,200,.06));opacity:1}
+body[data-phase="night"] .district-card::before{background:linear-gradient(135deg,rgba(10,20,80,.17),rgba(0,0,60,.13));opacity:1}
+body[data-phase="dawn"]  .district-header{background:linear-gradient(180deg,rgba(255,140,0,.1),transparent)!important}
+body[data-phase="dusk"]  .district-header{background:linear-gradient(180deg,rgba(200,0,120,.1),transparent)!important}
+body[data-phase="night"] .district-header{background:linear-gradient(180deg,rgba(0,20,90,.18),transparent)!important}
+body[data-phase="night"] .district-card.unlocked{box-shadow:0 0 16px rgba(47,155,255,.11),0 2px 12px rgba(0,0,0,.6)}
+body[data-phase="night"] .stat-val{text-shadow:0 0 8px currentColor}
+body[data-phase="night"] .slot.income-ready{border-color:rgba(74,222,128,.6)!important}
+body[data-phase="dawn"]  .dn-badge{background:rgba(255,165,50,.12);border-color:rgba(255,165,50,.3);color:#FFA032}
+body[data-phase="dusk"]  .dn-badge{background:rgba(255,60,120,.12);border-color:rgba(255,60,120,.3);color:#FF3C78}
+body[data-phase="night"] .dn-badge{background:rgba(47,155,255,.12);border-color:rgba(47,155,255,.3);color:#2F9BFF}
+
 /* ===== DROP ALERT OVERLAY ===== */
 #dropAlertOverlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.88);backdrop-filter:blur(14px);opacity:0;pointer-events:none;transition:opacity .4s}
 #dropAlertOverlay.active{opacity:1;pointer-events:all}
@@ -815,6 +832,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
       <div class="rep-title" id="hubRepTitle">Street Rookie</div>
     </div>
     <div style="display:flex;align-items:center;gap:8px">
+      <div id="dnBadge" class="dn-badge">☀️ 00h</div>
       <div id="piAuthBadge" style="display:none;font-size:10px;background:rgba(155,47,255,.2);color:#CC77FF;border:1px solid rgba(155,47,255,.4);padding:2px 8px;border-radius:20px;font-weight:700">π connecté</div>
       <div class="notif-btn" onclick="openNotifPanel()" style="position:relative">🔔<div id="notifBadge" style="display:none">0</div></div>
     </div>
@@ -2019,7 +2037,7 @@ async function loginWithPi() {
         document.documentElement.style.setProperty('--cc-bg', loadedChar.accentBg || loadedChar.glow.replace('.4)','.12)'));
       }
       initDistricts(); updateHUDStats(); renderActivity();
-      showScreen('hub'); startGameTick(); initWeather();
+      showScreen('hub'); startGameTick(); initWeather(); startDayNightCycle();
       setTimeout(checkActiveDrops, 2500);
     } else {
       saveGame();
@@ -2318,6 +2336,7 @@ function goToCharSelect() {
     startEventCarousel();
     showScreen('hub');
     startGameTick();
+    startDayNightCycle();
     checkDailyReward();
     return;
   }
@@ -2394,6 +2413,7 @@ function startGame() {
   showScreen('hub');
   startGameTick();
   initWeather();
+  startDayNightCycle();
   setTimeout(checkActiveDrops, 2500);
   if (!state.tutorialDone) setTimeout(startTutorial, 1200);
 }
@@ -4365,6 +4385,29 @@ function popStat(id) {
   el.addEventListener('animationend', () => el.classList.remove('popping'), { once: true });
 }
 
+// ── DAY/NIGHT CYCLE ──────────────────────────────────────────
+const _DN_PHASES = [
+  { id:'night', emoji:'🌃', from:0,  to:5  },
+  { id:'dawn',  emoji:'🌅', from:5,  to:8  },
+  { id:'day',   emoji:'☀️', from:8,  to:18 },
+  { id:'dusk',  emoji:'🌆', from:18, to:21 },
+  { id:'night', emoji:'🌃', from:21, to:24 },
+];
+function _getPhase(h) { return _DN_PHASES.find(p => h >= p.from && h < p.to) || _DN_PHASES[0]; }
+let _dnInterval = null;
+function applyDayNight() {
+  const h = new Date().getHours();
+  const phase = _getPhase(h);
+  document.body.dataset.phase = phase.id;
+  const badge = document.getElementById('dnBadge');
+  if (badge) badge.textContent = phase.emoji + ' ' + String(h).padStart(2,'0') + 'h';
+}
+function startDayNightCycle() {
+  applyDayNight();
+  if (_dnInterval) clearInterval(_dnInterval);
+  _dnInterval = setInterval(applyDayNight, 60000);
+}
+
 // ── FLOAT TEXT ────────────────────────────────────────────────
 let _comboCount = 0, _comboTimer = null;
 function spawnFloat(text, color='#FFD700') {
@@ -4726,6 +4769,7 @@ window.addEventListener('load', async () => {
     showScreen('hub');
     startGameTick();
     initWeather();
+    startDayNightCycle();
     const sub = document.getElementById('prestigeQuickSub');
     if (sub && state.prestigeLevel > 0) sub.textContent = `✨ Prestige ${state.prestigeLevel} actif`;
 
