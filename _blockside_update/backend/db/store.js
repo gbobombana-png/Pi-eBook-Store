@@ -5,8 +5,16 @@ const saves    = new Map(); // piUid -> gameState
 const leaderboard = new Map();
 const payments = new Map(); // paymentId -> paymentRecord
 const auctions = new Map(); // auctionId -> auctionRecord
+const mintedCounts = new Map(); // nftId -> count minted
 
 export const PLATFORM_FEE = 0.10; // 10% sur chaque vente
+
+export const NFT_MAX_SUPPLY = {
+  nft_founder: 10,
+  nft_legend:  5,
+  nft_dragon:  3,
+  nft_city:    1,
+};
 
 export const db = {
   // ── Utilisateurs ──────────────────────────────────────────────
@@ -53,14 +61,23 @@ export const db = {
     if (p) payments.set(paymentId, { ...p, txid, status: 'completed', completedAt: Date.now() });
   },
 
+  // ── Supply NFT ────────────────────────────────────────────────
+  getMintedCount(nftId) { return mintedCounts.get(nftId) || 0; },
+  incrementMintedCount(nftId) { mintedCounts.set(nftId, (mintedCounts.get(nftId) || 0) + 1); },
+  getAllSupply() {
+    return Object.fromEntries(
+      Object.entries(NFT_MAX_SUPPLY).map(([id, max]) => [id, { minted: mintedCounts.get(id) || 0, max }])
+    );
+  },
+
   // ── Enchères NFT ─────────────────────────────────────────────
-  createAuction(sellerUid, { nftId, tokenId, nftName, nftEmoji, nftRarity, startPrice, durationHours }) {
+  createAuction(sellerUid, { nftId, tokenId, nftName, nftEmoji, nftRarity, startPrice, durationHours, isCreatorDrop = false }) {
     const auctionId = `auction_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
     const endsAt = Date.now() + durationHours * 3600000;
     const record = {
       auctionId, sellerUid, nftId, tokenId, nftName, nftEmoji, nftRarity,
       startPrice, currentBid: 0, currentBidder: null, currentBidderName: null,
-      bids: [], endsAt, status: 'active', createdAt: Date.now(),
+      bids: [], endsAt, status: 'active', createdAt: Date.now(), isCreatorDrop,
     };
     auctions.set(auctionId, record);
     return record;

@@ -132,34 +132,41 @@ router.post('/complete', authMiddleware, async (req, res) => {
       if (auction.status === 'sold') return res.json({ completed: true, alreadyDone: true });
       if (auction.currentBidder !== req.piUser.uid) return res.status(403).json({ error: 'Tu n\'es pas le gagnant de cette enchère' });
 
-      // Transférer le NFT
+      const buyerSave = db.getSave(req.piUser.uid) || {};
+      if (!buyerSave.nftOwned) buyerSave.nftOwned = [];
+
+      if (auction.isCreatorDrop) {
+        // DROP CRÉATEUR : mint fresh — le NFT n'existait pas encore
+        const tokenId = `BLK-NFT-${auction.nftId.replace('nft_','').toUpperCase()}-${req.piUser.uid.slice(0,6).toUpperCase()}-${txid.slice(-8).toUpperCase()}`;
+        buyerSave.nftOwned.push({ nftId: auction.nftId, tokenId, mintedAt: Date.now(), txid });
+        if (auction.nftId === 'nft_dragon') {
+          buyerSave.ownedSkins = [...new Set([...(buyerSave.ownedSkins||['default']), 'dragon'])];
+        }
+        db.upsertSave(req.piUser.uid, buyerSave);
+        db.incrementMintedCount(auction.nftId);
+        db.markAuctionSold(auctionId, req.piUser.uid, txid);
+        return res.json({ completed: true, auction: true, creatorDrop: true, nftId: auction.nftId, tokenId, finalPrice: auction.currentBid });
+      }
+
+      // REVENTE P2P : transfert depuis le vendeur
       const sellerSave = db.getSave(auction.sellerUid) || {};
-      const buyerSave  = db.getSave(req.piUser.uid) || {};
       const nftIndex = (sellerSave.nftOwned||[]).findIndex(n => n.nftId === auction.nftId && n.tokenId === auction.tokenId);
       if (nftIndex !== -1) {
         const [nftRecord] = sellerSave.nftOwned.splice(nftIndex, 1);
-        // Retirer le flag d'enchère du NFT vendeur
-        if (!buyerSave.nftOwned) buyerSave.nftOwned = [];
         buyerSave.nftOwned.push({ ...nftRecord, listed: false, listingPrice: 0, auctionId: null, boughtAt: Date.now(), boughtFrom: auction.sellerUid });
         db.upsertSave(auction.sellerUid, sellerSave);
       }
       db.upsertSave(req.piUser.uid, buyerSave);
 
-      // Créditer le vendeur (90% du prix final en NEON, plateforme garde 10%)
+      // Créditer le vendeur (90% en NEON, plateforme garde 10%)
       const sellerShare = 1 - PLATFORM_FEE;
       const sellerNeon = Math.floor(auction.currentBid * 1000 * sellerShare);
-      sellerSave.neonBalance = (sellerSave.neonBalance || 0) + sellerNeon;
-      db.upsertSave(auction.sellerUid, sellerSave);
+      const sellerSaveForCredit = db.getSave(auction.sellerUid) || {};
+      sellerSaveForCredit.neonBalance = (sellerSaveForCredit.neonBalance || 0) + sellerNeon;
+      db.upsertSave(auction.sellerUid, sellerSaveForCredit);
 
       db.markAuctionSold(auctionId, req.piUser.uid, txid);
-      return res.json({
-        completed: true,
-        auction: true,
-        nftId: auction.nftId,
-        finalPrice: auction.currentBid,
-        sellerNeon,
-        platformFee: PLATFORM_FEE,
-      });
+      return res.json({ completed: true, auction: true, nftId: auction.nftId, finalPrice: auction.currentBid, sellerNeon, platformFee: PLATFORM_FEE });
     }
 
     // Item standard
