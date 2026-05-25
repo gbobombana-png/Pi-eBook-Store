@@ -1573,7 +1573,7 @@ async function loginWithPi() {
     _piDebug(inited ? 'Pi.init() OK — authentification…' : 'Pi.init() échoué — tentative auth…');
 
     const auth = await Pi.authenticate(['username', 'payments'], onIncompletePayment);
-    _piDebug('Auth OK — user: ' + (auth?.user?.username || '?'));
+    _piDebug('Auth OK — user: ' + (auth?.user?.username || '?') + ' | UID: ' + (auth?.user?.uid || '?'));
 
     state.username = auth.user.username || 'PiUser';
     state.piAuthenticated = true;
