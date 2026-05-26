@@ -539,15 +539,24 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
 .war-attack-btn:active{transform:scale(.95)}
 
 /* ── SOCIAL PROFILE ──────────────────────────────────────────── */
-.profile-card-flex{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:20px;padding:20px;margin:16px;border:1px solid var(--border);position:relative;overflow:hidden}
-.profile-char-photo{width:72px;height:72px;background-size:cover;background-position:top center;border-radius:50%;border:3px solid var(--cc);flex-shrink:0}
-.profile-role-badge{display:inline-flex;align-items:center;gap:4px;background:var(--cc-bg,rgba(255,107,26,.12));border:1px solid var(--cc,var(--orange))40;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;color:var(--cc,var(--orange))}
-.profile-stat-row{display:flex;gap:12px;margin-top:12px}
+.profile-banner{height:110px;margin:0;position:relative;overflow:hidden;flex-shrink:0}
+.profile-banner-edit{position:absolute;top:10px;right:12px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:4px 12px;color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:'Sora',sans-serif;backdrop-filter:blur(4px)}
+.profile-avatar-wrap{margin:-38px 0 0 18px;position:relative;z-index:2;display:inline-block}
+.profile-avatar-circle{width:76px;height:76px;border-radius:50%;border:3px solid var(--cc,var(--orange));background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:38px;box-shadow:0 0 20px var(--cc-glow,rgba(255,107,26,.4))}
+.profile-meta{padding:6px 18px 14px;margin-top:4px}
+.profile-username{font-size:22px;font-weight:900;letter-spacing:.5px}
+.profile-role-badge{display:inline-flex;align-items:center;gap:4px;background:var(--cc-bg,rgba(255,107,26,.12));border:1px solid rgba(255,255,255,.1);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;color:var(--cc,var(--orange));margin-top:4px}
+.profile-tagline{font-style:italic;color:var(--muted);font-size:13px;padding:10px 18px 0;line-height:1.5}
+.profile-stat-row{display:flex;gap:12px;margin:12px 16px 0}
 .profile-stat-item{flex:1;background:rgba(255,255,255,.04);border-radius:12px;padding:10px;text-align:center}
 .profile-stat-val{font-size:20px;font-weight:800;font-family:'Space Mono',monospace;color:var(--cc,var(--orange))}
 .profile-stat-lbl{font-size:10px;color:var(--muted);margin-top:2px;font-weight:600}
 .profile-quote{font-style:italic;color:var(--muted);font-size:13px;padding:12px 16px;border-left:2px solid var(--cc,var(--orange));margin:0 16px 16px}
 .share-btn{background:linear-gradient(135deg,var(--cc,var(--orange)),var(--pink));border:none;color:#fff;padding:12px 24px;border-radius:12px;font-weight:700;font-size:13px;cursor:pointer;font-family:'Sora',sans-serif;width:calc(100% - 32px);margin:0 16px 16px;display:flex;align-items:center;justify-content:center;gap:8px}
+/* Banner presets */
+.banner-presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.banner-preset{width:44px;height:28px;border-radius:8px;cursor:pointer;border:2px solid transparent;transition:border .2s}
+.banner-preset.active{border-color:#fff}
 
 /* ── LEVEL UP OVERLAY ────────────────────────────────────────── */
 @keyframes levelup-in{0%{opacity:0;transform:scale(.5)}70%{transform:scale(1.05)}100%{opacity:1;transform:scale(1)}}
@@ -1218,6 +1227,28 @@ body[data-phase="night"] .dn-badge{background:rgba(47,155,255,.12);border-color:
   </div>
 </div>
 
+<div class="modal-overlay" id="profileEditModal" onclick="if(event.target===this)closeModal('profileEditModal')">
+  <div class="modal-box" style="max-width:360px">
+    <div class="modal-header">
+      <span style="font-size:16px;font-weight:800">✏️ Personnaliser le profil</span>
+      <button class="modal-close" onclick="closeModal('profileEditModal')">✕</button>
+    </div>
+    <div style="padding:16px;display:flex;flex-direction:column;gap:16px">
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:8px">BANNIÈRE</div>
+        <div class="banner-presets" id="bannerPresetsUI"></div>
+        <div id="bannerPreview" style="height:70px;border-radius:12px;margin-top:10px;transition:background 0.4s ease"></div>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:8px">TAGLINE <span style="font-weight:400;font-style:italic">(40 car. max)</span></div>
+        <input id="profileTaglineInput" type="text" maxlength="40" placeholder="Ta phrase signature…"
+          style="width:100%;box-sizing:border-box;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:'Sora',sans-serif;outline:none"/>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="saveProfileEdit()">✅ Sauvegarder</button>
+    </div>
+  </div>
+</div>
+
 <div id="levelupOverlay">
   <div class="levelup-card">
     <div class="levelup-stars">⭐⭐⭐</div>
@@ -1736,6 +1767,9 @@ let state = {
   prestigeBonus: 1.0,
   currentWeather: 'clear',
   weatherChangedAt: 0,
+  // Phase 3 — Profile
+  profileBanner: 'char',
+  profileTagline: '',
 };
 
 let currentScreen = 'splash';
@@ -3332,23 +3366,82 @@ function applyPaymentEffect(item) {
 // ============================================================
 // PROFILE
 // ============================================================
+const BANNER_PRESETS = [
+  {id:'char',   label:'Perso',     bg: c => `linear-gradient(135deg,${c}55 0%,${c}11 60%,#0d0d1a 100%)`},
+  {id:'neon',   label:'Neon',      bg: () => 'linear-gradient(135deg,#0a0828 0%,#1a0a4e 50%,#2F9BFF22 100%)'},
+  {id:'fire',   label:'Fire',      bg: () => 'linear-gradient(135deg,#1a0800 0%,#FF6B1A44 50%,#FF2D7833 100%)'},
+  {id:'gold',   label:'Gold',      bg: () => 'linear-gradient(135deg,#0d0d00 0%,#2a2000 50%,#FFD70033 100%)'},
+  {id:'matrix', label:'Matrix',    bg: () => 'linear-gradient(135deg,#000d00 0%,#001a00 50%,#4ADE8022 100%)'},
+];
+
+function _getBannerBg(char) {
+  const preset = BANNER_PRESETS.find(p => p.id === (state.profileBanner||'char')) || BANNER_PRESETS[0];
+  return preset.bg(char.color);
+}
+
+function openProfileEdit() {
+  const char = CHARACTERS.find(c => c.id === state.character) || CHARACTERS[0];
+  const modal = document.getElementById('profileEditModal');
+  if (!modal) return;
+  const input = document.getElementById('profileTaglineInput');
+  if (input) input.value = state.profileTagline || '';
+  const presetsUI = document.getElementById('bannerPresetsUI');
+  const preview   = document.getElementById('bannerPreview');
+  if (presetsUI) {
+    presetsUI.innerHTML = BANNER_PRESETS.map(p => `
+      <div class="banner-preset ${(state.profileBanner||'char')===p.id?'active':''}"
+           data-pid="${p.id}"
+           style="background:${p.bg(char.color)}"
+           onclick="_selectBannerPreset('${p.id}')">
+        <div style="font-size:9px;color:rgba(255,255,255,.7);text-align:center;padding-top:6px">${p.label}</div>
+      </div>`).join('');
+  }
+  if (preview) preview.style.background = _getBannerBg(char);
+  modal.classList.add('open');
+}
+
+function _selectBannerPreset(id) {
+  const char = CHARACTERS.find(c => c.id === state.character) || CHARACTERS[0];
+  state.profileBanner = id;
+  document.querySelectorAll('#bannerPresetsUI .banner-preset').forEach(el => {
+    el.classList.toggle('active', el.dataset.pid === id);
+  });
+  const preview = document.getElementById('bannerPreview');
+  if (preview) preview.style.background = _getBannerBg(char);
+}
+
+function saveProfileEdit() {
+  const input = document.getElementById('profileTaglineInput');
+  if (input) state.profileTagline = input.value.trim().slice(0, 40);
+  saveGame();
+  closeModal('profileEditModal');
+  renderProfile();
+  showToast('✅ Profil mis à jour!', 'success');
+}
+
 function renderProfile() {
   const char = CHARACTERS.find(c => c.id === state.character) || CHARACTERS[0];
   const prestigeStars = '⭐'.repeat(state.prestigeLevel || 0) || '';
   const container = document.getElementById('profileContent');
   if (!container) return;
+  const faction = state.crew ? FACTIONS.find(f=>f.id===state.crew) : null;
+  const tagline = state.profileTagline || char.tagline || char.quote || '';
   container.innerHTML = `
-    <div class="profile-card-flex" style="--cc:${char.color};--cc-glow:${char.glow};--cc-bg:${char.accentBg||char.glow.replace('.4)','.12)')}">
-      <div class="profile-char-photo" style="background-image:url('char-${char.id}.png');border-color:${char.color}"></div>
-      <div style="flex:1">
-        <div style="font-size:22px;font-weight:900;letter-spacing:1px">${state.username||char.name}</div>
-        <div class="profile-role-badge" style="margin-top:4px">
-          ${char.icon} ${char.role}${state.prestigeLevel ? ' · ' + prestigeStars + ' Prestige ' + state.prestigeLevel : ''}
-        </div>
-        <div style="font-size:12px;color:var(--muted);margin-top:6px;font-family:'Space Mono',monospace">${getRepTitle(state.rep)}</div>
+    <div style="--cc:${char.color};--cc-glow:${char.glow};--cc-bg:${char.accentBg||char.glow.replace('.4)','.12)')}">
+      <div class="profile-banner" style="background:${_getBannerBg(char)}">
+        <button class="profile-banner-edit" onclick="openProfileEdit()">✏️ Personnaliser</button>
+        ${faction ? `<div style="position:absolute;bottom:10px;left:16px;display:flex;align-items:center;gap:6px;background:${faction.bg};border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;color:${faction.color}">${faction.emoji} ${faction.name}</div>` : ''}
       </div>
+      <div class="profile-avatar-wrap">
+        <div class="profile-avatar-circle" style="border-color:${char.color};box-shadow:0 0 20px ${char.glow}">${char.icon}</div>
+      </div>
+      <div class="profile-meta">
+        <div class="profile-username">${state.username||char.name}</div>
+        <div class="profile-role-badge">${char.icon} ${char.role}${state.prestigeLevel ? ' · ' + prestigeStars + ' Prestige ' + state.prestigeLevel : ''}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:5px;font-family:'Space Mono',monospace">${getRepTitle(state.rep)}</div>
+      </div>
+      ${tagline ? `<div class="profile-tagline">"${tagline}"</div>` : ''}
     </div>
-    <blockquote class="profile-quote">${char.quote||''}</blockquote>
     <div class="profile-stat-row" style="margin:0 16px">
       <div class="profile-stat-item"><div class="profile-stat-val" style="color:${char.color}">$${formatMoney(state.money)}</div><div class="profile-stat-lbl">Balance</div></div>
       <div class="profile-stat-item"><div class="profile-stat-val" style="color:var(--purple)">${(state.rep||0).toLocaleString('fr-FR')}</div><div class="profile-stat-lbl">Réputation</div></div>
