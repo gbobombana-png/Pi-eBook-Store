@@ -2606,7 +2606,9 @@ function renderBuildingList(districtId, rarity) {
         ${isNFTBuilding && !nftUnlocked ? `<div style="font-size:10px;color:#9B2FFF;margin-top:4px">🔒 Requiert NFT ${b.nftRequired.replace('nft_','').toUpperCase()}</div>` : ''}
       </div>
       <div class="building-buy">
-        <div class="building-cost ${canBuy?'':'unaffordable'}">${cost===0?'GRATUIT':'$'+fmt(cost)}</div>
+        ${isNFTBuilding && !nftUnlocked
+          ? `<div class="building-cost unaffordable" style="font-size:11px">🔒 NFT</div>`
+          : `<div class="building-cost ${canBuy?'':'unaffordable'}">${cost===0?'GRATUIT':'$'+fmt(cost)}</div>`}
         <button class="buy-btn" ${canBuy?'':'disabled'} onclick="buyBuilding('${currentDistrictId}','${b.id}',${buildModalSlotIndex})">${nftUnlocked?'Acheter':'🔒 NFT'}</button>
       </div>
     </div>`;
