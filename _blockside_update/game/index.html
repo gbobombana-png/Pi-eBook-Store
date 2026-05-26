@@ -105,7 +105,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sora',
 /* ===== HUB ===== */
 #hub{background:var(--bg)}
 .top-bar{display:flex;align-items:center;gap:12px;padding:16px 16px 8px;flex-shrink:0}
-.avatar-circle{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;flex-shrink:0;border:2px solid var(--border)}
+.avatar-circle{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;flex-shrink:0;border:2px solid var(--border)}
 .top-bar-info{flex:1;min-width:0}
 .username{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rep-title{font-size:11px;color:var(--orange);font-weight:600;font-family:'Space Mono',monospace}
@@ -826,7 +826,7 @@ body[data-phase="night"] .dn-badge{background:rgba(47,155,255,.12);border-color:
 <!-- HUB -->
 <div id="hub" class="screen">
   <div class="top-bar">
-    <div class="avatar-circle" id="hubAvatar" style="background:rgba(255,107,26,.2);color:var(--orange)">Z</div>
+    <div class="avatar-circle" id="hubAvatar" style="background:rgba(255,107,26,.2);color:var(--orange)">💲</div>
     <div class="top-bar-info">
       <div class="username" id="hubUsername">Player</div>
       <div class="rep-title" id="hubRepTitle">Street Rookie</div>
@@ -2431,7 +2431,7 @@ function updateHUDStats() {
   const char = CHARACTERS.find(c=>c.id===state.character)||CHARACTERS[0];
   const avatar = document.getElementById('hubAvatar');
   if (avatar) {
-    avatar.textContent = char.name[0];
+    avatar.textContent = char.icon || char.name[0];
     avatar.style.background = char.color+'33';
     avatar.style.color = char.color;
     avatar.style.borderColor = char.color+'66';
